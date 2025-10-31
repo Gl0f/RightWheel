@@ -13,7 +13,6 @@ from datetime import date
 import math 
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from flask import render_template
 
 app = Flask(__name__)
 CORS(app, allow_headers=["Content-Type", "Authorization"])
@@ -117,24 +116,6 @@ def db_execute(query, params=None):
     return True, None # Повертаємо успіх
 
 # --- МАРШРУТИ API ---
-
-@app.route('/')
-def index():
-    try:
-        # Використовуємо вашу власну функцію для отримання даних
-        query = "SELECT id, name, country, logo_url FROM brands ORDER BY name ASC"
-        brands, error = fetch_query(query)
-        
-        if error:
-            # Якщо сталася помилка з базою даних
-            return f"Помилка отримання даних з БД: {error}", 500
-        
-        # Відмальовуємо HTML-шаблон 'index.html' і передаємо в нього бренди
-        return render_template('main.html', brands=brands)
-        
-    except Exception as e:
-        # Загальна помилка, якщо щось пішло не так
-        return f"Сталася помилка сервера: {str(e)}", 500
 
 # 1. Отримати всі марки
 @app.route('/api/brands')
@@ -970,7 +951,6 @@ def update_my_password():
         return jsonify({"error": error}), 500
         
     return jsonify({"message": "Пароль успішно оновлено"})
-
 
 
 @app.route('/api/me/account/email', methods=['PUT'])

@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Комплектації — RightWheel</title>
+  <title>Деталі автомобіля — RightWheel</title>
   <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <header>
+ <header>
   <div class="header-content">
     
     <div class="logo-nav">
@@ -54,59 +54,26 @@
 
   <div class="container">
     <main>
-      <div id="breadcrumbs" class="breadcrumbs"></div>
-      
-      <div class="generation-quick-nav-container">
-        <label for="generationQuickSelect">Інші покоління:</label>
-        <select id="generationQuickSelect" class="generation-quick-select">
-          <option>Завантаження...</option>
-        </select>
-      </div>
+        <div id="breadcrumbs" class="breadcrumbs"></div>
+        
 
-      <h2 id="generationMainTitle">Завантаження...</h2>
-      
-      <div id="generationGalleryContainer" class="generation-gallery-container" style="display: none;">
-        <div class="generation-main-image">
-            <img id="generationMainImage" src="" alt="Головне фото покоління">
+        <div id="carDetailContainer">
+            <p>Завантаження даних про автомобіль...</p>
         </div>
-        <div id="generationThumbnailGrid" class="generation-thumbnail-grid">
-            </div>
-      </div>
-
-      <div id="generationDescriptionContainer" class="generation-description" style="display: none;">
-        <p>Завантаження опису...</p>
-      </div>
-
-      <div id="generationVideosContainer" class="generation-videos-section" style="display: none;">
-        <h3>Відеоогляди</h3>
-        <div id="generationVideosGrid" class="generation-videos-grid">
-            </div>
-      </div>
-      
-      <div class="trim-list-section">
-        <h3 id="trimsListTitle">Комплектації</h3>
-        <div id="trimListContainer" class="trim-list-container">
-            </div>
-      </div>
-
-      <div class="pagination-row">
-        <div id="paginationInfo" class="pagination-info"></div>
-        <div id="paginationRow" class="pagination-buttons"></div>
-      </div>
-      <div class="recently-viewed-section" style="display: none;">
-        <h3>
-            Нещодавно переглянуті
-        </h3>
-        <div class="recent-scroll-wrapper"> 
-            <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <div id="recentlyViewedCars" class="recently-viewed-grid">
-                </div>
-            <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
-            </button>
+        <div class="recently-viewed-section" style="display: none;">
+          <h3>
+              Нещодавно переглянуті
+          </h3>
+          <div class="recent-scroll-wrapper"> 
+              <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <div id="recentlyViewedCars" class="recently-viewed-grid">
+                  </div>
+              <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
+              </button>
+          </div>
         </div>
-      </div>
-      <div id="brandQuickNavContainer" class="brand-quick-nav-container"></div>
+        <div id="brandQuickNavContainer" class="brand-quick-nav-container"></div>
     </main>
   </div>
 
@@ -168,11 +135,8 @@
       </form>
     </div>
   </div>
+
   
-  <div id="comparisonBar" class="comparison-bar"></div> 
-  <div id="comparisonModal" class="modal-root" style="display:none"></div>
-  <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/generation.js') }}"></script>
+  <script src="utils.js"></script> <script src="model.js"></script><script src="app.js"></script><script src="car-detail.js"></script>
 </body>
 </html>
