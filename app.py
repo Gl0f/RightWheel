@@ -130,7 +130,7 @@ def index():
             return f"Помилка отримання даних з БД: {error}", 500
         
         # Відмальовуємо HTML-шаблон 'index.html' і передаємо в нього бренди
-        return render_template('index.html', brands=brands)
+        return render_template('main.html', brands=brands)
         
     except Exception as e:
         # Загальна помилка, якщо щось пішло не так
