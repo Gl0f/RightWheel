@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Обране — RightWheel</title>
+  <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+  <div class="header-content">
+    
+    <div class="logo-nav">
+      
+      <div class="logo">
+        <a href="main.html" style="text-decoration: none; color: inherit;">
+            <h1>Right Wheel</h1>
+        </a>
+      </div>
+      
+      <a href="forum.html" class="nav-link-forum">Форум</a>
+      
+      <a href="news.html" class="nav-link-forum">Новини</a>
+
+    </div>
+    
+    <div class="controls">
+      
+      <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Обране
+      </a>
+      <a href="account.html" id="accountLinkBtn" class="btn secondary" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Мій кабінет
+      </a>
+      <button id="showLoginModalBtn" class="btn primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Увійти
+      </button>
+      <button id="logoutBtn" class="btn secondary" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Вийти
+      </button>
+      
+    </div>
+  </div>
+</header>
+  <div class="container">
+    <main>
+      <div id="carListView" class="car-list-view">
+        <div class="back-nav">
+          <a href="main.html" class="btn secondary small">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            На головну
+          </a>
+        </div>
+        <h2 id="favoritesTitle">⭐ Обрані автомобілі</h2>
+        <div class="list-header" id="listHeader">
+          <div></div> <div>Фото</div>
+          <div data-sort="model">Автомобіль / Комплектація</div>
+          <div data-sort="year">Рік</div>
+          <div data-sort="power">Потужність</div>
+          <div data-sort="fuel">Паливо</div>
+          <div>Трансмісія</div>
+          <div></div> </div>
+        <div id="carList" class="list">
+          <p>Завантаження обраних...</p>
+        </div>
+        </div>
+        <div class="recently-viewed-section" style="display: none;">
+        <h3>
+            Нещодавно переглянуті
+        </h3>
+        <div class="recent-scroll-wrapper"> 
+            <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div id="recentlyViewedCars" class="recently-viewed-grid">
+                </div>
+            <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
+            </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="infoModal" class="modal-root" style="display:none">
+  <div class="modal-back" id="infoModalBack"></div>
+  <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+      <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
+      </div>
+      <div class="form-content" style="gap: 20px;">
+      <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="infoModalOkBtn" class="btn primary">OK</button>
+      </div>
+      </div>
+  </div>
+  </div>
+
+  <div id="loginModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Вхід до RightWheel</h2>
+        <div>
+            <button id="showRegisterBtn" class="btn secondary small">Реєстрація</button>
+            <button id="closeLoginModalBtn" class="btn small secondary" style="margin-left: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </div>
+      </div>
+      <form id="loginForm" class="form-content">
+        <div class="form-group"> <input id="loginUsername" type="text" placeholder="Логін" required /> </div>
+         <div class="form-group"> <input id="loginPassword" type="password" placeholder="Пароль" required /> </div>
+         <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="captchaCheck" required /> <label for="captchaCheck">Підтвердити</label> </div> </div>
+         <button class="btn primary full-width" type="submit">Увійти</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="registerModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Реєстрація в RightWheel</h2>
+        <div>
+            <button id="showLoginBtn" class="btn secondary small">Вхід</button>
+            <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </div>
+      </div>
+      <form id="registerForm" class="form-content">
+        <div class="form-group"> <input id="registerUsername" type="text" placeholder="Логін" required /> </div>
+        <div class="form-group"> <input id="registerEmail" type="email" placeholder="Email" required /> </div>
+        <div class="form-group"> <input id="registerPassword" type="password" placeholder="Пароль" required /> </div>
+        <div class="form-group"> <input id="registerConfirmPassword" type="password" placeholder="Підтвердження пароля" required /> </div>
+        <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="registerCaptchaCheck" required /> <label for="registerCaptchaCheck">Підтвердити</label> </div> </div>
+        <button class="btn primary full-width" type="submit">Зареєструватися</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="favorites.js"></script><script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Комплектації — RightWheel</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <a href="main.html" style="text-decoration: none; color: inherit;">
+            <h1>🚗 Right Wheel</h1>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <main>
+      <div id="carListView" class="car-list-view">
+        <div id="breadcrumbs" class="breadcrumbs"></div>
+        <h2 id="currentGenerationTitle">Завантаження...</h2>
+
+        <div class="toolbar">
+            </div>
+
+        <div class="list-header" id="listHeader">
+          <div></div> <div>Фото</div>
+          <div data-sort="model">Комплектація / Двигун</div>
+          <div data-sort="year">Рік</div>
+          <div data-sort="power">Потужність</div>
+          <div data-sort="fuel">Паливо</div>
+          <div>Трансмісія</div>
+          
+        </div>
+
+        <div id="carList" class="list"></div>
+
+        <div class="pagination-row">
+          <div id="paginationInfo" class="pagination-info"></div>
+          <div id="paginationRow" class="pagination-buttons"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="generation.js"></script>
+</body>
+</html>
