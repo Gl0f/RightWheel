@@ -3,16 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Покоління — RightWheel</title>
+  <title>Результати пошуку — RightWheel</title>
   <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <header>
+ <header>
   <div class="header-content">
     
     <div class="logo-nav">
@@ -51,17 +50,30 @@
     </div>
   </div>
 </header>
-
   <div class="container">
     <main>
-      <div id="breadcrumbs" class="breadcrumbs"></div>
-      <div class="model-quick-nav-container">
-        <label for="modelQuickSelect">Інші моделі ${state.brandName}:</label> <select id="modelQuickSelect" class="model-quick-select">
-          <option>Завантаження...</option>
-        </select>
+      <div id="carListView" class="car-list-view">
+        <div class="back-nav">
+          <a href="main.html" class="btn secondary small">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            На головну
+          </a>
+        </div>
+        <h2 id="searchResultsTitle">Результати пошуку</h2>
+        <div class="list-header" id="listHeader">
+          <div></div> <div>Фото</div>
+          <div data-sort="model">Автомобіль / Комплектація</div>
+          <div data-sort="year">Рік</div>
+          <div data-sort="power">Потужність</div>
+          <div data-sort="fuel">Паливо</div>
+          <div>Трансмісія</div>
+        </div>
+        <div id="carList" class="list"></div>
+        <div class="pagination-row">
+          <div id="paginationInfo" class="pagination-info"></div>
+          <div id="paginationRow" class="pagination-buttons"></div>
+        </div>
       </div>
-      <h2 id="currentModelTitle">Завантаження...</h2>
-      <div id="yearListContainer" style="margin-top: 20px;"></div>
       <div class="recently-viewed-section" style="display: none;">
         <h3>
             Нещодавно переглянуті
@@ -75,7 +87,6 @@
             </button>
         </div>
       </div>
-      <div id="brandQuickNavContainer" class="brand-quick-nav-container"></div>
     </main>
   </div>
 
@@ -94,7 +105,7 @@
   </div>
   </div>
 
-  <div id="loginModal" class="modal-root" style="display:none">
+  <<div id="loginModal" class="modal-root" style="display:none">
     <div class="modal-back"></div>
     <div class="modal">
       <div class="modal-header">
@@ -137,8 +148,11 @@
       </form>
     </div>
   </div>
-  
-  
-  <script src="utils.js"></script> <script src="model.js"></script><script src="app.js"></script>
+
+  <div id="comparisonBar" class="comparison-bar"></div>
+  <div id="comparisonModal" class="modal-root" style="display:none"></div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/search_results.js') }}"></script>
 </body>
 </html>

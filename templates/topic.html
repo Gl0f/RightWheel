@@ -3,15 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Обране — RightWheel</title>
+  <title>Завантаження теми... — RightWheel</title>
   <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    .post-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 15px;
+    }
+    .post-header {
+        padding: 10px 15px;
+        background: #2a2a2a;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+    }
+    .post-header strong {
+        color: var(--text);
+    }
+    .post-content {
+        padding: 20px 15px;
+        line-height: 1.7;
+    }
+    /* Стиль для початкового поста теми */
+    .initial-post .post-content {
+        font-size: 16px;
+    }
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Вирівнюємо по вертикалі */
+    }
+
+    .post-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px; /* Відстань між датою та кнопкою */
+        color: var(--muted); /* Колір дати */
+    }
+
+    .delete-post-btn {
+        /* Використовуємо .btn.danger.small зі style.css */
+        padding: 4px 6px; /* Трохи менше */
+    }
+  </style>
 </head>
 <body>
-  <header>
+
+ <header>
   <div class="header-content">
     
     <div class="logo-nav">
@@ -50,42 +97,57 @@
     </div>
   </div>
 </header>
+  
   <div class="container">
     <main>
-      <div id="carListView" class="car-list-view">
-        <div class="back-nav">
-          <a href="main.html" class="btn secondary small">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            На головну
-          </a>
-        </div>
-        <h2 id="favoritesTitle">⭐ Обрані автомобілі</h2>
-        <div class="list-header" id="listHeader">
-          <div></div> <div>Фото</div>
-          <div data-sort="model">Автомобіль / Комплектація</div>
-          <div data-sort="year">Рік</div>
-          <div data-sort="power">Потужність</div>
-          <div data-sort="fuel">Паливо</div>
-          <div>Трансмісія</div>
-          <div></div> </div>
-        <div id="carList" class="list">
-          <p>Завантаження обраних...</p>
-        </div>
-        </div>
-        <div class="recently-viewed-section" style="display: none;">
-        <h3>
-            Нещодавно переглянуті
-        </h3>
-        <div class="recent-scroll-wrapper"> 
-            <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <div id="recentlyViewedCars" class="recently-viewed-grid">
-                </div>
-            <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
-            </button>
+      <div class="breadcrumbs">
+          <a href="forum.html">Форум</a>
+          <span>/</span>
+          <span class="current" id="breadcrumbTopicTitle">Завантаження...</span>
+      </div>
+
+      <h2 id="topicMainTitle" style="margin-top: 10px;">Завантаження теми...</h2>
+
+      <div id="postsListContainer" class="posts-list-container" style="margin-top: 20px;">
+        <p>Завантаження повідомлень...</p>
+      </div>
+
+      <div id="newReplyContainer" class="forum-form-container" style="display: none; margin-top: 30px;">
+        <h3>Ваша відповідь</h3>
+        <form id="newReplyForm" class="form-content">
+          <div class="form-group">
+            <textarea id="replyContent" placeholder="Напишіть вашу відповідь..." rows="5" required></textarea>
+          </div>
+          <button class="btn primary" type="submit">Відповісти</button>
+        </form>
+      </div>
+      
+      <div id="loginToReplyMessage" class="empty-state" style="display: none; margin-top: 30px;">
+        <p>Будь ласка, <a href="#" id="loginLink">увійдіть</a>, щоб залишати відповіді.</p>
+      </div>
+
+    </main>
+  </div>
+  
+  <div id="deleteConfirmModal" class="modal-root" style="display:none">
+    <div class="modal-back" id="deleteModalBack"></div>
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: var(--danger);">Підтвердити видалення</h2>
+        <button id="closeDeleteModalBtn" class="btn small secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="form-content" style="gap: 20px;">
+        <p id="deleteModalMessage" style="font-size: 16px; margin: 0;">
+            Ви впевнені, що хочете видалити це? Цю дію неможливо скасувати.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="cancelDeleteBtn" class="btn secondary">Скасувати</button>
+            <button id="confirmDeleteBtn" class="btn danger">Так, видалити</button>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 
   <div id="infoModal" class="modal-root" style="display:none">
@@ -146,7 +208,9 @@
       </form>
     </div>
   </div>
-
-  <script src="favorites.js"></script><script src="app.js"></script>
+  
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/topic.js') }}"></script>
+  
 </body>
 </html>

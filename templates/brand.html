@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Деталі автомобіля — RightWheel</title>
+  <title>Моделі — RightWheel</title>
   <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
- <header>
+  <header>
   <div class="header-content">
     
     <div class="logo-nav">
@@ -54,29 +54,28 @@
 
   <div class="container">
     <main>
-        <div id="breadcrumbs" class="breadcrumbs"></div>
-        
+      <div id="breadcrumbs" class="breadcrumbs"></div>
+      <h2 id="currentBrandTitle">Завантаження...</h2>
+      
+      <div id="modelListContainer" style="margin-top: 20px;"></div>
 
-        <div id="carDetailContainer">
-            <p>Завантаження даних про автомобіль...</p>
+      <div class="recently-viewed-section" style="display: none;">
+        <h3>
+            Нещодавно переглянуті
+        </h3>
+        <div class="recent-scroll-wrapper"> 
+            <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div id="recentlyViewedCars" class="recently-viewed-grid">
+                </div>
+            <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
+            </button>
         </div>
-        <div class="recently-viewed-section" style="display: none;">
-          <h3>
-              Нещодавно переглянуті
-          </h3>
-          <div class="recent-scroll-wrapper"> 
-              <button id="scrollRecentLeft" class="scroll-btn left hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <div id="recentlyViewedCars" class="recently-viewed-grid">
-                  </div>
-              <button id="scrollRecentRight" class="scroll-btn right hidden"> <svg width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
-              </button>
-          </div>
-        </div>
-        <div id="brandQuickNavContainer" class="brand-quick-nav-container"></div>
+      </div>
+      <div id="brandQuickNavContainer" class="brand-quick-nav-container"></div>
     </main>
   </div>
-
+  
   <div id="infoModal" class="modal-root" style="display:none">
   <div class="modal-back" id="infoModalBack"></div>
   <div class="modal" style="max-width: 500px;">
@@ -136,7 +135,9 @@
     </div>
   </div>
 
-  
-  <script src="utils.js"></script> <script src="model.js"></script><script src="app.js"></script><script src="car-detail.js"></script>
+
+  <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/brand.js') }}"></script>
 </body>
 </html>
