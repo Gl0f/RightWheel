@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (compareBtn) {
                 
                 compareBtn.replaceWith(compareBtn.cloneNode(true)); // Клонуємо, щоб видалити старі
-                document.getElementById('compareBtn').addEventListener('click', openComparisonModal);
+                document.getElementById('compareBtn').addEventListener('click', () => { window.location.href = 'comparison.html'; });
             }
             if (clearBtn) {
            
@@ -529,15 +529,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ФУНКЦІЯ для перемикання порівняння ---
+    // --- ФУНКЦІЯ для перемикання порівняння ---
     function toggleCompare(trimId) {
         const trimIdStr = trimId.toString();
-        const isCompared = state.comparisonList.includes(trimIdStr);
+        // Перевіряємо, чи БУВ автомобіль у списку ДО кліку
+        const wasCompared = state.comparisonList.includes(trimIdStr);
 
-        // Викликаємо функцію, яка оновить state.comparisonList, localStorage та renderComparisonBar
-        updateComparisonList(trimIdStr, !isCompared);
+        // Перевірка ліміту (якщо ми намагаємося додати новий)
+        if (!wasCompared && state.comparisonList.length >= 4) {
+            showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
+            return; // Не даємо додати
+        }
+
+        // Викликаємо глобальну функцію, яка оновить localStorage та нижній бар
+        updateComparisonList(trimIdStr, !wasCompared);
+
+        // Оновлюємо ЛОКАЛЬНИЙ стан (state) сторінки, щоб UI був синхронізований
+        if (wasCompared) {
+            state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
+        } else {
+            state.comparisonList.push(trimIdStr);
+        }
 
         // Оновлюємо вигляд кнопки
         updateCompareButtonState(trimIdStr);
+
+        // === НОВИЙ КОД: ПОКАЗУЄМО СПОВІЩЕННЯ ===
+        if (wasCompared) {
+            // Якщо він БУВ у списку, значить ми його видалили
+            showInfoModal('Порівняння', 'Автомобіль видалено зі списку порівняння.', 'info');
+        } else {
+            // Якщо його НЕ БУЛО, значить ми його додали
+            showInfoModal('Порівняння', 'Автомобіль додано до списку порівняння!', 'success');
+        }
     }
 
     // --- ФУНКЦІЯ для оновлення вигляду кнопки ---

@@ -291,40 +291,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+/**
+     * Обробник кліку на кнопку "Додати до порівняння"
+     */
     function handleDetailCompareClick() {
         if (!state.trimId) return;
-
+        
         const trimIdStr = state.trimId.toString();
-        const isCompared = state.comparisonList.includes(trimIdStr);
-
-        // Перевіряємо наявність глобальних функцій
-        console.log('Тип updateComparisonList:', typeof updateComparisonList);
-        console.log('Тип renderComparisonBar:', typeof renderComparisonBar);
-
+        // Запам'ятовуємо, чи БУВ автомобіль у порівнянні ДО кліку
+        const wasCompared = state.comparisonList.includes(trimIdStr);
+        
         if (typeof updateComparisonList === 'function' && typeof renderComparisonBar === 'function') {
-
-             if (!isCompared && state.comparisonList.length >= 4) {
+            
+             if (!wasCompared && state.comparisonList.length >= 4) {
                 showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
                 return;
             }
-
-            if (isCompared) {
+            
+            // Оновлюємо локальний стан
+            if (wasCompared) {
                 state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
             } else {
                 state.comparisonList.push(trimIdStr);
             }
-
+            
+            // Оновлюємо стан кнопки
             updateDetailCompareButtonState();
-
-            console.log(`Викликаю updateComparisonList('${trimIdStr}', ${!isCompared})`);
-            updateComparisonList(trimIdStr, !isCompared);
-
-            console.log('Викликаю renderComparisonBar()');
-            renderComparisonBar();
-
+            
+            // Викликаємо глобальні функції, щоб оновити localStorage та бар
+            updateComparisonList(trimIdStr, !wasCompared);
+            renderComparisonBar(); // Перемальовуємо бар внизу
+            
+            // === НОВИЙ КОД: ПОКАЗУЄМО СПОВІЩЕННЯ ===
+            if (wasCompared) {
+                // Якщо він БУВ у списку, значить ми його видалили
+                showInfoModal('Порівняння', 'Автомобіль видалено зі списку порівняння.', 'info');
+            } else {
+                // Якщо його НЕ БУЛО, значить ми його додали
+                showInfoModal('Порівняння', 'Автомобіль додано до списку порівняння!', 'success');
+            }
+            // === КІНЕЦЬ НОВОГО КОДУ ===
+            
         } else {
-            console.error('Функції updateComparisonList або renderComparisonBar не знайдено!');
-            console.log('Глобальні функції не знайдено! Перевірте порядок завантаження скриптів та їх вміст.');
+            console.error('Функції updateComparisonList або renderComparisonBar не знайдено. Переконайтеся, що app.js завантажено.');
             showInfoModal('Помилка', 'Не вдалося оновити список порівняння.', 'error');
         }
     }

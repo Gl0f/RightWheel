@@ -1,18 +1,21 @@
 :root {
-  /* НОВА ПАЛІТРА: Чорно-червона */
-  --bg: #123456; /* Глибокий темний фон */
-  --card: #1E1E1E; /* Фон для карток, трохи світліший за фон */
-  --muted: #888888; /* Приглушений сірий текст */
-  --accent: #E40C2B; /* Яскравий червоний акцент */
+  /* НОВА ПАЛІТРА: Креслення (Blueprint) */
+  --bg: #1A202C; /* Глибокий темно-синій фон */
+  --card: #2D3748; /* Світліші синьо-сірі картки */
+  --muted: #A0AEC0; /* Приглушений світло-сірий текст */
+  --accent: #E40C2B; /* Ваш червоний акцент */
   --accent-dark: #B8001C; /* Темніший червоний для ховерів */
-  --accent-light: rgba(228, 12, 43, 0.1); /* Прозорий червоний для підсвічування */
-  --success: #39FF14; /* Неоновий зелений для контрасту (ціна) */
-  --danger: #FF1D58; /* Яскравий рожево-червоний для небезпеки */
-  --warning: #FFD700; /* Золотий для зірочок "Обраного" */
-  --text: #F5F5F5; /* Майже білий текст для читабельності */
-  --border: #333333; /* Темно-сірі рамки */
-  --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --accent-light: rgba(228, 12, 43, 0.1); /* Прозорий червоний (добре працюватиме) */
+  
+  --success: #38A169; /* Приглушений зелений */
+  --danger: #E53E3E; /* Яскраво-червоний для небезпеки */
+  --warning: #FFA000; /* Насичений помаранчево-жовтий */
+  
+  --text: #E2E8F0; /* Основний світлий текст (майже білий) */
+  --border: #4A5568; /* Чіткі, але не яскраві рамки */
+  
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Більш помітна тінь */
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -27,6 +30,34 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   padding-bottom: 80px; /* Space for comparison bar */
+}
+
+
+/* --- Винятки --- */
+
+/* Повертаємо Inter для логотипу */
+.logo h1 {
+  font-family: 'Inter', sans-serif; 
+  font-weight: 700;
+  color: var(--accent); 
+  text-transform: none; /* Логотип НЕ робимо великими */
+}
+
+/* Повертаємо Inter для кнопок, посилань та дрібного тексту */
+.btn,
+.nav-link-forum,
+.brand-country,
+.model-item-year,
+.gen-details,
+.trim-card-details,
+.topic-card-meta,
+.spec-label,
+.quick-spec-label,
+.breadcrumbs,
+.featured-car-content .spec-line, /* */
+.featured-car-content .body-drive-line /* */ {
+    font-family: 'Inter', sans-serif;
+    text-transform: none; /* НЕ робимо великими */
 }
 
 .container {
@@ -246,7 +277,21 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
   border-radius: 15px; /* Більш округлі кути */
 }
 .brand-item:hover { border-color: var(--accent); box-shadow: 0 4px 8px rgba(228, 12, 43, 0.1); transform: translateY(-2px); }
-.brand-logo-placeholder { width: 60px; height: 60px; background: var(--accent-light); border-radius: 50%; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); font-weight: 700; border: 1px solid var(--accent);position: relative; /* Потрібно для позиціонування img */overflow: hidden; /* Ховаємо те, що виходить за межі круга */ }
+.brand-logo-placeholder { 
+    width: 60px; 
+    height: 60px; 
+    background: transparent; /* <-- НОВИЙ КОЛІР (прозорий) */
+    border-radius: 50%; 
+    margin-bottom: 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 20px; 
+    color: var(--accent); 
+    font-weight: 700; 
+    border: 1px solid var(--accent);
+    position: relative; /* Потрібно для позиціонування img */overflow: hidden; /* Ховаємо те, що виходить за межі круга */ 
+}
 .brand-logo-placeholder span {
     /* Це для літери, яка буде на тлі */
     z-index: 1;
@@ -1818,4 +1863,96 @@ header {
 
 #infoModal {
   z-index: 1050; /* Вищий z-index, щоб бути над іншими модалками */
+}
+/* --- Стиль для блоку порівняння в профілі --- */
+.account-comparison-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+.account-comparison-section h4 {
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 5px 0;
+    text-transform: none; /* Не робити ВЕЛИКИМИ */
+    font-family: 'Inter', sans-serif; /* Повернути звичайний шрифт */
+}
+.account-comparison-section p {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 15px 0;
+}
+.account-comparison-section .btn {
+    width: 100%; /* Кнопка на всю ширину */
+    justify-content: center; /* Центрувати текст */
+}
+/* === ПОКРАЩЕННЯ МОДАЛЬНОГО ВІКНА ВХОДУ === */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    /* 1. Встановлюємо колір тексту */
+    -webkit-text-fill-color: var(--text) !important; 
+    caret-color: var(--text) !important;
+
+    /* 2. Трюк із тінню, щоб "зафарбувати" фон */
+    -webkit-box-shadow: 0 0 0 40px #2a2a2a inset !important; /* Використовуємо той самий колір, що й у звичайного поля */
+    
+    /* 3. Хак із довгою анімацією, щоб "обдурити" браузер */
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 2. Додавання <label> над полями */
+.form-content label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+/* 3. Контейнер для "Пароль" та "Забули пароль?" */
+.label-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 4. Посилання "Забули пароль?" */
+.form-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+}
+.form-link:hover {
+    text-decoration: underline;
+}
+
+/* 5. Блок "Немає акаунту?..." внизу */
+.modal-footer-link {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 15px;
+    color: var(--muted);
+}
+.modal-footer-link .form-link {
+    font-size: 15px;
+    font-weight: 600;
+    margin-left: 5px;
+}
+/* === ВИПРАВЛЕННЯ КАПЧІ (CAPTCHA) === */
+    
+/* Скидаємо стилі, які помилково застосувалися до <label> з .form-content */
+.captcha-container label {
+    display: inline;      /* Скидаємо 'display: block' */
+    margin-bottom: 0;     /* Скидаємо 'margin-bottom' */
+    
+    /* Беремо стилі з .captcha-text для узгодженості */
+    font-weight: 600;     
+    color: var(--text);   
+    font-size: 16px;
 }

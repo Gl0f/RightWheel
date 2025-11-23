@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         oldPasswordInput: document.getElementById('accOldPassword'),
         newPasswordInput: document.getElementById('accNewPassword'),
         confirmPasswordInput: document.getElementById('accConfirmPassword'),
+        goToComparisonBtn: document.getElementById('goToComparisonBtn'),
     };
 
     let authToken = null;
@@ -92,6 +93,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function loadComparisonList() {
+        if (!elements.goToComparisonBtn) return;
+
+        let comparisonList = [];
+        try {
+            // Завантажуємо список порівняння з localStorage
+            const savedComparison = localStorage.getItem('RightWheel_comparison');
+            comparisonList = savedComparison ? JSON.parse(savedComparison) : [];
+        } catch (e) { 
+            console.error("Помилка завантаження списку порівняння:", e); 
+            comparisonList = []; 
+        }
+
+        const count = comparisonList.length;
+        const buttonText = elements.goToComparisonBtn.querySelector('span');
+
+        if (buttonText) {
+            buttonText.textContent = `Переглянути список (${count})`;
+        }
+
+        // Робимо кнопку активною, лише якщо список не порожній
+        if (count > 0) {
+            elements.goToComparisonBtn.disabled = false;
+            elements.goToComparisonBtn.addEventListener('click', () => {
+                window.location.href = 'comparison.html';
+            });
+        } else {
+            elements.goToComparisonBtn.disabled = true;
+        }
+    }
+
 
     async function handleChangeEmail(e) {
         e.preventDefault();
@@ -162,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadAccountDetails();
         loadMyTopics();
+        loadComparisonList();
         
         elements.emailForm.addEventListener('submit', handleChangeEmail);
         elements.passwordForm.addEventListener('submit', handleChangePassword);

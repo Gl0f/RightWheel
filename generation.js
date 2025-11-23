@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
              
                 compareBtn.replaceWith(compareBtn.cloneNode(true)); // Клонуємо, щоб видалити старі
                 console.log('Adding listener to compareBtn');
-                document.getElementById('compareBtn').addEventListener('click', openComparisonModal);
+                document.getElementById('compareBtn').addEventListener('click', () => { window.location.href = 'comparison.html'; });
             }
             if (clearBtn) {
            
@@ -680,15 +680,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ФУНКЦІЯ для перемикання порівняння ---
+// --- ФУНКЦІЯ для перемикання порівняння ---
     function toggleCompare(trimId) {
         const trimIdStr = trimId.toString();
-        const isCompared = state.comparisonList.includes(trimIdStr);
+        // Перевіряємо, чи БУВ автомобіль у списку ДО кліку
+        const wasCompared = state.comparisonList.includes(trimIdStr);
 
-        // Викликаємо функцію, яка оновить state.comparisonList, localStorage та renderComparisonBar
-        updateComparisonList(trimIdStr, !isCompared);
+        // Перевірка ліміту (якщо ми намагаємося додати новий)
+        if (!wasCompared && state.comparisonList.length >= 4) {
+            showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
+            return; // Не даємо додати
+        }
+
+        // Викликаємо глобальну функцію, яка оновить localStorage та нижній бар
+        updateComparisonList(trimIdStr, !wasCompared);
+
+        // Оновлюємо ЛОКАЛЬНИЙ стан (state) сторінки, щоб UI був синхронізований
+        if (wasCompared) {
+            state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
+        } else {
+            state.comparisonList.push(trimIdStr);
+        }
 
         // Оновлюємо вигляд кнопки
         updateCompareButtonState(trimIdStr);
+
+        // === НОВИЙ КОД: ПОКАЗУЄМО СПОВІЩЕННЯ ===
+        if (wasCompared) {
+            // Якщо він БУВ у списку, значить ми його видалили
+            showInfoModal('Порівняння', 'Автомобіль видалено зі списку порівняння.', 'info');
+        } else {
+            // Якщо його НЕ БУЛО, значить ми його додали
+            showInfoModal('Порівняння', 'Автомобіль додано до списку порівняння!', 'success');
+        }
     }
 
     // --- ФУНКЦІЯ для оновлення вигляду кнопки ---
@@ -701,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
+/**
      * Перемикає стан "Обране" для комплектації.
      */
     async function toggleFavorite(trimId) {
@@ -732,12 +756,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url, options);
             if (!response.ok) throw new Error('Не вдалося оновити обране');
             
+            // === ОНОВЛЕНА ЛОГІКА СПОВІЩЕНЬ ===
             if (isFavorited) {
+                // Якщо БУВ в обраному, значить ми видалили
                 state.favorites = state.favorites.filter(id => id !== trimIdStr);
+                showInfoModal('Обране', 'Автомобіль видалено з обраного.', 'info');
             } else {
+                // Якщо НЕ БУВ, значить додали
                 state.favorites.push(trimIdStr);
+                showInfoModal('Обране', 'Автомобіль додано до обраного!', 'success');
             }
             updateFavoriteButtonState(trimIdStr);
+            // === КІНЕЦЬ ОНОВЛЕННЯ ===
+
         } catch (error) {
             console.error("Помилка toggleFavorite:", error);
             showInfoModal('Помилка', error.message, 'error');

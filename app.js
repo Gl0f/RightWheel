@@ -69,6 +69,57 @@ const state = {
    
 };
 
+// --- Global Fetch Interceptor ---
+// Зберігаємо оригінальну функцію fetch
+const originalFetch = window.fetch;
+
+/**
+ * Глобальний перехоплювач для всіх fetch-запитів.
+ * Автоматично обробляє помилки 401 (Unauthorized) для очищення сесії.
+ */
+window.fetch = async function (url, options) {
+    // Викликаємо оригінальний fetch
+    const response = await originalFetch(url, options);
+
+    // Перевіряємо, чи це не запит на сам логін/реєстрацію
+    const isAuthRequest = url.includes('/api/auth/login') || url.includes('/api/auth/register');
+
+    // Перевіряємо на 401 Unauthorized
+    if (response.status === 401 && !isAuthRequest) {
+        console.error('Fetch Interceptor: Отримано 401 Unauthorized. Очищення сесії.');
+
+        // 1. Очищуємо localStorage (викликаємо частину логіки handleLogout)
+        localStorage.removeItem('RightWheel_access_token');
+        localStorage.removeItem('RightWheel_loggedInUser');
+        state.isLoggedIn = false;
+        
+        // 2. Показуємо модальне вікно
+        showInfoModal(
+            'Сесія застаріла', 
+            'Ваш сеанс входу завершився. Натисніть "OK" для перезавантаження сторінки.', 
+            'error'
+        );
+
+        // 3. Додаємо слухач на кнопку "OK" модалки, щоб перезавантажити сторінку
+        const okButton = document.getElementById('infoModalOkBtn');
+        if (okButton) {
+            // Видаляємо старі слухачі, щоб уникнути дублікатів
+            okButton.replaceWith(okButton.cloneNode(true));
+            // Прив'язуємо перезавантаження до "OK"
+            document.getElementById('infoModalOkBtn').addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
+        
+        // 4. Зупиняємо подальше виконання .then() .json() у коді, що викликав запит
+        return new Promise(() => {}); 
+    }
+
+    // Якщо все добре (не 401), повертаємо відповідь як зазвичай
+    return response;
+};
+// --- End of Global Fetch Interceptor ---
+
 let USERS_DATABASE = [];
 
 // --- Збереження/Завантаження з localStorage (ТІЛЬКИ для користувачів та обраного/порівняння) ---
@@ -173,15 +224,15 @@ async function handleLogin(e) {
     
         localStorage.setItem('RightWheel_access_token', data.access_token);
         localStorage.setItem('RightWheel_loggedInUser', username);
-
-        checkLoginStatus();
-
-        // 3. Оновлюємо UI
-        state.isLoggedIn = true;
+        
+        // Ховаємо модалку перед перезавантаженням
         if (elements.loginModal) elements.loginModal.style.display = 'none';
-        if (elements.logoutBtn) elements.logoutBtn.style.display = 'inline-flex';
-        if (elements.showFavoritesBtn) elements.showFavoritesBtn.style.display = 'inline-flex';
-        if (elements.openAddModalBtn) elements.openAddModalBtn.disabled = false;
+
+        // === ОНОВЛЕНО ===
+        // Примусово перезавантажуємо сторінку.
+        // Це гарантує, що всі елементи (напр., кнопки "Обране")
+        // завантажаться з урахуванням нового статусу логіну.
+        window.location.reload();
 
     } catch (error) {
         console.error("Помилка логіну:", error);
@@ -211,7 +262,11 @@ function handleLogout() {
     if(elements.openAddModalBtn) elements.openAddModalBtn.disabled = true;
     if(elements.accountLinkBtn) elements.accountLinkBtn.style.display = 'none';
 
-    if (elements.loginForm) elements.loginForm.reset();
+    // === ОНОВЛЕНО ===
+    // 2. Негайно перезавантажуємо сторінку.
+    // Це найпростіший спосіб очистити стан і показати сторінку
+    // у режимі "гостя", особливо на захищених сторінках як "Мій кабінет".
+    window.location.reload();
     // Можливо, потрібно перезавантажити сторінку або перемалювати її стан
     checkLoginStatus();
 }
@@ -721,7 +776,7 @@ function renderComparisonBar() {
     if (count > 0) {
         elements.comparisonBar.classList.add('visible');
         elements.comparisonBar.innerHTML = `<div class="comparison-content"><span>Обрано для порівняння: ${count} авто</span><div><button class="btn secondary small" id="clearComparisonBtn">Очистити</button><button class="btn primary" id="compareBtn" ${count < 2 ? 'disabled' : ''}>Порівняти</button></div></div>`;
-        document.getElementById('compareBtn')?.addEventListener('click', openComparisonModal);
+        document.getElementById('compareBtn')?.addEventListener('click', () => { window.location.href = 'comparison.html'; });
         document.getElementById('clearComparisonBtn')?.addEventListener('click', clearComparison);
     } else {
         elements.comparisonBar.classList.remove('visible');
@@ -1035,8 +1090,21 @@ async function init() {
     checkLoginStatus(); 
 
     // Додаємо слухачі для хедера та модалок (вони є на всіх сторінках)
-    elements.showRegisterBtn?.addEventListener('click', showRegisterModal);
-    elements.showLoginBtn?.addEventListener('click', showLoginModal);
+    // Нові слухачі для посилань внизу модалок
+    document.getElementById('showRegisterBtnFromLogin')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showRegisterModal();
+    });
+    document.getElementById('showLoginBtnFromRegister')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showLoginModal();
+    });
+
+    // Слухач для "Забули пароль?"
+    document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showInfoModal('Функція у розробці', 'Функція відновлення паролю наразі недоступна.', 'info');
+    });
     elements.registerForm?.addEventListener('submit', handleRegister);
     elements.loginForm?.addEventListener('submit', handleLogin);
     elements.logoutBtn?.addEventListener('click', handleLogout);
