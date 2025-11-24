@@ -1956,3 +1956,674 @@ input:-webkit-autofill:active {
     color: var(--text);   
     font-size: 16px;
 }
+
+.checkbox-group { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.checkbox-group input { width: 16px; height: 16px; margin: 0; }
+.auth-divider { display: flex; align-items: center; color: #A0AEC0; font-size: 13px; margin: 15px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid #4A5568; }
+.auth-divider span { padding: 0 10px; }
+.google-btn { background: white !important; color: #333 !important; font-weight: 600; justify-content: center; }
+.google-btn:hover { background: #f1f1f1 !important; }
+
+/* Стилі для 3D переглядача */
+.media-viewer-container {
+    position: relative;
+    width: 100%;
+    /* Висота має бути фіксованою або адаптивною, щоб 3D сцена мала розмір */
+    height: 500px; 
+    background-color: #1a1a1a; /* Темний фон для 3D */
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+}
+
+/* Фото всередині в'ювера */
+.media-viewer-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Контейнер самого Three.js */
+#threejs-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Кнопки перемикання внизу */
+.media-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px;
+    border-radius: 25px;
+    display: flex;
+    gap: 5px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.media-btn {
+    background: transparent;
+    border: none;
+    color: #ccc;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.media-btn.active {
+    background-color: var(--accent);
+    color: white;
+    font-weight: 600;
+}
+
+.media-btn:hover:not(.active) {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* === SPOTIFY-LIKE LOGIN THEME === */
+
+/* Фон модалки */
+.modal.login-theme {
+    background-color: #121212; /* Глибокий чорний */
+    color: white;
+    border: none;
+    max-width: 500px; /* Вужче вікно */
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Заголовок */
+.modal-header-center {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.modal-title-large {
+    font-size: 32px; /* Великий шрифт */
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    color: white;
+    font-family: 'Inter', sans-serif; /* Або ваш шрифт */
+}
+
+/* Кнопка закриття (абсолютна) */
+.close-btn-abs {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    cursor: pointer;
+}
+.close-btn-abs:hover { color: white; }
+
+/* Поля вводу */
+.sp-label {
+    display: block;
+    text-align: left;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.sp-input {
+    background-color: #121212;
+    border: 1px solid #727272;
+    color: white;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 16px;
+}
+.sp-input:focus {
+    border-color: white;
+    outline: 2px solid white;
+}
+.sp-input::placeholder {
+    color: #727272;
+}
+
+/* Зелена кнопка (Primary) */
+.sp-btn-primary {
+    background-color: #1ed760; /* Spotify Green */
+    color: black;
+    font-weight: 700;
+    border-radius: 500px; /* Овальна форма */
+    padding: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: transform 0.1s, background-color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.sp-btn-primary:hover {
+    background-color: #1fdf64;
+    transform: scale(1.02);
+    color: black;
+}
+
+/* Кнопка Google (Outline) */
+.sp-btn-outline {
+    background-color: transparent !important;
+    border: 1px solid #727272 !important;
+    color: white !important;
+    border-radius: 500px;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    position: relative;
+}
+.sp-btn-outline:hover {
+    border-color: white !important;
+    background-color: rgba(255,255,255,0.05) !important;
+}
+.sp-btn-outline svg {
+    position: absolute;
+    left: 30px; /* Іконка зліва */
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Чекбокси та текст */
+.sp-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.checkbox-group label {
+    font-size: 13px;
+    color: #b3b3b3;
+}
+
+/* Посилання внизу */
+.white-link {
+    color: white;
+    text-decoration: underline;
+}
+.white-link:hover {
+    color: #1ed760;
+}
+
+.auth-divider {
+    color: white;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.auth-divider::before, .auth-divider::after {
+    border-color: #727272;
+}
+
+/* === COMPACT LOGIN MODAL (Рідний стиль) === */
+
+/* 1. Контейнер модалки: менший розмір та рідний колір */
+.modal.login-theme {
+    background-color: var(--card); /* Ваш стандартний синьо-сірий колір */
+    border: 1px solid var(--border);
+    color: var(--text);
+    max-width: 380px; /* Роблю вікно вузьким і компактним */
+    padding: 30px;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+/* 2. Заголовок */
+.modal-title-large {
+    font-size: 24px; /* Менший шрифт */
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    color: var(--accent); /* Ваш червоний акцент */
+    font-family: 'Inter', sans-serif;
+}
+
+.modal-header-center {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+/* 3. Кнопка закриття */
+.close-btn-abs {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.close-btn-abs:hover { color: var(--text); }
+
+/* 4. Поля вводу (стандартний вигляд) */
+.sp-label {
+    display: block;
+    text-align: left;
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: var(--muted);
+}
+
+.sp-input {
+    background-color: #2a2a2a; /* Темний фон інпутів */
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 10px;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+.sp-input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* 5. Кнопка "Увійти" (Червона) */
+.sp-btn-primary {
+    background-color: var(--accent); /* Червоний */
+    color: var(--text);
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 10px;
+    text-transform: none; /* Звичайний регістр літер */
+    font-size: 15px;
+    margin-top: 15px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sp-btn-primary:hover {
+    background-color: var(--accent-dark);
+}
+
+/* 6. Кнопка Google (Біла, як і має бути) */
+.sp-btn-outline {
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important; /* Темний текст на білому */
+    border-radius: 50px;
+    padding: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sp-btn-outline:hover {
+    background-color: #f1f1f1 !important;
+}
+.sp-btn-outline svg {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* 7. Чекбокси та текст */
+.sp-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.checkbox-group label {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* 8. Посилання та розділювачі */
+.white-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+.white-link:hover { text-decoration: underline; }
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 15px 0;
+    text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+}
+.auth-divider span { padding: 0 10px; }
+
+.modal-footer-link {
+    margin-top: 20px;
+    font-size: 13px;
+}
+/* === WIDE & COMPACT LOGIN MODAL === */
+
+/* 1. Контейнер: Ширший і менші відступи зверху/знизу */
+.modal.login-theme {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    
+    /* ЗМІНИ ТУТ: */
+    max-width: 550px; /* Робимо ширшим */
+    padding: 25px 40px; /* Менше зверху/знизу, більше з боків */
+    
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+/* 2. Заголовок: компактніший */
+.modal-title-large {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+}
+
+.modal-header-center {
+    position: relative;
+    margin-bottom: 20px; /* Менший відступ */
+}
+
+/* 3. Кнопка закриття */
+.close-btn-abs {
+    position: absolute;
+    top: -10px;
+    right: -25px; /* Зсуваємо правіше через зміну padding */
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+}
+.close-btn-abs:hover { color: var(--text); }
+
+/* 4. Поля вводу */
+.sp-label {
+    display: block;
+    text-align: left;
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: var(--muted);
+}
+
+.sp-input {
+    background-color: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 8px 12px; /* Трохи компактніше поле */
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+.sp-input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* 5. Чекбокси В ОДИН РЯДОК (Економія висоти) */
+.sp-checkbox-wrapper {
+    display: flex;
+    flex-direction: row; /* Розміщуємо в рядок */
+    justify-content: space-between; /* Розводимо по краях */
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.checkbox-group label {
+    font-size: 12px; /* Трохи менший шрифт */
+    color: var(--muted);
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* 6. Кнопки (компактніші) */
+.sp-btn-primary {
+    background-color: var(--accent);
+    color: var(--text);
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 8px; /* Тонша кнопка */
+    text-transform: none;
+    font-size: 15px;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sp-btn-primary:hover { background-color: var(--accent-dark); }
+
+.sp-btn-outline {
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important;
+    border-radius: 50px;
+    padding: 8px; /* Тонша кнопка */
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sp-btn-outline:hover { background-color: #f1f1f1 !important; }
+
+.sp-btn-outline svg {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* 7. Розділювач */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin: 10px 0; /* Менші відступи */
+    text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+}
+.auth-divider span { padding: 0 10px; }
+
+.modal-footer-link {
+    margin-top: 15px;
+    font-size: 13px;
+}
+.white-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+.white-link:hover { text-decoration: underline; }
+/* 6. Кнопка Google (Виправлена) */
+.sp-btn-outline {
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+    color: #333 !important;
+    border-radius: 50px;
+    padding: 10px; /* Тонша кнопка */
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    /* === ГОЛОВНІ ЗМІНИ ТУТ === */
+    display: flex;           /* Вмикаємо гнучке вирівнювання */
+    align-items: center;     /* Рівняємо по вертикалі */
+    justify-content: center; /* Рівняємо по центру */
+    gap: 10px;               /* Відступ між іконкою "G" і текстом */
+    position: relative;
+}
+
+.sp-btn-outline:hover { background-color: #f1f1f1 !important; }
+
+.sp-btn-outline svg {
+    /* Прибираємо абсолютне позиціонування, щоб іконка стала частиною потоку */
+    position: static; 
+    transform: none;
+    margin: 0; /* Зайві відступи прибираємо */
+}
+
+/* === QUIZ STYLES === */
+
+/* Кнопка запуску гри (можна зробити анімованою) */
+.quiz-trigger-btn {
+    background: linear-gradient(45deg, #FF0000, #FF8C00);
+    color: white;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+}
+.quiz-trigger-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.8);
+}
+
+/* Контейнер гри */
+.quiz-container {
+    text-align: center;
+}
+
+.quiz-score {
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: inline-block;
+    padding: 5px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+}
+
+.quiz-image-box {
+    width: 100%;
+    height: 250px;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+    border: 2px solid var(--border);
+}
+
+.quiz-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Обрізає зайве */
+    transition: filter 0.3s ease;
+}
+
+/* Складність: трохи розмиваємо фото, поки не вгадають (опціонально) */
+/* .quiz-image-box img.blurred { filter: blur(4px); } */
+
+.quiz-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.quiz-option-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.quiz-option-btn:hover {
+    background: #3a3a3a;
+    border-color: var(--muted);
+}
+
+/* Стани відповіді */
+.quiz-option-btn.correct {
+    background: var(--success) !important;
+    color: white !important;
+    border-color: var(--success) !important;
+}
+
+.quiz-option-btn.wrong {
+    background: var(--danger) !important;
+    color: white !important;
+    border-color: var(--danger) !important;
+    opacity: 0.6;
+}
+
+.quiz-next-btn {
+    margin-top: 20px;
+    width: 100%;
+    display: none; /* Прихована, поки не дадуть відповідь */
+}
+
+/* --- СТИЛІ ДЛЯ ВІКНА ПРОГРАШУ --- */
+
+/* Робимо фон темнішим для вікна програшу */
+#gameOverModal .modal-back {
+    background: rgba(0, 0, 0, 0.85); 
+    backdrop-filter: blur(2px);
+}
+
+/* Анімація появи */
+#gameOverModal .modal {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}

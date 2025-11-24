@@ -2,17 +2,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Елементи DOM ---
     const carDetailContainer = document.getElementById('carDetailContainer');
     const breadcrumbsContainer = document.getElementById('breadcrumbs');
-    let detailCompareBtn = null; // Ми знайдемо його пізніше
+    let detailCompareBtn = null;
 
     // --- Стан сторінки ---
     let state = {
         brandId: null, brandName: '', modelId: null, modelName: '',
         generationId: null, generationName: '', trimId: null,
-        comparisonList: [] // ДОДАЙТЕ ЦЕЙ РЯДОК
+        comparisonList: [],
+        is3DInitialized: false // Прапор для 3D
     };
 
+    // --- Змінні для 3D (Three.js) ---
+    let scene, camera, renderer, model, controls, animationId;
+
     /**
-     * Витягує всі ID та імена з параметрів URL.
+     * Витягує параметри з URL.
      */
     function getParamsFromUrl() {
         const params = new URLSearchParams(window.location.search);
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Відображає навігацію "хлібні крихти".
+     * Хлібні крихти.
      */
     function renderBreadcrumbs(trimName = 'Комплектація') {
         if (!breadcrumbsContainer) return;
@@ -35,20 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const generationLink = `generation.html?brandId=${state.brandId}&brandName=${encodeURIComponent(state.brandName)}&modelId=${state.modelId}&modelName=${encodeURIComponent(state.modelName)}&generationId=${state.generationId}&generationName=${encodeURIComponent(state.generationName)}`;
 
         breadcrumbsContainer.innerHTML = `
-            <a href="main.html">Головна</a>
-            <span>/</span>
-            <a href="${brandLink}">${state.brandName}</a>
-            <span>/</span>
-            <a href="${modelLink}">${state.modelName}</a>
-            <span>/</span>
-            <a href="${generationLink}">${state.generationName}</a>
-            <span>/</span>
+            <a href="main.html">Головна</a> <span>/</span>
+            <a href="${brandLink}">${state.brandName}</a> <span>/</span>
+            <a href="${modelLink}">${state.modelName}</a> <span>/</span>
+            <a href="${generationLink}">${state.generationName}</a> <span>/</span>
             <span class="current">${trimName}</span>
         `;
     }
 
     /**
-     * Зберігає ID переглянутої комплектації в localStorage.
+     * Зберігає ID в "Нещодавно переглянуті".
      */
     function saveToRecentlyViewed(trimId) {
         if (!trimId) return;
@@ -70,28 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Допоміжна функція для створення рядка в таблиці характеристик.
-     * @param {string} label - Назва характеристики.
-     * @param {string|number} value - Значення.
-     * @param {string} [unit=''] - Одиниця виміру (напр., 'мм', 'кг').
-     * @returns {string} - HTML-рядок <tr>...</tr>.
+     * Рядок таблиці характеристик.
      */
     function createSpecRow(label, value, unit = '') {
-        if (value === null || value === undefined || value === '') {
-            return ''; // Не рендеримо рядок, якщо даних немає
-        }
-        return `
-            <tr class="spec-row">
-                <td class="spec-label">${label}</td>
-                <td class="spec-value">${value} ${unit}</td>
-            </tr>
-        `;
+        if (value === null || value === undefined || value === '') return '';
+        return `<tr class="spec-row"><td class="spec-label">${label}</td><td class="spec-value">${value} ${unit}</td></tr>`;
     }
 
     /**
-     * Генерує HTML для галереї зображень.
-     * @param {object} car - Об'єкт автомобіля з API.
-     * @returns {string} - HTML-код для галереї.
+     * Генерує HTML галереї (З ПІДТРИМКОЮ 3D).
      */
     function renderGallery(car) {
         const images = car.images || [];
@@ -102,15 +89,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (images.length > 1) {
             thumbnailsHTML = images.map((imgUrl, index) => `
                 <div class="thumbnail-item ${index === 0 ? 'active' : ''}" data-image-url="${imgUrl}">
-                    <img src="${imgUrl}" alt="${car.make_name} ${car.model_name} thumbnail ${index + 1}">
+                    <img src="${imgUrl}" alt="thumbnail ${index + 1}">
                 </div>
             `).join('');
         }
 
         return `
             <div class="car-gallery-container">
-                <div class="main-image-container">
-                    <img id="mainCarImage" src="${mainImage}" alt="Головне фото ${car.make_name} ${car.model_name}">
+                <div class="media-viewer-container">
+                    <img id="mainCarImage" class="media-viewer-image" src="${mainImage}" alt="${car.make_name} ${car.model_name}">
+                    
+                    <div id="threejs-container" style="display: none;"></div>
+
+                    <div class="media-controls">
+                        <button id="btn-view-photo" class="media-btn active">Фото</button>
+                        <button id="btn-view-3d" class="media-btn">3D Огляд</button>
+                    </div>
                 </div>
                 ${images.length > 1 ? `<div class="thumbnail-grid">${thumbnailsHTML}</div>` : ''}
             </div>
@@ -118,12 +112,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Генерує HTML для бічної панелі "Швидкі факти".
-     * @param {object} car - Об'єкт автомобіля з API.
-     * @returns {string} - HTML-код для бічної панелі.
+     * Логіка ініціалізації Three.js.
      */
+    function init3DScene() {
+        if (state.is3DInitialized) return; 
+
+        const container = document.getElementById('threejs-container');
+        if (!container) return;
+
+        // 1. Сцена
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x2a2a2a);
+
+        // 2. Камера
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(4, 2, 4);
+
+        // 3. Рендерер
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // 4. Світло
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // 5. Контролери
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+
+        // 6. Завантаження моделі
+        const loader = new THREE.GLTFLoader();
+        const modelUrl = `static/models/${state.trimId}.glb`;
+
+        console.log(`Завантаження 3D моделі: ${modelUrl}`);
+
+        loader.load(modelUrl, 
+            (gltf) => {
+                model = gltf.scene;
+                // Центрування
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center);
+                // Масштабування
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3 / maxDim; 
+                model.scale.set(scale, scale, scale);
+
+                scene.add(model);
+            }, 
+            undefined, 
+            (error) => {
+                console.error('Помилка 3D:', error);
+                showInfoModal('3D не доступне', 'Для цього авто поки немає 3D моделі.', 'info');
+                document.getElementById('btn-view-photo').click();
+            }
+        );
+
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            if (!container || container.style.display === 'none') return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        state.is3DInitialized = true;
+    }
+
+    /**
+     * Налаштування перемикачів Фото/3D.
+     */
+    function setupMediaToggles() {
+        const btnPhoto = document.getElementById('btn-view-photo');
+        const btn3D = document.getElementById('btn-view-3d');
+        const imgContainer = document.getElementById('mainCarImage');
+        const threeContainer = document.getElementById('threejs-container');
+        const thumbnailGrid = document.querySelector('.thumbnail-grid');
+
+        if (!btnPhoto || !btn3D) return;
+
+        btnPhoto.addEventListener('click', () => {
+            btnPhoto.classList.add('active');
+            btn3D.classList.remove('active');
+            imgContainer.style.display = 'block';
+            threeContainer.style.display = 'none';
+            if (thumbnailGrid) thumbnailGrid.style.opacity = '1';
+        });
+
+        btn3D.addEventListener('click', () => {
+            btn3D.classList.add('active');
+            btnPhoto.classList.remove('active');
+            imgContainer.style.display = 'none';
+            threeContainer.style.display = 'block';
+            if (thumbnailGrid) thumbnailGrid.style.opacity = '0.3';
+            
+            if (!state.is3DInitialized) init3DScene();
+        });
+    }
+
     function renderQuickSpecs(car) {
-        // Збираємо факти, як на скріншоті
         const facts = [
             { label: 'Тип кузова', value: car.body_type },
             { label: 'Витрата палива', value: car.fuel_consumption_mixed, unit: 'л/100 км' },
@@ -138,26 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
             { label: 'Об\'єм багажника', value: car.trunk_volume_l, unit: 'л' },
             { label: 'Коробка передач', value: car.transmission },
         ];
-
-        let factsHTML = facts
-            .map(fact => {
-                if (fact.value) {
-                    return `<div class="quick-spec-item">
-                                <span class="quick-spec-label">${fact.label}</span>
-                                <span class="quick-spec-value">${fact.value} ${fact.unit || ''}</span>
-                            </div>`;
-                }
-                return '';
-            })
-            .join('');
-
+        let factsHTML = facts.map(fact => fact.value ? `<div class="quick-spec-item"><span class="quick-spec-label">${fact.label}</span><span class="quick-spec-value">${fact.value} ${fact.unit || ''}</span></div>` : '').join('');
         return `<div class="quick-specs-box">${factsHTML}</div>`;
     }
 
     /**
-     * Генерує HTML для всіх таблиць з характеристиками.
-     * @param {object} car - Об'єкт автомобіля з API.
-     * @returns {string} - HTML-код таблиць.
+     * ПОВНА ВЕРСІЯ renderSpecifications (повернуто всі поля).
      */
     function renderSpecifications(car) {
         return `
@@ -253,263 +340,134 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    /**
-     * Додає слухачі подій для мініатюр галереї.
-     */
     function attachGalleryListeners() {
         const mainImage = document.getElementById('mainCarImage');
         const thumbnails = document.querySelectorAll('.thumbnail-item');
-        
-        if (!mainImage || thumbnails.length === 0) {
-            return;
-        }
+        if (!mainImage || thumbnails.length === 0) return;
 
         thumbnails.forEach(thumb => {
             thumb.addEventListener('click', () => {
-                // Оновлюємо головне зображення
-                mainImage.src = thumb.dataset.imageUrl;
+                const btnPhoto = document.getElementById('btn-view-photo');
+                if (btnPhoto && !btnPhoto.classList.contains('active')) btnPhoto.click();
                 
-                // Оновлюємо активний клас
+                mainImage.src = thumb.dataset.imageUrl;
                 thumbnails.forEach(t => t.classList.remove('active'));
                 thumb.classList.add('active');
             });
         });
     }
 
-
-    /**
-     * Завантажує список порівняння з localStorage.
-     */
     function loadComparisonList() {
         try {
             const savedComparison = localStorage.getItem('RightWheel_comparison');
             state.comparisonList = savedComparison ? JSON.parse(savedComparison) : [];
-        } catch (e) { 
-            console.error("Помилка завантаження списку порівняння:", e); 
-            state.comparisonList = []; 
-        }
+        } catch (e) { state.comparisonList = []; }
     }
 
-
-/**
-     * Обробник кліку на кнопку "Додати до порівняння"
-     */
     function handleDetailCompareClick() {
         if (!state.trimId) return;
-        
         const trimIdStr = state.trimId.toString();
-        // Запам'ятовуємо, чи БУВ автомобіль у порівнянні ДО кліку
         const wasCompared = state.comparisonList.includes(trimIdStr);
         
         if (typeof updateComparisonList === 'function' && typeof renderComparisonBar === 'function') {
-            
              if (!wasCompared && state.comparisonList.length >= 4) {
-                showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
+                showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів.', 'info');
                 return;
             }
+            if (wasCompared) state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
+            else state.comparisonList.push(trimIdStr);
             
-            // Оновлюємо локальний стан
-            if (wasCompared) {
-                state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
-            } else {
-                state.comparisonList.push(trimIdStr);
-            }
-            
-            // Оновлюємо стан кнопки
             updateDetailCompareButtonState();
-            
-            // Викликаємо глобальні функції, щоб оновити localStorage та бар
             updateComparisonList(trimIdStr, !wasCompared);
-            renderComparisonBar(); // Перемальовуємо бар внизу
-            
-            // === НОВИЙ КОД: ПОКАЗУЄМО СПОВІЩЕННЯ ===
-            if (wasCompared) {
-                // Якщо він БУВ у списку, значить ми його видалили
-                showInfoModal('Порівняння', 'Автомобіль видалено зі списку порівняння.', 'info');
-            } else {
-                // Якщо його НЕ БУЛО, значить ми його додали
-                showInfoModal('Порівняння', 'Автомобіль додано до списку порівняння!', 'success');
-            }
-            // === КІНЕЦЬ НОВОГО КОДУ ===
-            
+            renderComparisonBar(); 
+            showInfoModal('Порівняння', wasCompared ? 'Видалено зі списку.' : 'Додано до списку!', wasCompared ? 'info' : 'success');
         } else {
-            console.error('Функції updateComparisonList або renderComparisonBar не знайдено. Переконайтеся, що app.js завантажено.');
-            showInfoModal('Помилка', 'Не вдалося оновити список порівняння.', 'error');
+            console.error('Функції порівняння не знайдено (перевірте app.js)');
         }
     }
     
-    /**
-     * Оновлює стан кнопки порівняння (текст та клас).
-     */
     function updateDetailCompareButtonState() {
         if (!detailCompareBtn) return;
-        
         const trimIdStr = state.trimId.toString();
         const isCompared = state.comparisonList.includes(trimIdStr);
-        
         const textSpan = detailCompareBtn.querySelector('span');
         
         if (isCompared) {
             if (textSpan) textSpan.textContent = 'Видалити з порівняння';
-            detailCompareBtn.classList.add('compared'); // Додаємо клас для стилізації (якщо є)
+            detailCompareBtn.classList.add('primary');
             detailCompareBtn.classList.remove('secondary');
-            detailCompareBtn.classList.add('primary'); // Робимо червоною
         } else {
             if (textSpan) textSpan.textContent = 'Додати до порівняння';
-            detailCompareBtn.classList.remove('compared');
-            detailCompareBtn.classList.remove('primary');
             detailCompareBtn.classList.add('secondary');
-        }
-    }
-    
-    /**
-     * Обробник кліку на кнопку "Додати до порівняння"
-     */
-    function handleDetailCompareClick() {
-        if (!state.trimId) return;
-        
-        const trimIdStr = state.trimId.toString();
-        const isCompared = state.comparisonList.includes(trimIdStr);
-        
-        // Викликаємо ГЛОБАЛЬНІ функції з app.js (вони мають бути доступні)
-        
-        if (typeof updateComparisonList === 'function' && typeof renderComparisonBar === 'function') {
-            
-            // Імітуємо логіку updateComparisonList, щоб перевірити ліміт
-             if (!isCompared && state.comparisonList.length >= 4) {
-                showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-                return;
-            }
-            
-            // Оновлюємо локальний стан
-            if (isCompared) {
-                state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
-            } else {
-                state.comparisonList.push(trimIdStr);
-            }
-            
-            // Оновлюємо стан кнопки
-            updateDetailCompareButtonState();
-            
-            // Викликаємо глобальні функції, щоб оновити localStorage та бар
-            updateComparisonList(trimIdStr, !isCompared);
-            renderComparisonBar(); // Перемальовуємо бар внизу
-            
-        } else {
-            console.error('Функції updateComparisonList або renderComparisonBar не знайдено. Переконайтеся, що app.js завантажено.');
-            showInfoModal('Помилка', 'Не вдалося оновити список порівняння.', 'error');
+            detailCompareBtn.classList.remove('primary');
         }
     }
 
-
-    /**
-     * Завантажує детальну інформацію про комплектацію з API та відображає її
-     */
     async function loadAndDisplayCarDetails() {
         if (!state.trimId) {
-            carDetailContainer.innerHTML = '<h2>Помилка: ID комплектації не вказано в URL.</h2>';
-            renderBreadcrumbs("Помилка");
+            carDetailContainer.innerHTML = '<h2>Помилка: ID не вказано.</h2>';
             return;
         }
-
+        
+        // ЗБЕРІГАЄМО ІСТОРІЮ ПЕРЕГЛЯДУ
         saveToRecentlyViewed(state.trimId);
-        carDetailContainer.innerHTML = '<p>Завантаження даних про автомобіль...</p>'; // TODO: Замінити на скелетон
+        
+        carDetailContainer.innerHTML = '<p>Завантаження...</p>';
         renderBreadcrumbs("Завантаження...");
 
         try {
             const apiUrl = `http://127.0.0.1:5000/api/trims/${state.trimId}`;
             const response = await fetch(apiUrl);
-
-            if (!response.ok) {
-                let errorText = `HTTP error! status: ${response.status}`;
-                try {
-                    const errorJson = await response.json();
-                    errorText += `, Message: ${errorJson.error || response.statusText}`;
-                } catch (e) { errorText += `, Message: ${response.statusText}`; }
-                throw new Error(errorText);
-            }
+            if (!response.ok) throw new Error('Помилка API');
             
-            const car = await response.json(); // Отримуємо об'єкт з усіма даними
-
-            if (!car) {
-                throw new Error("Не вдалося отримати дані про автомобіль.");
-            }
-
-            // Оновлюємо заголовок сторінки та хлібні крихти
+            const car = await response.json();
             const pageTitle = `${car.make_name} ${car.model_name} ${car.name}`;
             document.title = `${pageTitle} — RightWheel`;
             renderBreadcrumbs(car.name);
 
-            // Генеруємо HTML для нового дизайну
-            const galleryHTML = renderGallery(car);
-            const quickSpecsHTML = renderQuickSpecs(car);
-            const specificationsHTML = renderSpecifications(car);
-
-            // Збираємо фінальний макет (Grid: main-content | sidebar)
             carDetailContainer.innerHTML = `
                 <h2 class="car-detail-main-title">${pageTitle} (${car.year})</h2>
-                
                 <div class="car-detail-layout-grid">
                     <div class="car-main-content">
-                        ${galleryHTML}
-                        ${specificationsHTML}
+                        ${renderGallery(car)}
+                        ${renderSpecifications(car)}
                     </div>
-                    
                     <div class="car-sidebar">
-                        ${quickSpecsHTML}
-                        
+                        ${renderQuickSpecs(car)}
                         <div class="compare-button-container">
-                            <button id="detailAddToCompareBtn" class="btn secondary full-width" data-id="${car.id}">
-                                <span>Завантаження...</span>
-                            </button>
+                            <button id="detailAddToCompareBtn" class="btn secondary full-width"><span>Завантаження...</span></button>
                         </div>
-
-                        <div id="similarCarsContainer" class="similar-cars-section">
-                            Завантаження схожих авто...
-                        </div>
+                        <div id="similarCarsContainer" class="similar-cars-section">Завантаження схожих авто...</div>
                     </div>
                 </div>
             `;
 
-            // ---Ініціалізуємо кнопку порівняння ---
             detailCompareBtn = document.getElementById('detailAddToCompareBtn');
             if (detailCompareBtn) {
-                // Встановлюємо початковий стан кнопки
                 updateDetailCompareButtonState(); 
                 detailCompareBtn.addEventListener('click', handleDetailCompareClick);
             }
           
-            
+            setupMediaToggles(); // Налаштовуємо кнопки 3D
             attachGalleryListeners();
-            // Завантажуємо схожі авто (ця функція у вас вже була і має працювати)
             await loadAndRenderSimilarCars(state.trimId);
 
         } catch (error) {
-            console.error("Помилка завантаження деталей автомобіля:", error);
-            renderBreadcrumbs("Помилка");
-            carDetailContainer.innerHTML = `<h2 style="color: red;">Не вдалося завантажити дані: ${error.message}. Дивіться консоль.</h2>`;
+            console.error("Error:", error);
+            carDetailContainer.innerHTML = `<h2>Помилка завантаження даних.</h2>`;
         }
     }
 
-    /**
-     * Завантажує та відображає схожі автомобілі.
-     * (Ця функція, ймовірно, у вас вже є. Переконайтеся, що вона на місці).
-     */
     async function loadAndRenderSimilarCars(currentTrimId) {
         const container = document.getElementById('similarCarsContainer');
         if (!container) return;
-
         try {
-            const similarApiUrl = `http://127.0.0.1:5000/api/trims/${currentTrimId}/similar`;
-            const response = await fetch(similarApiUrl);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const response = await fetch(`http://127.0.0.1:5000/api/trims/${currentTrimId}/similar`);
             const similarCars = await response.json();
-
             if (!similarCars || similarCars.length === 0) {
-                container.innerHTML = '<h4>Схожих автомобілів не знайдено</h4>';
+                container.innerHTML = '<h4>Схожих авто не знайдено</h4>';
                 return;
             }
-
             const cardsHTML = similarCars.map(sCar => {
                 const params = new URLSearchParams({
                     id: sCar.id, brandId: sCar.brand_id, brandName: sCar.make_name,
@@ -517,24 +475,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     generationId: sCar.generation_id,
                     generationName: sCar.generation_name || `${sCar.year_start}-${sCar.year_end || 'н.ч.'}`
                 });
-                const carLink = `car.html?${params.toString()}`;
-
-                return `
-                <a href="${carLink}" class="similar-car-card">
-                    <div class="similar-car-title">${sCar.make_name} ${sCar.model_name}</div>
-                    <div class="similar-car-details">
-                        <span>${sCar.year}</span>
-                        <span>${sCar.name} (${sCar.engine || ''})</span>
-                    </div>
-                </a>`;
+                return `<a href="car.html?${params.toString()}" class="similar-car-card"><div class="similar-car-title">${sCar.make_name} ${sCar.model_name}</div><div class="similar-car-details"><span>${sCar.year}</span><span>${sCar.name}</span></div></a>`;
             }).join('');
-
             container.innerHTML = `<h4>Схожі автомобілі</h4><div class="similar-cars-grid">${cardsHTML}</div>`;
-
-        } catch (error) {
-            console.error("Помилка завантаження схожих авто:", error);
-            container.innerHTML = '<h4 style="color: var(--muted);">Не вдалося завантажити схожі авто.</h4>';
-        }
+        } catch (error) { container.innerHTML = ''; }
     }
 
     /**
@@ -544,9 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
         getParamsFromUrl();
         loadComparisonList();
         loadAndDisplayCarDetails();
-        renderBrandQuickNav('brandQuickNavContainer'); 
+        if(typeof renderBrandQuickNav === 'function') renderBrandQuickNav('brandQuickNavContainer'); 
     }
 
     initCarDetailPage();
-   
 });

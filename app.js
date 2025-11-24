@@ -238,6 +238,11 @@ async function handleLogin(e) {
         console.error("Помилка логіну:", error);
         showInfoModal('Помилка входу', error.message, 'error');
     }
+    const consent = document.getElementById('consentCheck').checked;
+    if (!consent) {
+        showInfoModal('Увага', 'Потрібна згода на обробку даних.', 'info');
+        return;
+    }
 }
 
 function showRegisterModal() { if(elements.loginModal) elements.loginModal.style.display = 'none'; if(elements.registerModal) elements.registerModal.style.display = 'flex'; }
@@ -1175,5 +1180,53 @@ async function init() {
     // Запускаємо завантаження даних для головної сторінки
     await renderData();
 }
+
+// --- GOOGLE LOGIN ---
+  const googleBtn = document.getElementById('googleLoginBtn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            // ВАШ CLIENT ID
+            const CLIENT_ID = "597725200058-jkofhkeccrpuknq2tpf7tbado5vcfg01.apps.googleusercontent.com";
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                use_fedcm_for_prompt: false,
+                callback: async (response) => {
+                    try {
+                        const res = await fetch('http://127.0.0.1:5000/api/auth/google', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ token: response.credential })
+                        });
+                        
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            localStorage.setItem('RightWheel_access_token', data.access_token);
+                            localStorage.setItem('RightWheel_loggedInUser', data.username);
+                            
+                            // Ховаємо модалку, якщо вона відкрита
+                            const loginModal = document.getElementById('loginModal');
+                            if (loginModal) loginModal.style.display = 'none';
+                            
+                            window.location.reload();
+                        } else {
+                            alert(data.error || "Помилка входу");
+                        }
+                    } catch (e) {
+                        console.error("Помилка відправки токена:", e);
+                    }
+                }
+            });
+
+google.accounts.id.prompt((notification) => {
+    if (notification.isNotDisplayed()) {
+        // Тут буде справжня причина: наприклад, "browser_not_supported" або "suppressed_by_user"
+        console.log("Google Prompt НЕ показано через:", notification.getNotDisplayedReason());
+    } else if (notification.isSkippedMoment()) {
+        console.log("Google Prompt пропущено через:", notification.getSkippedReason());
+    }
+});
+        });
+    }
 
 document.addEventListener('DOMContentLoaded', init);

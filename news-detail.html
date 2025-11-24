@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Деталі новини — RightWheel</title>
+  <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .news-detail-container {
+        background: var(--card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 30px;
+        margin-top: 20px;
+        box-shadow: var(--shadow);
+    }
+    .news-detail-image {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: cover;
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        background-color: var(--bg);
+    }
+    .news-detail-meta {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 15px;
+        display: flex;
+        gap: 15px;
+    }
+    .news-detail-title {
+        font-size: 32px;
+        color: var(--text);
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+    .news-detail-content {
+        font-size: 18px;
+        line-height: 1.8;
+        color: #d1d5db; /* Трохи світліший за звичайний текст */
+        margin-bottom: 30px;
+    }
+    .source-link-block {
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+        text-align: center;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="logo-nav">
+        <div class="logo">
+          <a href="main.html" style="text-decoration: none; color: inherit;">
+              <h1>Right Wheel</h1>
+          </a>
+        </div>
+        <a href="forum.html" class="nav-link-forum">Форум</a>
+        <a href="news.html" class="nav-link-forum">Новини</a>
+      </div>
+      
+      <div class="controls">
+        <a href="news.html" class="btn secondary">
+            &larr; Назад до новин
+        </a>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <main>
+      <div id="newsDetailContainer" class="news-detail-container">
+        <img id="ndImage" class="news-detail-image" src="" alt="">
+        
+        <div class="news-detail-meta">
+            <span id="ndDate"></span>
+            <span>|</span>
+            <span id="ndSource">Джерело: RightWheel API</span>
+        </div>
+
+        <h1 id="ndTitle" class="news-detail-title">Завантаження...</h1>
+        
+        <div id="ndContent" class="news-detail-content">
+            </div>
+
+        <div class="source-link-block">
+            <p style="color: var(--muted); margin-bottom: 15px;">Це короткий огляд новини. Читати повну версію:</p>
+            <a id="ndLink" href="#" target="_blank" class="btn primary">Читати на джерелі &rarr;</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script src="news-detail.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>
