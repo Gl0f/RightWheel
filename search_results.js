@@ -108,11 +108,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearComparison() {
+        // 1. Очищуємо список у пам'яті
         state.comparisonList = [];
-        try { localStorage.removeItem('RightWheel_comparison'); }
-        catch(e) { console.error("Помилка очищення списку порівняння:", e); }
+        
+        // 2. Очищуємо localStorage
+        try { 
+            localStorage.removeItem('RightWheel_comparison'); 
+        } catch(e) { 
+            console.error("Помилка очищення списку порівняння:", e); 
+        }
+        
+        // 3. Ховаємо нижню панель
         renderComparisonBar();
-        elements.listElement?.querySelectorAll('.compare-checkbox').forEach(checkbox => { checkbox.checked = false; });
+        
+        // 4. === ВИПРАВЛЕННЯ: Скидаємо вигляд усіх кнопок на сторінці ===
+        if (elements.listElement) {
+            const allButtons = elements.listElement.querySelectorAll('.compare-btn');
+            allButtons.forEach(btn => {
+                btn.classList.remove('compared'); // Забираємо червоний колір
+                btn.title = "Додати до порівняння"; // Повертаємо підказку
+            });
+        }
     }
 
   
@@ -647,47 +663,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- ФУНКЦІЯ для перемикання порівняння ---
-    // --- ФУНКЦІЯ для перемикання порівняння ---
     function toggleCompare(trimId) {
         const trimIdStr = trimId.toString();
-        // Перевіряємо, чи БУВ автомобіль у списку ДО кліку
+        
+        // Перевіряємо актуальний стан у локальному списку
         const wasCompared = state.comparisonList.includes(trimIdStr);
 
         // Перевірка ліміту (якщо ми намагаємося додати новий)
         if (!wasCompared && state.comparisonList.length >= 4) {
             showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-            return; // Не даємо додати
+            return; 
         }
 
-        // Викликаємо глобальну функцію, яка оновить localStorage та нижній бар
-        updateComparisonList(trimIdStr, !wasCompared);
-
-        // Оновлюємо ЛОКАЛЬНИЙ стан (state) сторінки, щоб UI був синхронізований
+        // Оновлюємо ЛОКАЛЬНИЙ стан (state) сторінки
         if (wasCompared) {
             state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
         } else {
             state.comparisonList.push(trimIdStr);
         }
 
-        // Оновлюємо вигляд кнопки
+        // Викликаємо глобальну функцію для оновлення localStorage та нижньої панелі
+        updateComparisonList(trimIdStr, !wasCompared);
+
+        // Оновлюємо вигляд кнопки (червона/сіра)
         updateCompareButtonState(trimIdStr);
 
-        // === НОВИЙ КОД: ПОКАЗУЄМО СПОВІЩЕННЯ ===
+        // Показуємо сповіщення
         if (wasCompared) {
-            // Якщо він БУВ у списку, значить ми його видалили
             showInfoModal('Порівняння', 'Автомобіль видалено зі списку порівняння.', 'info');
         } else {
-            // Якщо його НЕ БУЛО, значить ми його додали
             showInfoModal('Порівняння', 'Автомобіль додано до списку порівняння!', 'success');
         }
     }
 
     // ФУНКЦІЯ для оновлення вигляду кнопки 
     function updateCompareButtonState(trimIdStr) {
-        const button = elements.trimListContainer?.querySelector(`.compare-btn[data-id="${trimIdStr}"]`);
+        // ВИПРАВЛЕННЯ: Використовуємо listElement (це і є наш #carList), а не trimListContainer
+        const button = elements.listElement?.querySelector(`.compare-btn[data-id="${trimIdStr}"]`);
+        
         if (button) {
             const isCompared = state.comparisonList.includes(trimIdStr);
-            button.classList.toggle('compared', isCompared); // Додаємо/видаляємо клас
+            
+            // Додаємо або забираємо клас 'compared' (який робить кнопку червоною)
+            if (isCompared) {
+                button.classList.add('compared');
+            } else {
+                button.classList.remove('compared');
+            }
+            
             button.title = isCompared ? "Видалити з порівняння" : "Додати до порівняння";
         }
     }

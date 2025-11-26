@@ -22,10 +22,7 @@
       <a href="news.html" class="nav-link-forum">Новини</a>
     </div>
     <div class="controls">
-      <a href="account.html" id="accountLinkBtn" class="btn secondary" style="display:none;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Мій кабінет
-      </a>
+      
       <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Обране
@@ -118,80 +115,7 @@
   </div>
   </div>
 
-  <div id="loginModal" class="modal-root" style="display:none">
-    <div class="modal-back"></div>
-    <div class="modal login-theme">
-      
-      <div class="modal-header-center">
-        <h2 class="modal-title-large">Раді вітати<br>вас знову</h2>
-        <button id="closeLoginModalBtn" class="close-btn-abs">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <form id="loginForm" class="form-content sp-form">
-        
-        <div class="form-group">
-          <label for="loginUsername" class="sp-label">Ел. пошта або ім'я користувача</label>
-          <input id="loginUsername" type="text" placeholder="Ел. пошта або логін" class="sp-input" required />
-        </div>
-        
-        <div class="form-group">
-           <label for="loginPassword" class="sp-label">Пароль</label>
-           <input id="loginPassword" type="password" placeholder="Пароль" class="sp-input" required />
-        </div>
-
-        <div class="sp-checkbox-wrapper">
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="captchaCheck" required />
-                <label for="captchaCheck">Я не робот</label>
-            </div>
-            
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="consentCheck" required />
-                <label for="consentCheck">Згода на обробку даних</label>
-            </div>
-        </div>
-         
-        <button class="btn sp-btn-primary" type="submit">Увійти</button>
-
-        <div class="auth-divider">
-           <span>або</span>
-        </div>
-
-        <div id="googleButtonDiv" style="width: 100%; display: flex; justify-content: center; margin-top: 15px;"></div>
-
-        <div class="modal-footer-link">
-            <span style="color: #a7a7a7;">Немає акаунта?</span>
-            <a href="#" class="form-link white-link" id="showRegisterBtnFromLogin">Зареєструватися</a>
-        </div>
-         
-      </form>
-    </div>
-  </div>
-
-  <div id="registerModal" class="modal-root" style="display:none">
-    <div class="modal-back"></div>
-    <div class="modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Реєстрація в RightWheel</h2>
-        <div>
-            <button id="showLoginBtn" class="btn secondary small">Вхід</button>
-            <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-        </div>
-      </div>
-      <form id="registerForm" class="form-content">
-        <div class="form-group"> <input id="registerUsername" type="text" placeholder="Логін" required /> </div>
-        <div class="form-group"> <input id="registerEmail" type="email" placeholder="Email" required /> </div>
-        <div class="form-group"> <input id="registerPassword" type="password" placeholder="Пароль" required /> </div>
-        <div class="form-group"> <input id="registerConfirmPassword" type="password" placeholder="Підтвердження пароля" required /> </div>
-        <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="registerCaptchaCheck" required /> <label for="registerCaptchaCheck">Підтвердити</label> </div> </div>
-        <button class="btn primary full-width" type="submit">Зареєструватися</button>
-      </form>
-    </div>
-  </div>
+  
   
   <script src="app.js"></script> 
   <script src="account.js"></script> 

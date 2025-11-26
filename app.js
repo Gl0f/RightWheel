@@ -547,102 +547,140 @@ async function renderFeaturedCars() {
 
 async function handleGlobalSearchInput() {
     const query = elements.globalSearchInput.value.toLowerCase().trim();
+    
     if (query.length < 2) {
         if (elements.searchDropdown) elements.searchDropdown.style.display = 'none';
         return;
     }
 
     try {
-        // --- Запит до API пошуку ---
-        const apiUrl = `http://127.0.0.1:5000/api/search?q=${encodeURIComponent(query)}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const results = await response.json(); // Отримуємо [{type: 'brand', id: 1, name: 'Audi'}, {type: 'model', id: 101, name: 'Golf', brand_name: 'VW', brand_id: 1}, ...]
+        const response = await fetch(`http://127.0.0.1:5000/api/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Network error');
+        
+        const results = await response.json();
 
         if (!elements.searchDropdown) return;
-        elements.searchDropdown.innerHTML = ''; // Очищуємо
+        elements.searchDropdown.innerHTML = '';
 
         if (results.length === 0) {
-            elements.searchDropdown.style.display = 'none';
+            elements.searchDropdown.innerHTML = '<div style="padding:8px 12px; color:#ccc; font-size: 13px;">Нічого не знайдено</div>';
+            elements.searchDropdown.style.display = 'block';
+            elements.searchDropdown.style.backgroundColor = '#2D3748';
+            elements.searchDropdown.style.width = '100%'; // Для повідомлення можна лишити широким
             return;
         }
 
-        // Відображаємо результати
         results.forEach(item => {
             const div = document.createElement('div');
             div.className = 'search-dropdown-item';
-            // Зберігаємо дані для обробки кліку
+            
+            // Стилі елемента
+            // white-space: nowrap; - забороняє перенос тексту, щоб ширина рахувалась правильно
+            div.style.cssText = "display: flex; align-items: center; padding: 4px 10px; border-bottom: 1px solid #4A5568; background: #2D3748; cursor: pointer; min-height: 40px; white-space: nowrap;";
+            
+            div.onmouseover = () => div.style.background = '#1A202C';
+            div.onmouseout = () => div.style.background = '#2D3748';
+
+            // Дані
             div.dataset.type = item.type;
             div.dataset.id = item.id;
             div.dataset.name = item.name;
-            if (item.type === 'model') {
+            
+            if (item.type === 'generation') {
                 div.dataset.brandId = item.brand_id;
                 div.dataset.brandName = item.brand_name;
+                div.dataset.modelId = item.model_id;
+                div.dataset.modelName = item.model_name;
+                div.dataset.generationName = item.generation_name;
+            } else if (item.type === 'brand') {
+                div.dataset.brandName = item.name;
             }
 
-            // Формуємо HTML для елемента списку
-            if (item.type === 'brand') {
-                div.innerHTML = `<div><div class="search-dropdown-make">${item.name}</div><div class="search-dropdown-model">(Марка)</div></div> ${item.country ? `<div style="font-size:11px; color:var(--muted)">${item.country}</div>` : ''}`;
-            } else if (item.type === 'model') {
-                div.innerHTML = `<div><div class="search-dropdown-make">${item.brand_name}</div><div class="search-dropdown-model">${item.name}</div></div><div style="font-size:11px; color:var(--muted)">(Модель)</div>`;
+            const imageUrl = item.image_url || 'https://via.placeholder.com/50x30?text=No+Img';
+            
+            if (item.type === 'generation') {
+                div.innerHTML = `
+                    <div style="width: 50px; height: 30px; margin-right: 10px; flex-shrink: 0; overflow: hidden; border-radius: 2px; background: #1A202C; border: 1px solid #4A5568;">
+                        <img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: center; line-height: 1.1;">
+                        <div style="color: #ffffff !important; font-weight: 600; font-size: 13px;">${item.name}</div>
+                        <div style="color: #A0AEC0 !important; font-size: 11px; margin-top: 2px;">${item.extra_info || ''}</div>
+                    </div>
+                    <div style="width: 15px;"></div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div style="padding-left: 4px; line-height: 1.1;">
+                        <div style="color: #ffffff !important; font-weight: 600; font-size: 13px;">${item.name}</div>
+                        <div style="color: #A0AEC0 !important; font-size: 10px;">${item.type === 'brand' ? 'Марка' : 'Модель'}</div>
+                    </div>
+                    <div style="width: 15px;"></div>
+                `;
             }
-            // Можна додати обробку 'trim', якщо API його повертає
+            
+            div.addEventListener('click', handleSearchDropdownClick);
             elements.searchDropdown.appendChild(div);
         });
+        
+        // === КРИТИЧНІ ЗМІНИ ДЛЯ ШИРИНИ ===
         elements.searchDropdown.style.display = 'block';
+        elements.searchDropdown.style.backgroundColor = '#2D3748';
+        elements.searchDropdown.style.border = '1px solid #4A5568';
+        elements.searchDropdown.style.borderRadius = '0 0 4px 4px';
+        
+        // 1. Відв'язуємо від правого краю
+        elements.searchDropdown.style.right = 'auto';
+        // 2. Змушуємо ширину залежати від контенту (найдовшого тексту)
+        elements.searchDropdown.style.width = 'max-content';
+        // 3. Скидаємо мінімальну ширину (було 100%)
+        elements.searchDropdown.style.minWidth = '0'; 
+        // 4. Встановлюємо мінімальний поріг (щоб не було зовсім вузьким, наприклад 250px)
+        elements.searchDropdown.style.minWidth = '250px'; 
 
     } catch (error) {
-        console.error("Помилка глобального пошуку:", error);
-        if (elements.searchDropdown) elements.searchDropdown.style.display = 'none';
+        console.error("Помилка пошуку:", error);
     }
 }
 
-
 function handleSearchDropdownClick(e) {
-    console.log("--- handleSearchDropdownClick START ---"); // Початок
     const item = e.target.closest('.search-dropdown-item');
-    console.log("Item found:", item); // Чи знайшли елемент?
-
-    if (!item) {
-        console.log("Clicked outside item, exiting.");
-        return;
-    }
+    if (!item) return;
 
     const type = item.dataset.type;
     const id = item.dataset.id;
     const name = item.dataset.name;
-    const brandId = item.dataset.brandId; 
-    const brandName = item.dataset.brandName;
-    console.log("Item data:", { type, id, name, brandId, brandName }); // Які дані зчитали?
 
-    if (!type || !id || !name) {
-         console.error("Missing critical data attributes!"); // Помилка даних?
-         return;
-    }
-
-    console.log("Calling closeSearchDropdown...");
-    closeSearchDropdown(); // Закриваємо меню
+    closeSearchDropdown();
 
     let targetUrl = '';
+
     if (type === 'brand') {
+        // Перехід на сторінку бренду
         targetUrl = `brand.html?id=${id}&name=${encodeURIComponent(name)}`;
-        console.log("Type is brand. Target URL:", targetUrl); // URL для бренду
+        
     } else if (type === 'model') {
-         if (!brandId || !brandName) {
-            console.error("Missing brand data for model type!"); // Помилка даних моделі?
-            return; 
-         }
-        targetUrl = `model.html?brandId=${brandId}&brandName=${encodeURIComponent(brandName)}&modelId=${id}&modelName=${encodeURIComponent(name)}`;
-        console.log("Type is model. Target URL:", targetUrl); // URL для моделі
+        // Перехід на сторінку моделі
+        targetUrl = `model.html?brandId=${item.dataset.brandId}&brandName=${encodeURIComponent(item.dataset.brandName)}&modelId=${id}&modelName=${encodeURIComponent(name)}`;
+        
+    } else if (type === 'generation') {
+        // === НОВЕ: Перехід на сторінку покоління ===
+        const params = new URLSearchParams({
+            brandId: item.dataset.brandId,
+            brandName: item.dataset.brandName,
+            modelId: item.dataset.modelId,
+            modelName: item.dataset.modelName,
+            generationId: id, // ID покоління
+            generationName: item.dataset.generationName || name
+        });
+        targetUrl = `generation.html?${params.toString()}`;
     }
 
     if (targetUrl) {
-        console.log("Attempting redirect to:", targetUrl); // Спроба переходу
         window.location.href = targetUrl;
     } else {
-         console.error("Could not determine target URL for type:", type); // Не визначили URL?
+        console.error("Невідомий тип елемента пошуку:", type);
     }
-    console.log("--- handleSearchDropdownClick END ---"); // Кінець
 }
 
 function closeSearchDropdown() { 

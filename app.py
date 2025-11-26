@@ -279,29 +279,65 @@ def search_cars():
              return jsonify({"error": "Помилка підключення до БД"}), 500
         cursor = conn.cursor()
 
+        # 1. Шукаємо БРЕНДИ
         cursor.execute("""
-            SELECT id, name, 'brand' as type, country
+            SELECT id, name, NULL as image_url, 'Бренд' as extra_info, 'brand' as type
             FROM brands
             WHERE name ILIKE %s
-            ORDER BY name ASC
-            LIMIT 5
+            LIMIT 2
         """, (search_term,))
         columns = [desc[0] for desc in cursor.description]
         for row in cursor.fetchall():
             results.append(dict(zip(columns, row)))
 
+        # 2. Шукаємо МОДЕЛІ (Ось це додасть "Volvo S90" як загальну категорію)
         cursor.execute("""
-            SELECT m.id, m.name, 'model' as type, b.name as brand_name, b.id as brand_id
+            SELECT 
+                m.id, 
+                b.name || ' ' || m.name as name,
+                m.image_url, 
+                'Всі покоління' as extra_info,
+                'model' as type,
+                b.id as brand_id, b.name as brand_name
             FROM models m
             JOIN brands b ON m.brand_id = b.id
-            WHERE m.name ILIKE %s
-            ORDER BY b.name ASC, m.name ASC
-            LIMIT 10
-        """, (search_term,))
+            WHERE m.name ILIKE %s OR (b.name || ' ' || m.name) ILIKE %s
+            LIMIT 3
+        """, (search_term, search_term))
+        
         columns = [desc[0] for desc in cursor.description]
         for row in cursor.fetchall():
-            if len(results) < 15:
-                 results.append(dict(zip(columns, row)))
+            res = dict(zip(columns, row))
+            # Якщо у моделі немає фото, беремо перше фото з її поколінь або заглушку
+            if not res['image_url']:
+                 res['image_url'] = f"https://via.placeholder.com/60x40?text={res['name']}"
+            results.append(res)
+
+        # 3. Шукаємо конкретні ПОКОЛІННЯ
+        cursor.execute("""
+            SELECT 
+                g.id, 
+                b.name || ' ' || m.name || ' ' || COALESCE(g.name, '') as name,
+                g.image_url,
+                g.year_start || ' - ' || COALESCE(CAST(g.year_end AS VARCHAR), 'н.ч.') as extra_info,
+                'generation' as type,
+                b.id as brand_id, b.name as brand_name,
+                m.id as model_id, m.name as model_name,
+                g.name as generation_name
+            FROM generations g
+            JOIN models m ON g.model_id = m.id
+            JOIN brands b ON m.brand_id = b.id
+            WHERE (b.name || ' ' || m.name || ' ' || COALESCE(g.name, '')) ILIKE %s
+            ORDER BY g.year_start DESC
+            LIMIT 5
+        """, (search_term,))
+        
+        columns = [desc[0] for desc in cursor.description]
+        for row in cursor.fetchall():
+            res = dict(zip(columns, row))
+            if not res['image_url']:
+                res['image_url'] = f"https://via.placeholder.com/60x40?text={res['brand_name']}"
+            results.append(res)
 
         cursor.close()
         conn.close()

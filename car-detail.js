@@ -3,12 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const carDetailContainer = document.getElementById('carDetailContainer');
     const breadcrumbsContainer = document.getElementById('breadcrumbs');
     let detailCompareBtn = null;
+    let detailFavoriteBtn = null;
 
     // --- Стан сторінки ---
     let state = {
         brandId: null, brandName: '', modelId: null, modelName: '',
         generationId: null, generationName: '', trimId: null,
         comparisonList: [],
+        favorites: [],
         is3DInitialized: false // Прапор для 3D
     };
 
@@ -372,6 +374,97 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- ОБРАНЕ (НОВИЙ ФУНКЦІОНАЛ) ---
+
+    /**
+     * Завантажує список обраних ID з API.
+     */
+    async function loadFavorites() {
+        const token = localStorage.getItem('RightWheel_access_token');
+        if (!token) { state.favorites = []; return; }
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/me/favorites/ids', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const ids = await response.json();
+                state.favorites = ids.map(id => id.toString());
+            }
+        } catch (e) { console.error("Error loading favorites:", e); }
+    }
+
+    /**
+     * Обробляє клік по кнопці "В обране".
+     */
+    async function handleDetailFavoriteClick() {
+        const token = localStorage.getItem('RightWheel_access_token');
+        if (!token) {
+            showInfoModal('Потрібен вхід', 'Будь ласка, увійдіть, щоб додавати авто в обране.', 'info');
+            return;
+        }
+        
+        const trimIdStr = state.trimId.toString();
+        const isFavorited = state.favorites.includes(trimIdStr);
+        const method = isFavorited ? 'DELETE' : 'POST';
+        const url = isFavorited 
+            ? `http://127.0.0.1:5000/api/me/favorites/${state.trimId}`
+            : 'http://127.0.0.1:5000/api/me/favorites';
+
+        // Блокуємо кнопку на час запиту
+        if(detailFavoriteBtn) detailFavoriteBtn.disabled = true;
+
+        try {
+            const options = {
+                method: method,
+                headers: { 'Authorization': `Bearer ${token}` }
+            };
+            if (method === 'POST') {
+                options.headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify({ trim_id: parseInt(state.trimId) });
+            }
+
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error('Failed to update favorites');
+
+            // Оновлюємо локальний стан
+            if (isFavorited) {
+                state.favorites = state.favorites.filter(id => id !== trimIdStr);
+                showInfoModal('Обране', 'Автомобіль видалено з обраного.', 'info');
+            } else {
+                state.favorites.push(trimIdStr);
+                showInfoModal('Обране', 'Автомобіль додано до обраного!', 'success');
+            }
+            updateDetailFavoriteButtonState();
+
+        } catch (e) {
+            console.error(e);
+            showInfoModal('Помилка', 'Не вдалося оновити обране.', 'error');
+        } finally {
+            if(detailFavoriteBtn) detailFavoriteBtn.disabled = false;
+        }
+    }
+
+    /**
+     * Оновлює вигляд кнопки "В обране" (текст, іконка, колір).
+     */
+    function updateDetailFavoriteButtonState() {
+        if (!detailFavoriteBtn) return;
+        const isFavorited = state.favorites.includes(state.trimId.toString());
+        
+        // Використовуємо innerHTML для заміни іконки та тексту
+        if (isFavorited) {
+            detailFavoriteBtn.classList.add('primary'); 
+            detailFavoriteBtn.classList.remove('secondary');
+            // Заповнена зірка
+            detailFavoriteBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> <span>В обраному</span>`;
+        } else {
+            detailFavoriteBtn.classList.add('secondary');
+            detailFavoriteBtn.classList.remove('primary');
+            // Контурна зірка
+            detailFavoriteBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> <span>В обране</span>`;
+        }
+    }
+
     function loadComparisonList() {
         try {
             const savedComparison = localStorage.getItem('RightWheel_comparison');
@@ -440,6 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.title = `${pageTitle} — RightWheel`;
             renderBreadcrumbs(car.name);
 
+            // Оновлена HTML структура з двома кнопками
             carDetailContainer.innerHTML = `
                 <h2 class="car-detail-main-title">${pageTitle} (${car.year})</h2>
                 <div class="car-detail-layout-grid">
@@ -449,18 +543,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="car-sidebar">
                         ${renderQuickSpecs(car)}
-                        <div class="compare-button-container">
-                            <button id="detailAddToCompareBtn" class="btn secondary full-width"><span>Завантаження...</span></button>
+                        
+                        <div class="buttons-group" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                             <button id="detailAddToCompareBtn" class="btn secondary" style="flex: 1;"><span>Завантаження...</span></button>
+                             <button id="detailAddToFavoriteBtn" class="btn secondary" style="flex: 1;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <span>В обране</span>
+                             </button>
                         </div>
+
                         <div id="similarCarsContainer" class="similar-cars-section">Завантаження схожих авто...</div>
                     </div>
                 </div>
             `;
 
             detailCompareBtn = document.getElementById('detailAddToCompareBtn');
+            detailFavoriteBtn = document.getElementById('detailAddToFavoriteBtn');
+
             if (detailCompareBtn) {
                 updateDetailCompareButtonState(); 
                 detailCompareBtn.addEventListener('click', handleDetailCompareClick);
+            }
+            if (detailFavoriteBtn) {
+                updateDetailFavoriteButtonState(); // Встановлюємо початковий стан (додано чи ні)
+                detailFavoriteBtn.addEventListener('click', handleDetailFavoriteClick);
             }
           
             setupMediaToggles(); // Налаштовуємо кнопки 3D
@@ -502,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initCarDetailPage() {
         getParamsFromUrl();
         loadComparisonList();
+        loadFavorites();
         loadAndDisplayCarDetails();
         if(typeof renderBrandQuickNav === 'function') renderBrandQuickNav('brandQuickNavContainer'); 
     }
