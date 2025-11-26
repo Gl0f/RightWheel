@@ -1055,56 +1055,81 @@ def scrape_news_content():
 
 
 
+# Отримуємо ID з середовища (безпечніше)
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
 @app.route('/api/auth/google', methods=['POST'])
 def google_login():
     data = request.get_json()
     token = data.get('token')
     
-    # --- ВСТАВТЕ ВАШ CLIENT ID ТУТ ---
-    GOOGLE_CLIENT_ID = "597725200058-jkofhkeccrpuknq2tpf7tbado5vcfg01.apps.googleusercontent.com" 
+    if not token:
+        return jsonify({"error": "Токен не надано"}), 400
 
     try:
-        id_info = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+        # Верифікація токена через Google
+        id_info = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(), 
+            GOOGLE_CLIENT_ID
+        )
+
+        # Отримуємо дані користувача
         email = id_info['email']
         name = id_info.get('name', email.split('@')[0])
+        
+        # Перевірка "aud" (audience) є важливою для безпеки
+        if id_info['aud'] != GOOGLE_CLIENT_ID:
+            raise ValueError('Could not verify audience.')
 
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Перевіряємо, чи є користувач
+        # 1. Шукаємо користувача за email
         cursor.execute("SELECT id, username FROM users WHERE email = %s", (email,))
         user_data = cursor.fetchone()
 
         if user_data:
-            user_id = user_data[0] # id
-            username = user_data[1] # username
+            # Користувач існує - авторизуємо
+            user_id = user_data[0]
+            username = user_data[1]
         else:
-            # Реєструємо нового
-            random_pass = generate_password_hash(os.urandom(16).hex())
-            base_name = name.replace(" ", "")
+            # Користувача немає - реєструємо
+            # Генеруємо складний рандомний пароль, оскільки вхід йде через Google
+            random_pass = generate_password_hash(os.urandom(32).hex())
+            
+            # Генеруємо унікальний логін
+            base_name = name.replace(" ", "").lower()
             username = base_name
             counter = 1
-            # Унікальний логін
+            
             while True:
                 cursor.execute("SELECT id FROM users WHERE username = %s", (username,))
-                if not cursor.fetchone(): break
+                if not cursor.fetchone():
+                    break
                 username = f"{base_name}{counter}"
                 counter += 1
             
-            cursor.execute("INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id", 
-                           (username, email, random_pass))
+            cursor.execute(
+                "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id", 
+                (username, email, random_pass)
+            )
             user_id = cursor.fetchone()[0]
             conn.commit()
 
         cursor.close()
         conn.close()
 
+        # Створюємо JWT токен
         access_token = create_access_token(identity=str(user_id))
         return jsonify(access_token=access_token, username=username)
 
+    except ValueError as e:
+        print(f"Token verification failed: {e}")
+        return jsonify({"error": "Недійсний токен Google"}), 401
     except Exception as e:
-        print(f"Google Error: {e}")
-        return jsonify({"error": "Помилка входу через Google"}), 500
+        print(f"Google Login Error: {e}")
+        return jsonify({"error": "Помилка сервера при вході через Google"}), 500
     
 # --- ВІКТОРИНА ---
 @app.route('/api/quiz/question')

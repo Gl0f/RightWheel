@@ -1087,6 +1087,84 @@ async function renderRecentlyViewed() {
     }
 }
 
+
+// app.js
+
+// Ця функція викликається автоматично після завантаження бібліотеки Google
+// (див. HTML крок нижче) або при ініціалізації сторінки
+function initGoogleAuth() {
+    const GOOGLE_CLIENT_ID = "946160534638-fonljg2rk50c1pcovhuk91anbhmj1s9o.apps.googleusercontent.com"; // Той самий, що і на бекенді
+    
+    // Перевіряємо, чи завантажилась бібліотека
+    if (typeof google === 'undefined') return;
+
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse
+    });
+
+    // Рендеримо кнопку в контейнер (створимо його в HTML)
+    const buttonContainer = document.getElementById("googleButtonDiv");
+    if (buttonContainer) {
+        google.accounts.id.renderButton(
+            buttonContainer,
+            { 
+                theme: "filled_black", // Темна тема під ваш дизайн
+                size: "large",         // Розмір
+                width: "100%",         // Розтягнути на ширину контейнера (або вкажіть пікселі, напр 350)
+                text: "continue_with", // Текст "Продовжити через Google"
+                shape: "pill"          // Заокруглені краї, як у ваших кнопок
+            }
+        );
+    }
+    
+    // Опціонально: відобразити спливаюче вікно (One Tap) праворуч зверху
+    // google.accounts.id.prompt(); 
+}
+
+// Обробка відповіді від Google
+async function handleGoogleCredentialResponse(response) {
+    console.log("Google Token received:", response.credential);
+
+    try {
+        const res = await fetch('http://127.0.0.1:5000/api/auth/google', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ token: response.credential })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+            // Зберігаємо токен і логін
+            localStorage.setItem('RightWheel_access_token', data.access_token);
+            localStorage.setItem('RightWheel_loggedInUser', data.username);
+            
+            showInfoModal('Успіх', 'Вхід через Google виконано успішно!', 'success');
+            
+            // Закриваємо модалку і перезавантажуємо сторінку
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) loginModal.style.display = 'none';
+            
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showInfoModal('Помилка', data.error || "Помилка входу через Google", 'error');
+        }
+    } catch (e) {
+        console.error("Network error:", e);
+        showInfoModal('Помилка', "Не вдалося з'єднатися з сервером", 'error');
+    }
+}
+
+// Додаємо ініціалізацію при завантаженні сторінки
+window.onload = function() {
+    // Викликаємо ініціалізацію Google, якщо бібліотека вже є
+    initGoogleAuth();
+    // Ваша існуюча init() функція
+    if (typeof init === 'function') init();
+};
+
+
 // --- Ініціалізація ---
 
 async function init() {
@@ -1181,52 +1259,6 @@ async function init() {
     await renderData();
 }
 
-// --- GOOGLE LOGIN ---
-  const googleBtn = document.getElementById('googleLoginBtn');
-    if (googleBtn) {
-        googleBtn.addEventListener('click', () => {
-            // ВАШ CLIENT ID
-            const CLIENT_ID = "597725200058-jkofhkeccrpuknq2tpf7tbado5vcfg01.apps.googleusercontent.com";
-            google.accounts.id.initialize({
-                client_id: CLIENT_ID,
-                use_fedcm_for_prompt: false,
-                callback: async (response) => {
-                    try {
-                        const res = await fetch('http://127.0.0.1:5000/api/auth/google', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ token: response.credential })
-                        });
-                        
-                        const data = await res.json();
-                        
-                        if (res.ok) {
-                            localStorage.setItem('RightWheel_access_token', data.access_token);
-                            localStorage.setItem('RightWheel_loggedInUser', data.username);
-                            
-                            // Ховаємо модалку, якщо вона відкрита
-                            const loginModal = document.getElementById('loginModal');
-                            if (loginModal) loginModal.style.display = 'none';
-                            
-                            window.location.reload();
-                        } else {
-                            alert(data.error || "Помилка входу");
-                        }
-                    } catch (e) {
-                        console.error("Помилка відправки токена:", e);
-                    }
-                }
-            });
 
-google.accounts.id.prompt((notification) => {
-    if (notification.isNotDisplayed()) {
-        // Тут буде справжня причина: наприклад, "browser_not_supported" або "suppressed_by_user"
-        console.log("Google Prompt НЕ показано через:", notification.getNotDisplayedReason());
-    } else if (notification.isSkippedMoment()) {
-        console.log("Google Prompt пропущено через:", notification.getSkippedReason());
-    }
-});
-        });
-    }
 
 document.addEventListener('DOMContentLoaded', init);
