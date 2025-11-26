@@ -128,18 +128,33 @@ document.addEventListener('DOMContentLoaded', () => {
         camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
         camera.position.set(4, 2, 4);
 
-        // 3. Рендерер
+        // 3. Рендерер (Налаштування яскравості!)
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // ВАЖЛИВО: Робимо кольори соковитими та яскравішими
+        renderer.outputEncoding = THREE.sRGBEncoding; 
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.5; // <--- Збільште це число (до 2.0), якщо все ще темно
+        
         container.appendChild(renderer.domElement);
 
         // 4. Світло
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(5, 10, 7);
+        // HemisphereLight дає м'яке заповнююче світло (зверху біле, знизу сіре)
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+        hemiLight.position.set(0, 20, 0);
+        scene.add(hemiLight);
+
+        // Основне спрямоване світло (імітує сонце)
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2); // Трохи збільшив інтенсивність до 1.2
+        dirLight.position.set(10, 10, 10);
         scene.add(dirLight);
+
+        // Додаткове підсвічування з іншого боку (щоб не було чорних тіней)
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        backLight.position.set(-10, 5, -10);
+        scene.add(backLight);
 
         // 5. Контролери
         controls = new THREE.OrbitControls(camera, renderer.domElement);
