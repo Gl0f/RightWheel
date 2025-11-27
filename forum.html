@@ -54,30 +54,46 @@
   
   <div class="container">
     <main>
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <h2 style="margin-bottom: 20px;">Форум спільноти</h2>
 
-      <div id="newPostContainer" class="forum-form-container" style="display: none;">
-        <h3>Створити нову тему</h3>
-        <form id="newPostForm" class="form-content">
-          <div class="form-group">
-            <input id="postTitle" type="text" placeholder="Заголовок вашої теми" required />
-          </div>
-          <div class="form-group">
-            <textarea id="postContent" placeholder="Напишіть ваше повідомлення..." rows="5" required></textarea>
-          </div>
-          <button class="btn primary" type="submit">Опублікувати</button>
-        </form>
-      </div>
-      
-      <div id="loginToPostMessage" class="empty-state" style="display: none; margin-bottom: 20px;">
-        <p>Будь ласка, <a href="#" id="loginLink">увійдіть</a>, щоб створити нову тему.</p>
-      </div>
+        <div class="forum-actions-bar">
+             </div>
 
-      <h2 style="margin-top: 30px;">Теми обговорень</h2>
-      <div id="topicsListContainer" class="topics-list-container">
-        <p>Завантаження тем...</p>
-      </div>
+        <div id="newPostContainer" class="forum-form-container" style="display: none; margin-bottom: 30px; background: #2D3748; padding: 20px; border-radius: 8px;">
+            <h3 style="margin-top: 0;">Створити нову тему</h3>
+            <form id="newPostForm" class="form-content">
+              <div class="form-group">
+                <input id="postTitle" type="text" placeholder="Заголовок теми" required style="background: #1A202C; border: 1px solid #4A5568;" />
+              </div>
+              <div class="form-group">
+                <textarea id="postContent" placeholder="Напишіть повідомлення..." rows="4" required style="background: #1A202C; border: 1px solid #4A5568;"></textarea>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                  <button class="btn primary" type="submit">Опублікувати тему</button>
+              </div>
+            </form>
+        </div>
+        
+        <div id="loginToPostMessage" class="empty-state" style="display: none; margin-bottom: 20px; border: 1px dashed #4A5568;">
+            <p>Хочете долучитися до обговорення? <a href="#" id="loginLink" style="color: #E40C2B;">Увійдіть</a>, щоб створити тему.</p>
+        </div>
 
-    </main>
+        <div class="forum-table-wrapper">
+            <div class="forum-header-row">
+                <div></div> <div>Тема / Автор</div>
+                <div style="text-align: center;">Статистика</div>
+                <div style="text-align: right;">Створено</div>
+            </div>
+
+            <div id="topicsListContainer" class="topics-list-container">
+                <p style="padding: 20px; color: #A0AEC0;">Завантаження тем...</p>
+            </div>
+        </div>
+
+    </div>
+</main>
   </div>
 
   <div id="infoModal" class="modal-root" style="display:none">
@@ -152,23 +168,45 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Реєстрація в RightWheel</h2>
-        <div>
-            <button id="showLoginBtn" class="btn secondary small">Вхід</button>
-            <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-        </div>
+        <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <form id="registerForm" class="form-content">
-        <div class="form-group"> <input id="registerUsername" type="text" placeholder="Логін" required /> </div>
-        <div class="form-group"> <input id="registerEmail" type="email" placeholder="Email" required /> </div>
-        <div class="form-group"> <input id="registerPassword" type="password" placeholder="Пароль" required /> </div>
-        <div class="form-group"> <input id="registerConfirmPassword" type="password" placeholder="Підтвердження пароля" required /> </div>
-        <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="registerCaptchaCheck" required /> <label for="registerCaptchaCheck">Підтвердити</label> </div> </div>
+        <div class="form-group">
+          <label for="registerUsername">Логін</label>
+          <input id="registerUsername" type="text" placeholder="Придумайте логін" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="Ваш email" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Пароль</label>
+          <input id="registerPassword" type="password" placeholder="Придумайте пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Підтвердження пароля</label>
+          <input id="registerConfirmPassword" type="password" placeholder="Повторіть пароль" required />
+        </div>
+        <div class="form-group">
+          <div class="captcha-container">
+            <div class="captcha-text">Я не робот</div>
+            <input type="checkbox" id="registerCaptchaCheck" required />
+            <label for="registerCaptchaCheck">Підтвердити</label>
+          </div>
+        </div>
         <button class="btn primary full-width" type="submit">Зареєструватися</button>
       </form>
+
+      <div class="modal-footer-link">
+        <span>Вже є акаунт?</span>
+        <a href="#" class="form-link" id="showLoginBtnFromRegister">Увійти</a>
+      </div>
+
     </div>
   </div>
+
   
   <script src="app.js"></script> 
   <script src="forum.js"></script> 

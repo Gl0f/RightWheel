@@ -2,16 +2,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Елементи DOM ---
     const elements = {
-        topicTitle: document.getElementById('topicMainTitle'),
-        breadcrumbTitle: document.getElementById('breadcrumbTopicTitle'),
-        postsListContainer: document.getElementById('postsListContainer'),
+        topicTitle: document.getElementById('topicMainTitle'), // Переконайтеся, що в topic.html ID саме такі
+        // Якщо ви використовуєте id="topicTitleDisplay" з мого попереднього прикладу HTML, замініть тут.
+        // Але судячи з вашого коду, ви використовуєте 'topicMainTitle'.
         
-        newReplyContainer: document.getElementById('newReplyContainer'),
-        newReplyForm: document.getElementById('newReplyForm'),
+        breadcrumbTitle: document.getElementById('breadcrumbTopicTitle'),
+        postsListContainer: document.getElementById('postsListContainer'), // або 'topicPostsContainer'
+        
+        newReplyContainer: document.getElementById('newReplyContainer'), // Контейнер форми відповіді
+        newReplyForm: document.getElementById('newReplyForm') || document.getElementById('replyForm'),
         replyContent: document.getElementById('replyContent'),
         
         loginToReplyMessage: document.getElementById('loginToReplyMessage'),
         loginLink: document.getElementById('loginLink'),
+        
+        // Модальне вікно видалення
         deleteConfirmModal: document.getElementById('deleteConfirmModal'),
         deleteModalMessage: document.getElementById('deleteModalMessage'),
         confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
@@ -23,16 +28,40 @@ document.addEventListener('DOMContentLoaded', () => {
     let topicId = null;
 
     /**
+     * Допоміжна функція для форматування тексту (безпека + переноси рядків)
+     */
+    function formatContent(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>");
+    }
+
+    function getAvatarUrl(url, username) {
+        if (url) {
+            return url.startsWith('http') ? url : `http://127.0.0.1:5000${url}`;
+        }
+        const initial = username ? username.charAt(0).toUpperCase() : '?';
+        return `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=100`;
+    }
+
+    /**
      * Перевіряє статус логіну та показує/ховає форму відповіді.
      */
     function checkLoginAndToggleForm() {
         const token = localStorage.getItem('RightWheel_access_token');
-        if (token) {
-            elements.newReplyContainer.style.display = 'block';
-            elements.loginToReplyMessage.style.display = 'none';
-        } else {
-            elements.newReplyContainer.style.display = 'none';
-            elements.loginToReplyMessage.style.display = 'block';
+        
+        // Перевірка на існування елементів, щоб уникнути помилок в консолі
+        if (elements.newReplyContainer && elements.loginToReplyMessage) {
+            if (token) {
+                elements.newReplyContainer.style.display = 'block';
+                elements.loginToReplyMessage.style.display = 'none';
+            } else {
+                elements.newReplyContainer.style.display = 'none';
+                elements.loginToReplyMessage.style.display = 'block';
+            }
         }
     }
 
@@ -42,45 +71,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTopicIdFromUrl() {
         const params = new URLSearchParams(window.location.search);
         topicId = params.get('id');
+        
         if (!topicId) {
-            elements.topicTitle.textContent = "Помилка: ID теми не вказано.";
-            elements.postsListContainer.innerHTML = '';
+            if(elements.topicTitle) elements.topicTitle.textContent = "Помилка: ID теми не вказано.";
+            if(elements.postsListContainer) elements.postsListContainer.innerHTML = '';
         }
     }
 
-
     /**
      * Відкриває модальне вікно для підтвердження видалення.
-     * @param {string} postId - ID поста, що видаляється.
-     * @param {boolean} isFirstPost - Чи є цей пост першим (тобто, самою темою).
      */
     function openDeleteConfirmationModal(postId, isFirstPost) {
         if (!elements.deleteConfirmModal) return;
 
-        // Оновлюємо текст повідомлення
         if (isFirstPost) {
             elements.deleteModalMessage.innerHTML = "Ви впевнені, що хочете видалити цю <b>тему</b>? Цю дію неможливо скасувати.<br><br><b>Будуть видалені всі відповіді в ній.</b>";
         } else {
             elements.deleteModalMessage.innerHTML = "Ви впевнені, що хочете видалити цю <b>відповідь</b>? Цю дію неможливо скасувати.";
         }
         
-        // Зберігаємо ID поста на кнопці для подальшого використання
         elements.confirmDeleteBtn.dataset.postId = postId;
-        
-        // Показуємо вікно
         elements.deleteConfirmModal.style.display = 'flex';
     }
 
-    /**
-     * Закриває модальне вікно підтвердження.
-     */
     function closeDeleteConfirmationModal() {
         if (!elements.deleteConfirmModal) return;
-        
-        // Ховаємо вікно
         elements.deleteConfirmModal.style.display = 'none';
-        
-        // Очищуємо ID з кнопки
         elements.confirmDeleteBtn.dataset.postId = '';
     }
 
@@ -90,8 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadTopicDetails() {
         if (!topicId) return;
 
-        elements.topicTitle.textContent = 'Завантаження теми...';
-        elements.postsListContainer.innerHTML = '<p>Завантаження повідомлень...</p>';
+        if(elements.topicTitle) elements.topicTitle.textContent = 'Завантаження теми...';
+        if(elements.postsListContainer) elements.postsListContainer.innerHTML = '<p>Завантаження повідомлень...</p>';
 
         try {
             const response = await fetch(`http://127.0.0.1:5000/api/forum/topics/${topicId}`);
@@ -101,110 +117,112 @@ document.addEventListener('DOMContentLoaded', () => {
                  throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json(); // { id, title, created_at, author_username, posts: [...] }
+            const data = await response.json(); 
 
-            // Оновлюємо заголовок сторінки та хлібні крихти
-            elements.topicTitle.textContent = data.title;
-            elements.breadcrumbTitle.textContent = data.title;
+            // Оновлюємо заголовок сторінки
+            if(elements.topicTitle) elements.topicTitle.textContent = data.title;
+            if(elements.breadcrumbTitle) elements.breadcrumbTitle.textContent = data.title;
             document.title = `${data.title} — RightWheel`;
 
             renderPosts(data.posts);
 
         } catch (error) {
             console.error("Помилка завантаження теми:", error);
-            elements.topicTitle.textContent = "Помилка";
-            elements.postsListContainer.innerHTML = `<p style="color: red;">Не вдалося завантажити тему: ${error.message}</p>`;
+            if(elements.topicTitle) elements.topicTitle.textContent = "Помилка";
+            if(elements.postsListContainer) elements.postsListContainer.innerHTML = `<p style="color: red;">Не вдалося завантажити тему: ${error.message}</p>`;
         }
     }
 
     /**
-     * Відображає список повідомлень.
+     * Відображає список повідомлень (ОНОВЛЕНИЙ ДИЗАЙН)
      */
-
-/**
- * Відображає список повідомлень.
- */
     function renderPosts(posts) {
         if (!posts || posts.length === 0) {
-            elements.postsListContainer.innerHTML = '<p>У цій темі ще немає повідомлень.</p>';
+            elements.postsListContainer.innerHTML = '<p>Немає повідомлень.</p>';
             return;
         }
 
-        // Отримуємо ім'я поточного залогіненого користувача
-        const currentUsername = localStorage.getItem('RightWheel_loggedInUser') || null;
+        const currentUsername = localStorage.getItem('RightWheel_loggedInUser');
 
         elements.postsListContainer.innerHTML = posts.map((post, index) => {
-            const createdDate = new Date(post.created_at).toLocaleString('uk-UA');
-            const postClass = (index === 0) ? 'post-card initial-post' : 'post-card';
+            const dateObj = new Date(post.created_at);
+            const dateStr = dateObj.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
+            const timeStr = dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+            
+            // Отримуємо URL аватарки
+            const avatarSrc = getAvatarUrl(post.author_avatar, post.author_username);
+            const profileLink = `user-profile.html?id=${post.author_id}`;
 
-            // --- Логіка для кнопки видалення ---
+            const isFirstPost = (index === 0);
+            const containerClass = isFirstPost ? 'forum-post initial-post' : 'forum-post';
+
             let deleteButtonHTML = '';
             if (post.author_username === currentUsername) {
-                // Цей пост належить поточному користувачу, показуємо кнопку
-                deleteButtonHTML = `
-                    <button class="btn danger small delete-post-btn" data-post-id="${post.id}" title="Видалити">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                `;
+                deleteButtonHTML = `<button class="btn danger small delete-post-btn" data-post-id="${post.id}" style="margin-left: 10px; padding: 2px 8px;">✕</button>`;
             }
-            // --- Кінець логіки ---
 
             return `
-                <div class="${postClass}">
-                    <div class="post-header">
-                        <span>Автор: <strong>${post.author_username || 'Анонім'}</strong></span>
-                        <div class="post-header-actions">
-                            <span>${createdDate}</span>
-                            ${deleteButtonHTML} </div>
+                <div class="${containerClass}" id="post-${post.id}">
+                    <div class="post-header-bar">
+                        <span class="post-date">${dateStr} о ${timeStr}</span>
+                        <div style="display: flex; align-items: center;">
+                            <span class="post-number">#${index + 1}</span>
+                            ${deleteButtonHTML}
+                        </div>
                     </div>
-                    <div class="post-content">
-                        ${post.content.replace(/\n/g, '<br>')}
+
+                    <div class="post-body">
+                        <aside class="post-user-aside" style="text-align: center;">
+                            <a href="${profileLink}" style="text-decoration: none;">
+                                <div class="user-avatar-placeholder" style="background: none; padding: 0; overflow: hidden; border: 1px solid #4A5568;">
+                                    <img src="${avatarSrc}" alt="${post.author_username}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div class="post-username" style="margin-top: 8px; color: #E2E8F0;">${post.author_username || 'Анонім'}</div>
+                            </a>
+                            <div class="user-title">Користувач</div>
+                        </aside>
+
+                        <article class="post-content-area">
+                            ${formatContent(post.content)}
+                        </article>
                     </div>
                 </div>
             `;
         }).join('');
     }
 
-
-/**
- * Обробляє видалення поста.
- */
+    /**
+     * Обробляє видалення поста.
+     */
     async function handleDeletePost(postId) {
         const token = localStorage.getItem('RightWheel_access_token');
         if (!token) {
-            showInfoModal('Сесія застаріла', 'Будь ласка, увійдіть знову, щоб керувати обраним.', 'error');
+            showInfoModal('Сесія застаріла', 'Будь ласка, увійдіть знову.', 'error');
             return;
         }
 
         try {
             const response = await fetch(`http://127.0.0.1:5000/api/forum/posts/${postId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            const data = await response.json(); // Отримуємо відповідь у будь-якому випадку
+            const data = await response.json();
 
             if (!response.ok) {
-                const errorMessage = data.error || data.msg || 'Не вдалося видалити пост';
-                throw new Error(errorMessage);
+                throw new Error(data.error || data.msg || 'Не вдалося видалити пост');
             }
 
-            
-            showInfoModal('Успіх', data.message, 'success'); // "Тему успішно видалено" або "Відповідь успішно видалено"
+            showInfoModal('Успіх', data.message, 'success');
 
-            // Перевіряємо, чи була видалена вся тема
             if (data.message.includes('Тему')) {
-                // Якщо так, повертаємо користувача на сторінку форуму
                 window.location.href = 'forum.html';
             } else {
-                // Інакше просто оновлюємо список постів
                 loadTopicDetails();
             }
 
         } catch (error) {
-            console.error("Помилка видалення поста:", error);
+            console.error("Помилка видалення:", error);
             showInfoModal('Помилка', error.message, 'error');
         }
     }
@@ -219,15 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('RightWheel_access_token');
 
         if (!content) {
-            showInfoModal('Помилка', 'Будь ласка, введіть текст відповіді.', 'error');
+            showInfoModal('Помилка', 'Введіть текст відповіді.', 'error');
             return;
         }
         if (!token) {
-            showInfoModal('Потрібен вхід', 'Ви маєте бути залогінені, щоб відповідати.', 'info');
-            return;
-        }
-        if (!topicId) {
-            showInfoModal('Помилка', 'Помилка: невідомий ID теми.', 'error');
+            showInfoModal('Потрібен вхід', 'Ви маєте бути залогінені.', 'info');
             return;
         }
 
@@ -243,70 +257,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                  const errorData = await response.json();
-                 // Перевіряємо поле "error" АБО "msg" (для JWT помилок)
-                 const errorMessage = errorData.error || errorData.msg || 'Не вдалося надіслати відповідь';
-                 throw new Error(errorMessage);
+                 throw new Error(errorData.error || errorData.msg || 'Помилка відправки');
             }
 
-           
-            elements.newReplyForm.reset(); // Очищуємо форму
-            loadTopicDetails(); // Оновлюємо список повідомлень
+            elements.newReplyForm.reset();
+            loadTopicDetails();
 
         } catch (error) {
-            console.error("Помилка відправки відповіді:", error);
+            console.error("Помилка відповіді:", error);
             showInfoModal('Помилка', error.message, 'error');
         }
     }
 
-    /**
-     * Ініціалізація сторінки
-     */
-
+    // --- Ініціалізація та слухачі ---
     function initTopicPage() {
         getTopicIdFromUrl();
         checkLoginAndToggleForm();
         loadTopicDetails();
 
-        // Слухач на форму відповіді
-        elements.newReplyForm.addEventListener('submit', handleReplySubmit);
+        if (elements.newReplyForm) {
+            elements.newReplyForm.addEventListener('submit', handleReplySubmit);
+        }
         
-        // Слухач на кліки в списку постів (для кнопки "Видалити")
-        elements.postsListContainer.addEventListener('click', (e) => {
-            const deleteButton = e.target.closest('.delete-post-btn');
-            if (deleteButton) {
-                const postId = deleteButton.dataset.postId;
-                if (postId) {
-                   
-                    // Перевіряємо, чи це перший пост
-                    const isFirstPost = deleteButton.closest('.post-card').classList.contains('initial-post');
-                    // Відкриваємо наше нове модальне вікно
-                    openDeleteConfirmationModal(postId, isFirstPost);
-                   
+        // Делегування подій для кнопок видалення
+        if (elements.postsListContainer) {
+            elements.postsListContainer.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-post-btn');
+                if (deleteButton) {
+                    const postId = deleteButton.dataset.postId;
+                    if (postId) {
+                        // Визначаємо, чи це перший пост, перевіряючи клас батьківського контейнера
+                        const postContainer = deleteButton.closest('.forum-post');
+                        const isFirstPost = postContainer && postContainer.classList.contains('initial-post');
+                        
+                        openDeleteConfirmationModal(postId, isFirstPost);
+                    }
                 }
-            }
-        });
+            });
+        }
         
-        elements.confirmDeleteBtn.addEventListener('click', () => {
-            const postId = elements.confirmDeleteBtn.dataset.postId;
-            if (postId) {
-                closeDeleteConfirmationModal(); // Спочатку закриваємо
-                handleDeletePost(postId);       // Потім видаляємо
-            }
-        });
+        // Модальне вікно видалення
+        if (elements.confirmDeleteBtn) {
+            elements.confirmDeleteBtn.addEventListener('click', () => {
+                const postId = elements.confirmDeleteBtn.dataset.postId;
+                if (postId) {
+                    closeDeleteConfirmationModal();
+                    handleDeletePost(postId);
+                }
+            });
+        }
         
-        elements.cancelDeleteBtn.addEventListener('click', closeDeleteConfirmationModal);
-        elements.closeDeleteModalBtn.addEventListener('click', closeDeleteConfirmationModal);
-        elements.deleteModalBack.addEventListener('click', closeDeleteConfirmationModal);
+        if(elements.cancelDeleteBtn) elements.cancelDeleteBtn.addEventListener('click', closeDeleteConfirmationModal);
+        if(elements.closeDeleteModalBtn) elements.closeDeleteModalBtn.addEventListener('click', closeDeleteConfirmationModal);
+        if(elements.deleteModalBack) elements.deleteModalBack.addEventListener('click', closeDeleteConfirmationModal);
         
-        // Слухач на посилання "Увійдіть"
-        elements.loginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (typeof showLoginModal === 'function') {
-                showLoginModal();
-            } else {
-                console.error('Помилка: не вдалося знайти функцію логіну.');
-            }
-        });
+        // Лінк логіну
+        if (elements.loginLink) {
+            elements.loginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (typeof showLoginModal === 'function') showLoginModal();
+            });
+        }
     }
 
     initTopicPage();

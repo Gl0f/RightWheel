@@ -3,216 +3,151 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Завантаження теми... — RightWheel</title>
+  <title>Перегляд теми — RightWheel</title>
   <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    .post-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        margin-bottom: 15px;
-    }
-    .post-header {
-        padding: 10px 15px;
-        background: #2a2a2a;
-        display: flex;
-        justify-content: space-between;
-        font-size: 13px;
-        color: var(--muted);
-        border-bottom: 1px solid var(--border);
-    }
-    .post-header strong {
-        color: var(--text);
-    }
-    .post-content {
-        padding: 20px 15px;
-        line-height: 1.7;
-    }
-    /* Стиль для початкового поста теми */
-    .initial-post .post-content {
-        font-size: 16px;
-    }
-    .post-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center; /* Вирівнюємо по вертикалі */
-    }
-
-    .post-header-actions {
-        display: flex;
-        align-items: center;
-        gap: 15px; /* Відстань між датою та кнопкою */
-        color: var(--muted); /* Колір дати */
-    }
-
-    .delete-post-btn {
-        /* Використовуємо .btn.danger.small зі style.css */
-        padding: 4px 6px; /* Трохи менше */
-    }
-  </style>
 </head>
 <body>
 
- <header>
-  <div class="header-content">
-    
-    <div class="logo-nav">
-      
-      <div class="logo">
-        <a href="main.html" style="text-decoration: none; color: inherit;">
-            <h1>Right Wheel</h1>
-        </a>
+  <header>
+    <div class="header-content">
+      <div class="logo-nav">
+        <div class="logo">
+          <a href="main.html" style="text-decoration: none; color: inherit;">
+              <h1>Right Wheel</h1>
+          </a>
+        </div>
+        <a href="forum.html" class="nav-link-forum">Форум</a>
+        <a href="news.html" class="nav-link-forum">Новини</a>
       </div>
       
-      <a href="forum.html" class="nav-link-forum">Форум</a>
-      
-      <a href="news.html" class="nav-link-forum">Новини</a>
+      <div class="controls">
+        <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Обране
+        </a>
+        <a href="account.html" id="accountLinkBtn" class="btn secondary" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Мій кабінет
+        </a>
+        <button id="showLoginModalBtn" class="btn primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Увійти
+        </button>
+        <button id="logoutBtn" class="btn secondary" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Вийти
+        </button>
+      </div>
+    </div>
+  </header>
 
-    </div>
-    
-    <div class="controls">
-      
-      <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Обране
-      </a>
-      <a href="account.html" id="accountLinkBtn" class="btn secondary" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Мій кабінет
-      </a>
-      <button id="showLoginModalBtn" class="btn primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Увійти
-      </button>
-      <button id="logoutBtn" class="btn secondary" style="display:none">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Вийти
-      </button>
-      
-    </div>
-  </div>
-</header>
-  
   <div class="container">
     <main>
-      <div class="breadcrumbs">
-          <a href="forum.html">Форум</a>
-          <span>/</span>
-          <span class="current" id="breadcrumbTopicTitle">Завантаження...</span>
-      </div>
-
-      <h2 id="topicMainTitle" style="margin-top: 10px;">Завантаження теми...</h2>
-
-      <div id="postsListContainer" class="posts-list-container" style="margin-top: 20px;">
-        <p>Завантаження повідомлень...</p>
-      </div>
-
-      <div id="newReplyContainer" class="forum-form-container" style="display: none; margin-top: 30px;">
-        <h3>Ваша відповідь</h3>
-        <form id="newReplyForm" class="form-content">
-          <div class="form-group">
-            <textarea id="replyContent" placeholder="Напишіть вашу відповідь..." rows="5" required></textarea>
-          </div>
-          <button class="btn primary" type="submit">Відповісти</button>
-        </form>
-      </div>
       
-      <div id="loginToReplyMessage" class="empty-state" style="display: none; margin-top: 30px;">
-        <p>Будь ласка, <a href="#" id="loginLink">увійдіть</a>, щоб залишати відповіді.</p>
+      <div class="breadcrumbs" style="margin-bottom: 20px;">
+          <a href="forum.html">Форум</a> <span>/</span>
+          <span id="breadcrumbTopicTitle" class="current">Завантаження...</span>
+      </div>
+
+      <div class="topic-title-header">
+          <h1 id="topicMainTitle" class="topic-title-h1">Завантаження теми...</h1>
+      </div>
+
+      <div id="postsListContainer" class="posts-list-container">
+          <p>Завантаження повідомлень...</p>
+      </div>
+
+      <div style="margin-top: 40px;">
+          
+          <div id="newReplyContainer" style="display: none; background: #2D3748; padding: 20px; border-radius: 8px;">
+              <h3 style="margin-top: 0; color: #E2E8F0;">Ваша відповідь</h3>
+              <form id="newReplyForm">
+                  <textarea id="replyContent" rows="6" placeholder="Напишіть повідомлення..." required 
+                            style="width: 100%; margin-bottom: 15px; background: #1A202C; border: 1px solid #4A5568; color: #E2E8F0; padding: 12px; border-radius: 4px; resize: vertical;"></textarea>
+                  <div style="text-align: right;">
+                      <button type="submit" class="btn primary">Надіслати відповідь</button>
+                  </div>
+              </form>
+          </div>
+
+          <div id="loginToReplyMessage" class="empty-state" style="display: none; border: 1px dashed #4A5568; padding: 20px;">
+              <p>Щоб відповісти в цій темі, будь ласка, <a href="#" id="loginLink" style="color: #E40C2B; font-weight: 600;">увійдіть в акаунт</a>.</p>
+          </div>
+
       </div>
 
     </main>
   </div>
-  
-  <div id="deleteConfirmModal" class="modal-root" style="display:none">
+
+  <div id="deleteConfirmModal" class="modal-root" style="display:none; z-index: 1100;">
     <div class="modal-back" id="deleteModalBack"></div>
-    <div class="modal" style="max-width: 500px;">
+    <div class="modal" style="max-width: 400px;">
       <div class="modal-header">
-        <h2 class="modal-title" style="color: var(--danger);">Підтвердити видалення</h2>
-        <button id="closeDeleteModalBtn" class="btn small secondary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+        <h2 class="modal-title">Підтвердження видалення</h2>
+        <button id="closeDeleteModalBtn" class="btn small secondary">✕</button>
       </div>
       <div class="form-content" style="gap: 20px;">
-        <p id="deleteModalMessage" style="font-size: 16px; margin: 0;">
-            Ви впевнені, що хочете видалити це? Цю дію неможливо скасувати.
-        </p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <p id="deleteModalMessage" style="font-size: 16px; margin: 0;">Ви впевнені?</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
             <button id="cancelDeleteBtn" class="btn secondary">Скасувати</button>
-            <button id="confirmDeleteBtn" class="btn danger">Так, видалити</button>
+            <button id="confirmDeleteBtn" class="btn danger">Видалити</button>
         </div>
       </div>
     </div>
   </div>
 
   <div id="infoModal" class="modal-root" style="display:none">
-  <div class="modal-back" id="infoModalBack"></div>
-  <div class="modal" style="max-width: 500px;">
-      <div class="modal-header">
-      <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
-      </div>
-      <div class="form-content" style="gap: 20px;">
-      <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="infoModalOkBtn" class="btn primary">OK</button>
-      </div>
-      </div>
-  </div>
+    <div class="modal-back" id="infoModalBack"></div>
+    <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+        <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
+        </div>
+        <div class="form-content" style="gap: 20px;">
+        <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="infoModalOkBtn" class="btn primary">OK</button>
+        </div>
+        </div>
+    </div>
   </div>
 
- <div id="loginModal" class="modal-root" style="display:none">
+  <div id="loginModal" class="modal-root" style="display:none">
     <div class="modal-back"></div>
     <div class="modal login-theme">
-      
       <div class="modal-header-center">
-        <h2 class="modal-title-large">Раді вітати<br>вас знову</h2>
-        <button id="closeLoginModalBtn" class="close-btn-abs">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
+        <h2 class="modal-title-large">Вхід</h2>
+        <button id="closeLoginModalBtn" class="close-btn-abs">✕</button>
       </div>
-
       <form id="loginForm" class="form-content sp-form">
-        
         <div class="form-group">
-          <label for="loginUsername" class="sp-label">Ел. пошта або ім'я користувача</label>
-          <input id="loginUsername" type="text" placeholder="Ел. пошта або логін" class="sp-input" required />
+          <label for="loginUsername" class="sp-label">Логін або Email</label>
+          <input id="loginUsername" type="text" placeholder="Ваш логін" class="sp-input" required />
         </div>
-        
         <div class="form-group">
            <label for="loginPassword" class="sp-label">Пароль</label>
            <input id="loginPassword" type="password" placeholder="Пароль" class="sp-input" required />
         </div>
-
         <div class="sp-checkbox-wrapper">
             <div class="form-group checkbox-group">
                 <input type="checkbox" id="captchaCheck" required />
                 <label for="captchaCheck">Я не робот</label>
             </div>
-            
             <div class="form-group checkbox-group">
                 <input type="checkbox" id="consentCheck" required />
                 <label for="consentCheck">Згода на обробку даних</label>
             </div>
         </div>
-         
         <button class="btn sp-btn-primary" type="submit">Увійти</button>
-
-        <div class="auth-divider">
-           <span>або</span>
-        </div>
-
+        <div class="auth-divider"><span>або</span></div>
         <div id="googleButtonDiv" style="width: 100%; display: flex; justify-content: center; margin-top: 15px;"></div>
-
         <div class="modal-footer-link">
             <span style="color: #a7a7a7;">Немає акаунта?</span>
             <a href="#" class="form-link white-link" id="showRegisterBtnFromLogin">Зареєструватися</a>
         </div>
-         
       </form>
     </div>
   </div>
@@ -222,26 +157,48 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Реєстрація в RightWheel</h2>
-        <div>
-            <button id="showLoginBtn" class="btn secondary small">Вхід</button>
-            <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-        </div>
+        <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <form id="registerForm" class="form-content">
-        <div class="form-group"> <input id="registerUsername" type="text" placeholder="Логін" required /> </div>
-        <div class="form-group"> <input id="registerEmail" type="email" placeholder="Email" required /> </div>
-        <div class="form-group"> <input id="registerPassword" type="password" placeholder="Пароль" required /> </div>
-        <div class="form-group"> <input id="registerConfirmPassword" type="password" placeholder="Підтвердження пароля" required /> </div>
-        <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="registerCaptchaCheck" required /> <label for="registerCaptchaCheck">Підтвердити</label> </div> </div>
+        <div class="form-group">
+          <label for="registerUsername">Логін</label>
+          <input id="registerUsername" type="text" placeholder="Придумайте логін" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="Ваш email" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Пароль</label>
+          <input id="registerPassword" type="password" placeholder="Придумайте пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Підтвердження пароля</label>
+          <input id="registerConfirmPassword" type="password" placeholder="Повторіть пароль" required />
+        </div>
+        <div class="form-group">
+          <div class="captcha-container">
+            <div class="captcha-text">Я не робот</div>
+            <input type="checkbox" id="registerCaptchaCheck" required />
+            <label for="registerCaptchaCheck">Підтвердити</label>
+          </div>
+        </div>
         <button class="btn primary full-width" type="submit">Зареєструватися</button>
       </form>
+
+      <div class="modal-footer-link">
+        <span>Вже є акаунт?</span>
+        <a href="#" class="form-link" id="showLoginBtnFromRegister">Увійти</a>
+      </div>
+
     </div>
   </div>
-  
-  <script src="app.js"></script> 
-  <script src="topic.js"></script> 
+
+
+  <script src="app.js"></script>
+  <script src="topic.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Профіль користувача — RightWheel</title>
+  <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+ <header>
+    <div class="header-content">
+      <div class="logo-nav">
+        <div class="logo"><a href="main.html" style="text-decoration: none; color: inherit;"><h1>Right Wheel</h1></a></div>
+        <a href="forum.html" class="nav-link-forum">Форум</a>
+        <a href="news.html" class="nav-link-forum">Новини</a>
+      </div>
+      <div class="controls">
+        <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">Обране</a>
+        <a href="account.html" id="accountLinkBtn" class="btn secondary" style="display:none;">Мій кабінет</a>
+        <button id="showLoginModalBtn" class="btn primary">Увійти</button>
+        <button id="logoutBtn" class="btn secondary" style="display:none">Вийти</button>
+      </div>
+    </div>
+ </header>
+  
+  <div class="container">
+    <main>
+      <div class="breadcrumbs" style="margin-bottom: 20px;">
+          <a href="forum.html">Форум</a> <span>/</span>
+          <span class="current">Профіль користувача</span>
+      </div>
+
+      <div class="panel-card" style="max-width: 600px; margin: 0 auto;">
+          <div class="panel-header">Інформація про користувача</div>
+          <div class="panel-body" style="text-align: center;">
+              
+              <div style="margin: 0 auto 15px; width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 2px solid #4A5568;">
+                  <img id="publicAvatar" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              
+              <h2 id="publicUsername" style="margin: 0; color: #E2E8F0; font-size: 24px;">Завантаження...</h2>
+              <p id="publicJoined" style="color: #A0AEC0; margin: 5px 0 20px 0; font-size: 14px;">...</p>
+
+              <hr style="border: 0; border-top: 1px solid #2D3748; margin: 20px 0;">
+
+              <div class="account-stats-grid">
+                <div class="stat-box">
+                    <strong id="publicTopics">-</strong>
+                    <span>Тем</span>
+                </div>
+                <div class="stat-box">
+                    <strong id="publicPosts">-</strong>
+                    <span>Повідомлень</span>
+                </div>
+              </div>
+
+          </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="loginModal" class="modal-root" style="display:none">...</div> 
+  <div id="infoModal" class="modal-root" style="display:none">...</div>
+
+  <script src="app.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+        const panelBody = document.querySelector('.panel-body');
+
+        // 1. Перевірка ID в URL
+        if (!userId || userId === 'undefined') {
+            panelBody.innerHTML = '<p style="color:red">Помилка: ID користувача не вказано в посиланні.</p>';
+            return;
+        }
+
+        try {
+            console.log(`Запит профілю для ID: ${userId}`); // Дебаг
+            const response = await fetch(`http://127.0.0.1:5000/api/users/${userId}/profile`);
+            
+            // 2. Якщо сервер повернув помилку
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || `Помилка сервера: ${response.status}`);
+            }
+            
+            const data = await response.json();
+
+            // 3. Відображення даних
+            // Аватар
+            const imgEl = document.getElementById('publicAvatar');
+            if (data.user.avatar_url) {
+                imgEl.src = data.user.avatar_url.startsWith('http') ? 
+                    data.user.avatar_url : `http://127.0.0.1:5000${data.user.avatar_url}`;
+            } else {
+                const initial = data.user.username.charAt(0).toUpperCase();
+                imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=4A5568&color=fff&size=150`;
+            }
+
+            document.getElementById('publicUsername').textContent = data.user.username;
+            
+            if (data.user.created_at) {
+                const dateObj = new Date(data.user.created_at);
+                document.getElementById('publicJoined').textContent = 'З нами з ' + dateObj.toLocaleDateString('uk-UA');
+            } else {
+                document.getElementById('publicJoined').textContent = 'Дата реєстрації невідома';
+            }
+
+            document.getElementById('publicTopics').textContent = data.stats.topic_count;
+            document.getElementById('publicPosts').textContent = data.stats.post_count;
+
+        } catch (error) {
+            console.error(error);
+            // Виводимо конкретний текст помилки на екран
+            panelBody.innerHTML = `<p style="color:red">Не вдалося завантажити профіль:<br>${error.message}</p>`;
+        }
+    });
+  </script>
+</body>
+</html>

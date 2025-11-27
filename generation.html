@@ -181,23 +181,45 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Реєстрація в RightWheel</h2>
-        <div>
-            <button id="showLoginBtn" class="btn secondary small">Вхід</button>
-            <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-        </div>
+        <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <form id="registerForm" class="form-content">
-        <div class="form-group"> <input id="registerUsername" type="text" placeholder="Логін" required /> </div>
-        <div class="form-group"> <input id="registerEmail" type="email" placeholder="Email" required /> </div>
-        <div class="form-group"> <input id="registerPassword" type="password" placeholder="Пароль" required /> </div>
-        <div class="form-group"> <input id="registerConfirmPassword" type="password" placeholder="Підтвердження пароля" required /> </div>
-        <div class="form-group"> <div class="captcha-container"> <div class="captcha-text">Я не робот</div> <input type="checkbox" id="registerCaptchaCheck" required /> <label for="registerCaptchaCheck">Підтвердити</label> </div> </div>
+        <div class="form-group">
+          <label for="registerUsername">Логін</label>
+          <input id="registerUsername" type="text" placeholder="Придумайте логін" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="Ваш email" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Пароль</label>
+          <input id="registerPassword" type="password" placeholder="Придумайте пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Підтвердження пароля</label>
+          <input id="registerConfirmPassword" type="password" placeholder="Повторіть пароль" required />
+        </div>
+        <div class="form-group">
+          <div class="captcha-container">
+            <div class="captcha-text">Я не робот</div>
+            <input type="checkbox" id="registerCaptchaCheck" required />
+            <label for="registerCaptchaCheck">Підтвердити</label>
+          </div>
+        </div>
         <button class="btn primary full-width" type="submit">Зареєструватися</button>
       </form>
+
+      <div class="modal-footer-link">
+        <span>Вже є акаунт?</span>
+        <a href="#" class="form-link" id="showLoginBtnFromRegister">Увійти</a>
+      </div>
+
     </div>
   </div>
+
   
   <div id="comparisonBar" class="comparison-bar"></div> <script src="utils.js"></script> 
   <script src="generation.js"></script><script src="app.js"></script>

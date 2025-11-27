@@ -51,35 +51,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- ДОПОМІЖНА ФУНКЦІЯ ДЛЯ АВАТАРКИ ---
+    function getAvatarUrl(url, username) {
+        if (url) {
+            return url.startsWith('http') ? url : `http://127.0.0.1:5000${url}`;
+        }
+        const initial = username ? username.charAt(0).toUpperCase() : '?';
+        return `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=100`;
+    }
+
     /**
-     * Відображає список тем у контейнері.
+     * Відображає список тем у контейнері (Оновлений дизайн TMC)
      * @param {Array} topics - Масив об'єктів тем
      */
     function renderTopics(topics) {
         if (!topics || topics.length === 0) {
             elements.topicsListContainer.innerHTML = `
-                <div class="empty-state">
-                    <h3>Обговорень ще немає.</h3>
-                    <p>Будьте першим, хто створить нову тему!</p>
-                </div>
-            `;
+                <div class="empty-state" style="border: none; padding: 40px; text-align: center;">
+                    <h3 style="color: #E2E8F0;">Тем поки немає 🤷‍♂️</h3>
+                    <p style="color: #A0AEC0;">Станьте першим, хто почне обговорення!</p>
+                </div>`;
             return;
         }
 
         elements.topicsListContainer.innerHTML = topics.map(topic => {
-           
             const topicLink = `topic.html?id=${topic.id}`; 
-            const createdDate = new Date(topic.created_at).toLocaleString('uk-UA');
+            // Посилання на профіль
+            const profileLink = `user-profile.html?id=${topic.author_id}`;
+            
+            const dateObj = new Date(topic.created_at);
+            const dateStr = dateObj.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', year: 'numeric' });
+            
+            const avatarSrc = getAvatarUrl(topic.author_avatar, topic.author_username);
 
             return `
-                <a href="${topicLink}" class="topic-card">
-                    <div class="topic-card-title">${topic.title}</div>
-                    <div class="topic-card-meta">
-                        <span>Автор: <strong>${topic.author_username || 'Анонім'}</strong></span>
-                        <span>Створено: ${createdDate}</span>
-                        <span>Відповідей: ${topic.post_count || 0}</span>
+                <div class="forum-topic-row">
+                    <a href="${profileLink}" class="topic-icon" style="overflow: hidden; border-radius: 50%; width: 40px; height: 40px; display: block;">
+                        <img src="${avatarSrc}" alt="${topic.author_username}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </a>
+
+                    <div class="topic-main-info">
+                        <a href="${topicLink}" class="topic-title" style="text-decoration: none; color: inherit;">${topic.title}</a>
+                        <div class="topic-meta">
+                            Автор: <a href="${profileLink}" class="topic-author" style="color: #A0AEC0; text-decoration: none;">${topic.author_username || 'Анонім'}</a>
+                        </div>
                     </div>
-                </a>
+
+                    <div class="topic-stats">
+                        <span class="stat-value">${topic.post_count || 0}</span>
+                        <span class="stat-label">відповідей</span>
+                    </div>
+
+                    <div class="topic-last-post">
+                        <div>${dateStr}</div>
+                    </div>
+                </div>
             `;
         }).join('');
     }

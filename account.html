@@ -13,110 +13,146 @@
 <body>
 
  <header>
-  <div class="header-content">
-    <div class="logo-nav">
-      <div class="logo">
-        <a href="main.html" style="text-decoration: none; color: inherit;"><h1>Right Wheel</h1></a>
+    <div class="header-content">
+      <div class="logo-nav">
+        <div class="logo">
+          <a href="main.html" style="text-decoration: none; color: inherit;"><h1>Right Wheel</h1></a>
+        </div>
+        <a href="forum.html" class="nav-link-forum">Форум</a>
+        <a href="news.html" class="nav-link-forum">Новини</a>
       </div>
-      <a href="forum.html" class="nav-link-forum">Форум</a>
-      <a href="news.html" class="nav-link-forum">Новини</a>
+      <div class="controls">
+        <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Обране
+        </a>
+        <button id="showLoginModalBtn" class="btn primary">Увійти</button>
+        <button id="logoutBtn" class="btn secondary" style="display:none">Вийти</button>
+      </div>
     </div>
-    <div class="controls">
-      
-      <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Обране
-      </a>
-      <button id="showLoginModalBtn" class="btn primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Увійти
-      </button>
-      <button id="logoutBtn" class="btn secondary" style="display:none">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Вийти
-      </button>
-    </div>
-  </div>
-</header>
+ </header>
   
   <div class="container">
     <main>
 
-      <h2 id="accountUsernameTitle">Мій кабінет</h2>
-      
-      <div class="account-layout">
-        <div class="account-card">
-          <h3>Налаштування</h3>
+      <div class="breadcrumbs" style="margin-bottom: 20px;">
+          <a href="main.html">Головна</a> <span>/</span>
+          <span class="current">Мій кабінет</span>
+      </div>
+
+      <div class="account-grid">
           
-          <form id="changeEmailForm" class="form-content">
-            <h4>Змінити Email</h4>
-            <div class="form-group">
-              <input id="accEmail" type="email" placeholder="Новий Email" required />
-            </div>
-            <div class="form-group">
-              <input id="accEmailPassword" type="password" placeholder="Поточний пароль для підтвердження" required />
-            </div>
-            <button class="btn primary" type="submit">Зберегти Email</button>
-          </form>
-          
-          <hr class="form-divider">
-          
-          <form id="changePasswordForm" class="form-content">
-            <h4>Змінити пароль</h4>
-            <div class="form-group">
-              <input id="accOldPassword" type="password" placeholder="Старий пароль" required />
-            </div>
-            <div class="form-group">
-              <input id="accNewPassword" type="password" placeholder="Новий пароль" required />
-            </div>
-             <div class="form-group">
-              <input id="accConfirmPassword" type="password" placeholder="Підтвердіть новий пароль" required />
-            </div>
-            <button class="btn primary" type="submit">Змінити пароль</button>
-          </form>
-        </div>
-        
-        <div class="account-card">
-          <h3>Моя активність</h3>
-          
-          <div id="accountStatsContainer" class="account-stats">
-            <p>Завантаження статистики...</p>
-          </div>
-          <div class="account-comparison-section">
-                <h4>Список порівняння</h4>
-                <p>Автомобілі, які ви додали для порівняння.</p>
-                <button id="goToComparisonBtn" class="btn secondary" disabled>
-                  <span>Переглянути список (0)</span>
-                </button>
+          <div class="left-column">
+              
+              <div class="panel-card">
+                  <div class="panel-header">Мій профіль</div>
+                  <div class="panel-body" style="text-align: center;">
+                      <div class="avatar-wrapper" style="margin: 0 auto 15px; width: 100px; height: 100px;">
+                          <img id="userAvatarImg" src="https://via.placeholder.com/150" alt="Avatar">
+                          <button id="changeAvatarBtn" class="edit-avatar-btn" title="Змінити фото">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
+                          <input type="file" id="avatarUploadInput" style="display: none;" accept="image/*">
+                      </div>
+                      <h2 id="accountUsernameTitle" style="margin: 0; color: #E2E8F0; font-size: 20px;">Завантаження...</h2>
+                      <p id="accountEmailDisplay" style="color: #A0AEC0; margin: 5px 0 0 0; font-size: 14px;">...</p>
+                  </div>
               </div>
-          
-          <h3 style="margin-top: 30px;">Мої теми</h3>
-          <div id="myTopicsList" class="my-topics-list">
-             <p>Завантаження тем...</p>
+
+              <div class="panel-card">
+                  <div class="panel-header">Безпека та Налаштування</div>
+                  <div class="panel-body">
+                      
+                      <form id="changeEmailForm" style="margin-bottom: 25px;">
+                        <h4 style="margin: 0 0 10px 0; color: #E40C2B; font-size: 14px;">Зміна Email</h4>
+                        <div class="form-group">
+                          <input id="accEmail" type="email" placeholder="Новий Email" class="forum-input" required />
+                        </div>
+                        <div class="form-group">
+                          <input id="accEmailPassword" type="password" placeholder="Поточний пароль" class="forum-input" required />
+                        </div>
+                        <button class="btn secondary small full-width" type="submit">Зберегти Email</button>
+                      </form>
+                      
+                      <hr style="border: 0; border-top: 1px solid #2D3748; margin: 20px 0;">
+                      
+                      <form id="changePasswordForm">
+                        <h4 style="margin: 0 0 10px 0; color: #E40C2B; font-size: 14px;">Зміна пароля</h4>
+                        <div class="form-group">
+                          <input id="accOldPassword" type="password" placeholder="Старий пароль" class="forum-input" required />
+                        </div>
+                        <div class="form-group">
+                          <input id="accNewPassword" type="password" placeholder="Новий пароль" class="forum-input" required />
+                        </div>
+                         <div class="form-group">
+                          <input id="accConfirmPassword" type="password" placeholder="Повторіть пароль" class="forum-input" required />
+                        </div>
+                        <button class="btn secondary small full-width" type="submit">Змінити пароль</button>
+                      </form>
+                  </div>
+              </div>
+
           </div>
-        </div>
+
+          <div class="right-column">
+              
+              <div class="panel-card">
+                  <div class="panel-header">Статистика активності</div>
+                  <div class="panel-body">
+                      <div id="accountStatsContainer" class="account-stats-grid">
+                        <div class="stat-box">
+                            <strong>-</strong>
+                            <span>Створено тем</span>
+                        </div>
+                        <div class="stat-box">
+                            <strong>-</strong>
+                            <span>Повідомлень</span>
+                        </div>
+                      </div>
+
+                      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #2D3748;">
+                        <h4 style="margin: 0 0 10px 0; color: #E2E8F0; font-size: 14px;">Список порівняння</h4>
+                        <p style="color: #A0AEC0; font-size: 13px; margin-bottom: 10px;">Автомобілі, які ви відібрали для порівняння характеристик.</p>
+                        <button id="goToComparisonBtn" class="btn primary small" disabled>
+                          <span>Переглянути список (0)</span>
+                        </button>
+                      </div>
+                  </div>
+              </div>
+
+              <div>
+                  <div class="forum-header-row" style="border-radius: 8px 8px 0 0; background: #2D3748; border: 1px solid #4A5568; border-bottom: none;">
+                    <div></div> 
+                    <div>Мої теми</div>
+                    <div style="text-align: center;">Відповідей</div>
+                    <div style="text-align: right;">Дата</div>
+                  </div>
+                  
+                  <div id="myTopicsList" class="topics-list-container" style="border: 1px solid #4A5568; border-top: none; background: #1A202C;">
+                     <p style="padding: 20px; color: #A0AEC0;">Завантаження...</p>
+                  </div>
+              </div>
+
+          </div>
       </div>
 
     </main>
   </div>
   
   <div id="infoModal" class="modal-root" style="display:none">
-  <div class="modal-back" id="infoModalBack"></div>
-  <div class="modal" style="max-width: 500px;">
-      <div class="modal-header">
-      <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
-      </div>
-      <div class="form-content" style="gap: 20px;">
-      <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="infoModalOkBtn" class="btn primary">OK</button>
-      </div>
-      </div>
-  </div>
+    <div class="modal-back" id="infoModalBack"></div>
+    <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+        <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
+        </div>
+        <div class="form-content" style="gap: 20px;">
+        <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="infoModalOkBtn" class="btn primary">OK</button>
+        </div>
+        </div>
+    </div>
   </div>
 
-  
-  
   <script src="app.js"></script> 
   <script src="account.js"></script> 
   <script src="https://accounts.google.com/gsi/client" async defer></script>

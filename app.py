@@ -13,6 +13,8 @@ from datetime import date, datetime, timezone
 from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from werkzeug.utils import secure_filename
+from datetime import datetime
 
 # --- ІМПОРТИ ДЛЯ НОВИН ---
 import requests 
@@ -20,6 +22,25 @@ import trafilatura # <--- ВИКОРИСТОВУЄМО ЦЮ БІБЛІОТЕКУ
 # -------------------------
 
 app = Flask(__name__)
+
+# --- ВСТАВИТИ ЦЕЙ БЛОК НА ПОЧАТКУ ФАЙЛУ ---
+
+# Налаштування папки для завантажень
+UPLOAD_FOLDER = 'static/uploads/avatars'
+# Дозволені розширення файлів
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Створюємо папку, якщо вона ще не існує
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Функція перевірки розширення файлу
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# -------------------------------------------
 
 # --- ЗАМІНИТИ СТАРЕ НАЛАШТУВАННЯ CORS НА ЦЕ ---
 CORS(app, 
@@ -644,6 +665,8 @@ def get_forum_topics():
             t.title, 
             t.created_at,
             u.username AS author_username,
+            u.avatar_url AS author_avatar,  -- НОВЕ
+            u.id AS author_id,              -- НОВЕ
             (SELECT COUNT(*) FROM forum_posts p WHERE p.topic_id = t.id) - 1 AS post_count
         FROM 
             forum_topics t
@@ -710,9 +733,11 @@ def get_topic_details(topic_id):
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
+        # Тема + автор теми
         cursor.execute(
             """
-            SELECT t.id, t.title, t.created_at, u.username AS author_username
+            SELECT t.id, t.title, t.created_at, 
+                   u.username AS author_username, u.avatar_url AS author_avatar, u.id AS author_id
             FROM forum_topics t
             JOIN users u ON t.user_id = u.id
             WHERE t.id = %s
@@ -726,9 +751,11 @@ def get_topic_details(topic_id):
             conn.close()
             return jsonify({"error": "Тему не знайдено"}), 404
 
+        # Пости + автори постів
         cursor.execute(
             """
-            SELECT p.id, p.content, p.created_at, u.username AS author_username
+            SELECT p.id, p.content, p.created_at, 
+                   u.username AS author_username, u.avatar_url AS author_avatar, u.id AS author_id
             FROM forum_posts p
             JOIN users u ON p.user_id = u.id
             WHERE p.topic_id = %s
@@ -746,6 +773,51 @@ def get_topic_details(topic_id):
         return jsonify(result)
 
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+# 3. НОВИЙ ЕНДПОІНТ: Публічний профіль користувача
+@app.route('/api/users/<int:user_id>/profile', methods=['GET'])
+def get_public_user_profile(user_id):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database error"}), 500
+        
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # --- ВИПРАВЛЕННЯ: Ми прибрали 'created_at' із запиту, щоб не було помилки ---
+        cursor.execute("SELECT id, username, avatar_url FROM users WHERE id = %s", (user_id,))
+        user_data = cursor.fetchone()
+        
+        if not user_data:
+            return jsonify({"error": "Користувача не знайдено"}), 404
+            
+        user_dict = dict(user_data)
+        # Ставимо дату як None, бо ми її не дістали з бази
+        user_dict['created_at'] = None 
+
+        cursor.execute("SELECT COUNT(*) AS topic_count FROM forum_topics WHERE user_id = %s", (user_id,))
+        topic_count = cursor.fetchone()['topic_count']
+        
+        cursor.execute("SELECT COUNT(*) AS post_count FROM forum_posts WHERE user_id = %s", (user_id,))
+        post_count = cursor.fetchone()['post_count']
+        
+        cursor.close()
+        
+        return jsonify({
+            "user": user_dict,
+            "stats": {
+                "topic_count": topic_count,
+                "post_count": post_count
+            }
+        })
+        
+    except Exception as e:
+        print(f"Profile API Error: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
@@ -785,7 +857,8 @@ def get_my_account_details():
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
-        cursor.execute("SELECT username, email FROM users WHERE id = %s", (user_id,))
+        # --- ОНОВЛЕНИЙ ЗАПИТ: Додано avatar_url ---
+        cursor.execute("SELECT username, email, avatar_url FROM users WHERE id = %s", (user_id,))
         user_data = cursor.fetchone()
         
         if not user_data:
@@ -1113,28 +1186,36 @@ def google_login():
         # Отримуємо дані користувача
         email = id_info['email']
         name = id_info.get('name', email.split('@')[0])
+        google_picture = id_info.get('picture') # <--- Отримуємо URL фото
         
-        # Перевірка "aud" (audience) є важливою для безпеки
         if id_info['aud'] != GOOGLE_CLIENT_ID:
             raise ValueError('Could not verify audience.')
 
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # 1. Шукаємо користувача за email
-        cursor.execute("SELECT id, username FROM users WHERE email = %s", (email,))
+        # 1. Шукаємо користувача за email (+ дістаємо avatar_url)
+        cursor.execute("SELECT id, username, avatar_url FROM users WHERE email = %s", (email,))
         user_data = cursor.fetchone()
 
         if user_data:
-            # Користувач існує - авторизуємо
+            # --- КОРИСТУВАЧ ІСНУЄ ---
             user_id = user_data[0]
             username = user_data[1]
+            current_avatar = user_data[2]
+            
+            # Якщо у користувача немає аватарки, але вона є в Google - оновлюємо
+            if not current_avatar and google_picture:
+                cursor.execute(
+                    "UPDATE users SET avatar_url = %s WHERE id = %s", 
+                    (google_picture, user_id)
+                )
+                conn.commit()
+                
         else:
-            # Користувача немає - реєструємо
-            # Генеруємо складний рандомний пароль, оскільки вхід йде через Google
+            # --- НОВИЙ КОРИСТУВАЧ ---
             random_pass = generate_password_hash(os.urandom(32).hex())
             
-            # Генеруємо унікальний логін
             base_name = name.replace(" ", "").lower()
             username = base_name
             counter = 1
@@ -1146,9 +1227,10 @@ def google_login():
                 username = f"{base_name}{counter}"
                 counter += 1
             
+            # Додаємо нового користувача одразу з фото
             cursor.execute(
-                "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id", 
-                (username, email, random_pass)
+                "INSERT INTO users (username, email, password_hash, avatar_url) VALUES (%s, %s, %s, %s) RETURNING id", 
+                (username, email, random_pass, google_picture)
             )
             user_id = cursor.fetchone()[0]
             conn.commit()
@@ -1156,7 +1238,6 @@ def google_login():
         cursor.close()
         conn.close()
 
-        # Створюємо JWT токен
         access_token = create_access_token(identity=str(user_id))
         return jsonify(access_token=access_token, username=username)
 
@@ -1230,6 +1311,47 @@ def get_quiz_question():
     except Exception as e:
         print(f"Quiz Error: {e}")
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/api/me/account/avatar', methods=['POST'])
+@jwt_required()
+def upload_avatar():
+    if 'file' not in request.files:
+        return jsonify({"error": "Файл не знайдено"}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "Файл не обрано"}), 400
+        
+    if file and allowed_file(file.filename):
+        user_id = get_jwt_identity()
+        
+        # Генеруємо ім'я файлу
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = secure_filename(f"user_{user_id}_{int(datetime.now().timestamp())}.{ext}")
+        
+        # Шлях для збереження на диск
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        save_path = os.path.join(basedir, app.config['UPLOAD_FOLDER'], filename)
+        
+        # --- ВСТАВИТИ ТУТ ---
+        file.seek(0)  # Повертаємо "курсор" на початок файлу, щоб він не записався порожнім
+        # -------------------
+        
+        file.save(save_path)
+        
+        # Шлях для бази даних (для HTML)
+        db_path = f"/static/uploads/avatars/{filename}"
+        
+        success, error = db_execute("UPDATE users SET avatar_url = %s WHERE id = %s", (db_path, user_id))
+        
+        if success:
+            return jsonify({"message": "Аватарку оновлено", "avatar_url": db_path})
+        else:
+            return jsonify({"error": error}), 500
+    
+    return jsonify({"error": "Недопустимий тип файлу"}), 400
 # --- ЗАПУСК СЕРВЕРА ---
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
