@@ -174,8 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="post-body">
                         <aside class="post-user-aside" style="text-align: center;">
                             <a href="${profileLink}" style="text-decoration: none;">
-                                <div class="user-avatar-placeholder" style="background: none; padding: 0; overflow: hidden; border: 1px solid #4A5568;">
-                                    <img src="${avatarSrc}" alt="${post.author_username}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="user-avatar-placeholder">
+                                    <img src="${avatarSrc}" alt="${post.author_username}">
                                 </div>
                                 <div class="post-username" style="margin-top: 8px; color: #E2E8F0;">${post.author_username || 'Анонім'}</div>
                             </a>

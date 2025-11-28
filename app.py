@@ -789,22 +789,35 @@ def get_public_user_profile(user_id):
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
-        # --- ВИПРАВЛЕННЯ: Ми прибрали 'created_at' із запиту, щоб не було помилки ---
-        cursor.execute("SELECT id, username, avatar_url FROM users WHERE id = %s", (user_id,))
+        # 1. Отримуємо розширену інфо про користувача
+        # ВАЖЛИВО: Додали created_at, current_car, bio, location
+        cursor.execute("""
+            SELECT id, username, avatar_url, current_car, bio
+            FROM users WHERE id = %s
+        """, (user_id,))
         user_data = cursor.fetchone()
         
         if not user_data:
             return jsonify({"error": "Користувача не знайдено"}), 404
             
         user_dict = dict(user_data)
-        # Ставимо дату як None, бо ми її не дістали з бази
-        user_dict['created_at'] = None 
 
+        # 2. Статистика
         cursor.execute("SELECT COUNT(*) AS topic_count FROM forum_topics WHERE user_id = %s", (user_id,))
         topic_count = cursor.fetchone()['topic_count']
         
         cursor.execute("SELECT COUNT(*) AS post_count FROM forum_posts WHERE user_id = %s", (user_id,))
         post_count = cursor.fetchone()['post_count']
+
+        # 3. НОВЕ: Останні теми користувача (щоб вивести їх списком)
+        cursor.execute("""
+            SELECT id, title, created_at 
+            FROM forum_topics 
+            WHERE user_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        """, (user_id,))
+        recent_topics = [dict(row) for row in cursor.fetchall()]
         
         cursor.close()
         
@@ -813,7 +826,8 @@ def get_public_user_profile(user_id):
             "stats": {
                 "topic_count": topic_count,
                 "post_count": post_count
-            }
+            },
+            "recent_topics": recent_topics  # Передаємо список тем
         })
         
     except Exception as e:
@@ -857,8 +871,11 @@ def get_my_account_details():
     try:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
-        # --- ОНОВЛЕНИЙ ЗАПИТ: Додано avatar_url ---
-        cursor.execute("SELECT username, email, avatar_url FROM users WHERE id = %s", (user_id,))
+        # --- ОНОВЛЕНО: Додали bio, current_car ---
+        cursor.execute("""
+            SELECT username, email, avatar_url, bio, current_car 
+            FROM users WHERE id = %s
+        """, (user_id,))
         user_data = cursor.fetchone()
         
         if not user_data:
@@ -881,10 +898,34 @@ def get_my_account_details():
         })
         
     except Exception as e:
+        print(f"Account Error: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
+
+
+@app.route('/api/me/account/details', methods=['PUT'])
+@jwt_required()
+def update_account_details():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    current_car = data.get('current_car')
+    bio = data.get('bio')
+
+    # Оновлюємо дані в базі
+    query = """
+        UPDATE users 
+        SET current_car = %s, bio = %s 
+        WHERE id = %s
+    """
+    success, error = db_execute(query, (current_car,  bio, user_id))
+
+    if not success:
+        return jsonify({"error": error}), 500
+        
+    return jsonify({"message": "Профіль успішно оновлено!"})
 
 @app.route('/api/me/topics', methods=['GET'])
 @jwt_required()

@@ -1,33 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const elements = {
+        // Основні елементи профілю
         usernameTitle: document.getElementById('accountUsernameTitle'),
         emailDisplay: document.getElementById('accountEmailDisplay'),
         statsContainer: document.getElementById('accountStatsContainer'),
         topicsList: document.getElementById('myTopicsList'),
         
-        // Форми
+        // Аватар
+        avatarImg: document.getElementById('userAvatarImg'),
+        changeAvatarBtn: document.getElementById('changeAvatarBtn'),
+        avatarInput: document.getElementById('avatarUploadInput'),
+
+        // Форма налаштувань профілю (Авто, Біо, Локація)
+        detailsForm: document.getElementById('profileDetailsForm'),
+        carInput: document.getElementById('accCar'),
+        bioInput: document.getElementById('accBio'),
+        
+        // Форма зміни Email
         emailForm: document.getElementById('changeEmailForm'),
         emailInput: document.getElementById('accEmail'),
         emailPasswordInput: document.getElementById('accEmailPassword'),
         
+        // Форма зміни пароля
         passwordForm: document.getElementById('changePasswordForm'),
         oldPasswordInput: document.getElementById('accOldPassword'),
         newPasswordInput: document.getElementById('accNewPassword'),
         confirmPasswordInput: document.getElementById('accConfirmPassword'),
         
-        // Кнопки
-        goToComparisonBtn: document.getElementById('goToComparisonBtn'),
-        
-        // Аватар
-        avatarImg: document.getElementById('userAvatarImg'),
-        changeAvatarBtn: document.getElementById('changeAvatarBtn'),
-        avatarInput: document.getElementById('avatarUploadInput')
+        // Кнопка переходу до порівняння
+        goToComparisonBtn: document.getElementById('goToComparisonBtn')
     };
 
     let authToken = null;
 
-    // --- Завантаження даних профілю ---
+    // --- 1. Завантаження даних профілю ---
     async function loadAccountDetails() {
         if (!authToken) return;
         
@@ -37,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (response.status === 401) {
+                // Якщо токен протух - викидаємо на головну (або спрацює глобальний перехоплювач)
                 window.location.href = 'main.html';
                 return;
             }
@@ -44,47 +52,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || data.msg);
             
-            // Заповнення інфо
-            elements.usernameTitle.textContent = data.user.username;
+            // Заповнення текстових полів
+            if (elements.usernameTitle) elements.usernameTitle.textContent = data.user.username;
             if (elements.emailDisplay) elements.emailDisplay.textContent = data.user.email;
+            
+            // Заповнення форми налаштувань (Авто, Локація, Біо)
+            if (elements.carInput) elements.carInput.value = data.user.current_car || '';
+            if (elements.bioInput) elements.bioInput.value = data.user.bio || '';
+
+            // Заповнення поля зміни email
             if (elements.emailInput) elements.emailInput.value = data.user.email;
             
-            // Аватар (ВИПРАВЛЕНА ЛОГІКА)
-            if (data.user.avatar_url) {
-                // Перевіряємо, чи це зовнішнє посилання (Google) чи локальне
-                if (data.user.avatar_url.startsWith('http')) {
-                    // Це Google - використовуємо як є
-                    elements.avatarImg.src = data.user.avatar_url;
+            // Логіка відображення Аватара
+            if (elements.avatarImg) {
+                if (data.user.avatar_url) {
+                    if (data.user.avatar_url.startsWith('http')) {
+                        elements.avatarImg.src = data.user.avatar_url;
+                    } else {
+                        elements.avatarImg.src = `http://127.0.0.1:5000${data.user.avatar_url}?t=${new Date().getTime()}`;
+                    }
                 } else {
-                    // Це локальне фото - додаємо адресу сервера
-                    elements.avatarImg.src = `http://127.0.0.1:5000${data.user.avatar_url}?t=${new Date().getTime()}`;
+                    const initial = data.user.username.charAt(0).toUpperCase();
+                    elements.avatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=E40C2B&color=fff&size=150&bold=true`;
                 }
-            } else {
-                // Якщо фото немає - генеруємо аватар з ініціалів
-                const initial = data.user.username.charAt(0).toUpperCase();
-                elements.avatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=E40C2B&color=fff&size=150&bold=true`;
             }
 
-            // Статистика (оновлений дизайн)
-            elements.statsContainer.innerHTML = `
-                <div class="stat-box">
-                    <strong>${data.stats.topic_count}</strong>
-                    <span>Створено тем</span>
-                </div>
-                <div class="stat-box">
-                    <strong>${data.stats.post_count}</strong>
-                    <span>Повідомлень</span>
-                </div>
-            `;
+            // Статистика
+            if (elements.statsContainer) {
+                elements.statsContainer.innerHTML = `
+                    <div class="stat-box">
+                        <strong>${data.stats.topic_count}</strong>
+                        <span>Створено тем</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong>${data.stats.post_count}</strong>
+                        <span>Повідомлень</span>
+                    </div>
+                `;
+            }
             
         } catch (error) {
             console.error('Помилка завантаження акаунту:', error);
+            if (elements.usernameTitle) elements.usernameTitle.textContent = 'Помилка';
         }
     }
 
-    // --- Завантаження тем (СТИЛЬ ФОРУМУ) ---
+    // --- 2. Завантаження тем користувача ---
     async function loadMyTopics() {
-        if (!authToken) return;
+        if (!authToken || !elements.topicsList) return;
 
         try {
             const response = await fetch('http://127.0.0.1:5000/api/me/topics', {
@@ -103,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Рендер рядків (копія стилю з forum.js)
             elements.topicsList.innerHTML = topics.map(topic => {
                 const topicLink = `topic.html?id=${topic.id}`;
                 const dateObj = new Date(topic.created_at);
@@ -115,19 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="topic-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         </div>
-
                         <div class="topic-main-info">
                             <span class="topic-title">${topic.title}</span>
-                            <div class="topic-meta">
-                                Створено вами
-                            </div>
+                            <div class="topic-meta">Створено вами</div>
                         </div>
-
                         <div class="topic-stats">
                             <span class="stat-value">${topic.post_count || 0}</span>
                             <span class="stat-label">відповідей</span>
                         </div>
-
                         <div class="topic-last-post">
                             <div>${dateStr}</div>
                             <div style="font-size: 11px; opacity: 0.7;">${timeStr}</div>
@@ -142,7 +151,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Логіка аватарки ---
+    // --- 3. Збереження деталей профілю (Авто, Біо) ---
+    async function handleUpdateProfileDetails(e) {
+        e.preventDefault();
+        
+        const car = elements.carInput.value;
+        const bio = elements.bioInput.value;
+
+        const btn = e.target.querySelector('button');
+        const originalText = btn.textContent;
+        btn.textContent = 'Збереження...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/me/account/details', {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    current_car: car,
+                    bio: bio
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+
+            showInfoModal('Успіх', 'Профіль успішно оновлено!', 'success');
+
+        } catch (error) {
+            showInfoModal('Помилка', error.message, 'error');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // --- 4. Завантаження аватарки ---
     function setupAvatarUpload() {
         if (!elements.changeAvatarBtn || !elements.avatarInput) return;
 
@@ -156,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('file', file);
 
             try {
-                elements.avatarImg.style.opacity = '0.5';
+                if (elements.avatarImg) elements.avatarImg.style.opacity = '0.5';
+                
                 const response = await fetch('http://127.0.0.1:5000/api/me/account/avatar', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${authToken}` },
@@ -167,18 +215,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error(data.error);
 
                 showInfoModal('Успіх', 'Аватарку оновлено!', 'success');
-                elements.avatarImg.src = `http://127.0.0.1:5000${data.avatar_url}?t=${new Date().getTime()}`;
+                if (elements.avatarImg) {
+                    elements.avatarImg.src = `http://127.0.0.1:5000${data.avatar_url}?t=${new Date().getTime()}`;
+                }
 
             } catch (error) {
                 showInfoModal('Помилка', error.message, 'error');
             } finally {
-                elements.avatarImg.style.opacity = '1';
+                if (elements.avatarImg) elements.avatarImg.style.opacity = '1';
                 elements.avatarInput.value = '';
             }
         });
     }
 
-    // --- Логіка форм (Email/Password) - без змін логіки, тільки прив'язка ---
+    // --- 5. Зміна Email ---
     async function handleChangeEmail(e) {
         e.preventDefault();
         const newEmail = elements.emailInput.value;
@@ -199,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- 6. Зміна Пароля ---
     async function handleChangePassword(e) {
         e.preventDefault();
         const oldP = elements.oldPasswordInput.value;
@@ -222,29 +273,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Список порівняння ---
+    // --- 7. Список порівняння ---
     function loadComparisonList() {
         if (!elements.goToComparisonBtn) return;
         let list = [];
         try { list = JSON.parse(localStorage.getItem('RightWheel_comparison') || '[]'); } catch (e) {}
         
-        elements.goToComparisonBtn.querySelector('span').textContent = `Переглянути список (${list.length})`;
+        const btnSpan = elements.goToComparisonBtn.querySelector('span');
+        if (btnSpan) btnSpan.textContent = `Переглянути список (${list.length})`;
         elements.goToComparisonBtn.disabled = list.length === 0;
         
         elements.goToComparisonBtn.onclick = () => window.location.href = 'comparison.html';
     }
 
+    // --- ІНІЦІАЛІЗАЦІЯ ---
     function initAccountPage() {
         authToken = localStorage.getItem('RightWheel_access_token');
-        if (!authToken) { window.location.href = 'main.html'; return; }
+        if (!authToken) { 
+            window.location.href = 'main.html'; 
+            return; 
+        }
 
         loadAccountDetails();
         loadMyTopics();
         loadComparisonList();
         setupAvatarUpload();
         
-        if(elements.emailForm) elements.emailForm.addEventListener('submit', handleChangeEmail);
-        if(elements.passwordForm) elements.passwordForm.addEventListener('submit', handleChangePassword);
+        if (elements.detailsForm) elements.detailsForm.addEventListener('submit', handleUpdateProfileDetails);
+        if (elements.emailForm) elements.emailForm.addEventListener('submit', handleChangeEmail);
+        if (elements.passwordForm) elements.passwordForm.addEventListener('submit', handleChangePassword);
     }
 
     initAccountPage();
