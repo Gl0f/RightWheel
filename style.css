@@ -3055,3 +3055,179 @@ input:-webkit-autofill:active {
     height: 16px;
     stroke: currentColor;
 }
+/* --- USER DROPDOWN MENU --- */
+
+/* --- ВИПРАВЛЕНИЙ СТИЛЬ ДЛЯ КНОПКИ ПРОФІЛЮ --- */
+
+.user-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    
+    /* Робимо стиль таким самим, як у .btn.secondary (кнопка Обране) */
+    background: #333; 
+    color: var(--text);
+    border: 1px solid transparent; /* Щоб не стрибало при ховері */
+    
+    padding: 5px 12px 5px 5px; /* Відступи: менше зліва (біля аватара), більше справа */
+    border-radius: 50px; /* Овальна форма */
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.user-menu-trigger:hover {
+    background: #444; /* Світліший при наведенні */
+    border-color: var(--border);
+}
+
+/* Ім'я користувача */
+.header-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    max-width: 120px; /* Обмеження ширини імені */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Аватар всередині кнопки */
+.header-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--accent); /* Червона обводка */
+    flex-shrink: 0; /* Щоб коло не сплющувалось */
+}
+
+/* Випадаюче меню (фікс позиції та Z-index) */
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px); /* Відступ знизу */
+    right: 0;
+    width: 220px;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Глибша тінь */
+    padding: 8px 0;
+    
+    z-index: 9999; /* ВАЖЛИВО: Щоб меню було поверх всього */
+    
+    display: none; /* Приховано */
+}
+
+/* Клас для відображення меню */
+.user-menu-container.active .user-dropdown {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Стиль для елементів випадаючого меню (посилання та кнопки) */
+.dropdown-item {
+    /* Розміщення */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%; /* На всю ширину */
+    padding: 12px 15px;
+    box-sizing: border-box;
+
+    /* Текст */
+    color: var(--text) !important; /* Примусово світлий колір */
+    text-decoration: none; /* Прибираємо підкреслення */
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    text-align: left;
+    
+    /* Скидання стилів кнопки */
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Спеціальний фікс для посилань, щоб не ставали фіолетовими */
+a.dropdown-item,
+a.dropdown-item:visited,
+a.dropdown-item:active {
+    color: var(--text) !important;
+    text-decoration: none;
+}
+
+/* Ефект наведення */
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+}
+
+/* Виправлення іконок */
+.dropdown-item svg {
+    color: var(--muted);
+    flex-shrink: 0; /* Щоб іконку не сплющувало */
+}
+
+.dropdown-item:hover svg {
+    color: #ffffff;
+}
+
+/* Червоний колір для кнопки "Вийти" при наведенні */
+#logoutBtnDropdown:hover {
+    color: var(--danger) !important;
+    background-color: rgba(229, 62, 62, 0.15);
+}
+#logoutBtnDropdown:hover svg {
+    color: var(--danger) !important;
+}
+/* У файлі style.css */
+
+.header-avatar img {
+    width: 100%;
+    height: 100%;
+    
+    /* Головне для пропорцій */
+    object-fit: cover;
+    display: block;
+
+    /* === МАГІЯ ДЛЯ ЧІТКОСТІ === */
+    
+    /* 1. Покращує контрастність при зменшенні (робить різким) */
+    image-rendering: -webkit-optimize-contrast;
+    
+    /* 2. Фікс для Chrome, щоб краї круга не були рваними або мильними */
+    transform: translateZ(0);
+    
+    /* 3. Гарантує, що фон не "просвічує" на пікселях */
+    background-color: var(--card); 
+}
+
+/* Також оновіть контейнер, щоб рамка була чіткою */
+/* Оновлений блок у style.css */
+.header-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    
+    /* Робить рамку чіткою поверх картинки */
+    border: 2px solid var(--accent); 
+    
+    /* Запобігає сплющенню */
+    flex-shrink: 0; 
+    
+    /* Фікс для чіткого обрізання країв */
+    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Для Safari/Chrome */
+    mask-image: radial-gradient(white, black); /* Стандартна властивість */
+}

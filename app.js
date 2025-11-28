@@ -29,6 +29,11 @@ const elements = {
     infoModalTitle: document.getElementById('infoModalTitle'),
     infoModalMessage: document.getElementById('infoModalMessage'),
     infoModalOkBtn: document.getElementById('infoModalOkBtn'),
+    userMenuContainer: document.getElementById('userMenuContainer'),
+    userMenuTrigger: document.getElementById('userMenuTrigger'),
+    headerUsername: document.getElementById('headerUsername'),
+    headerAvatarImg: document.getElementById('headerAvatarImg'),
+    logoutBtnDropdown: document.getElementById('logoutBtnDropdown'),
     infoModalBack: document.getElementById('infoModalBack')
     
  
@@ -325,30 +330,57 @@ function closeInfoModal() {
 
 function checkLoginStatus() {
     const token = localStorage.getItem('RightWheel_access_token');
-    const showLoginModalBtn = document.getElementById('showLoginModalBtn'); // Додано
+    const username = localStorage.getItem('RightWheel_loggedInUser');
+    const showLoginModalBtn = document.getElementById('showLoginModalBtn');
 
     if (token) {
         state.isLoggedIn = true;
-        // Показуємо кнопки для залогіненого
-        if (elements.logoutBtn) elements.logoutBtn.style.display = 'inline-flex';
-        if (elements.showFavoritesBtn) elements.showFavoritesBtn.style.display = 'inline-flex';
-        if (elements.openAddModalBtn) elements.openAddModalBtn.disabled = false;
-        // Ховаємо кнопку "Увійти"
+        
+        // 1. Ховаємо кнопку входу
         if (showLoginModalBtn) showLoginModalBtn.style.display = 'none';
-        // Ховаємо модалку (про всяк випадок)
-        if(elements.loginModal) elements.loginModal.style.display = 'none';
-        if (elements.accountLinkBtn) elements.accountLinkBtn.style.display = 'inline-flex';
+        
+        // 2. Показуємо меню користувача
+        if (elements.userMenuContainer) elements.userMenuContainer.style.display = 'inline-block';
+        
+        // 3. Показуємо кнопку обраного
+        if (elements.showFavoritesBtn) elements.showFavoritesBtn.style.display = 'inline-flex';
+
+        // 4. Оновлюємо ім'я в хедері
+        if (elements.headerUsername) elements.headerUsername.textContent = username || 'Користувач';
+
+        // 5. Оновлюємо аватарку в хедері (Швидкий запит або локально)
+        // Можна спробувати підтягнути аватарку, якщо вона є десь в localStorage,
+        // або зробити запит на /api/me/account.
+        // Поки що поставимо заглушку з ініціалами:
+        if (elements.headerAvatarImg) {
+             const initial = (username || 'U').charAt(0).toUpperCase();
+             // Якщо хочете реальну аватарку, треба робити fetch тут, але поки заглушка:
+             // Краще викликати окрему функцію updateHeaderAvatar()
+             elements.headerAvatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=E40C2B&color=fff&size=64&bold=true`;
+             
+             // СПРОБУЄМО ПІДТЯГНУТИ РЕАЛЬНУ АВАТАРКУ
+             fetch('http://127.0.0.1:5000/api/me/account', {
+                headers: { 'Authorization': `Bearer ${token}` }
+             })
+             .then(res => res.json())
+             .then(data => {
+                 if(data.user && data.user.avatar_url) {
+                     const url = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `http://127.0.0.1:5000${data.user.avatar_url}`;
+                     elements.headerAvatarImg.src = url;
+                 }
+             })
+             .catch(e => console.log('Avatar load error', e));
+        }
 
     } else {
         state.isLoggedIn = false;
-        // Ховаємо кнопки для залогіненого
-        if (elements.logoutBtn) elements.logoutBtn.style.display = 'none';
-        if (elements.showFavoritesBtn) elements.showFavoritesBtn.style.display = 'none';
-        if (elements.openAddModalBtn) elements.openAddModalBtn.disabled = true;
-        // Показуємо кнопку "Увійти"
+        
+        // Показуємо кнопку входу
         if (showLoginModalBtn) showLoginModalBtn.style.display = 'inline-flex';
-        if (elements.accountLinkBtn) elements.accountLinkBtn.style.display = 'none';
-        //  НЕ показуємо loginModal тут 
+        
+        // Ховаємо все інше
+        if (elements.userMenuContainer) elements.userMenuContainer.style.display = 'none';
+        if (elements.showFavoritesBtn) elements.showFavoritesBtn.style.display = 'none';
     }
 }
 
@@ -1277,6 +1309,43 @@ async function init() {
     
     // Запускаємо логіку пошуку
     await initAdvancedSearch(); 
+
+    // --- User Dropdown Logic (ВИПРАВЛЕНО) ---
+    
+    // 1. Знаходимо елементи заново (на випадок, якщо змінні зверху старі)
+    const menuTrigger = document.getElementById('userMenuTrigger');
+    const menuContainer = document.getElementById('userMenuContainer');
+    const logoutDropdownBtn = document.getElementById('logoutBtnDropdown');
+
+    if (menuTrigger && menuContainer) {
+        // Видаляємо старі слухачі (клонуванням), щоб не дублювати кліки
+        const newTrigger = menuTrigger.cloneNode(true);
+        menuTrigger.parentNode.replaceChild(newTrigger, menuTrigger);
+
+        // Додаємо новий слухач
+        newTrigger.addEventListener('click', (e) => {
+            e.stopPropagation(); // Зупиняємо вспливання
+            console.log("Клік по меню профілю!"); // Перевірка в консолі
+            menuContainer.classList.toggle('active');
+        });
+
+        // Закриття при кліку поза меню
+        document.addEventListener('click', (e) => {
+            if (menuContainer.classList.contains('active')) {
+                // Якщо клікнули не по меню і не по кнопці
+                if (!menuContainer.contains(e.target)) {
+                    menuContainer.classList.remove('active');
+                }
+            }
+        });
+    } else {
+        console.error("Елементи меню профілю не знайдені в DOM!");
+    }
+
+    // Слухач для кнопки виходу в меню
+    if (logoutDropdownBtn) {
+        logoutDropdownBtn.addEventListener('click', handleLogout);
+    }
 
     // Додаємо слухачі, специфічні для main.html
     elements.logoHomeLink?.addEventListener('click', () => window.location.href = 'main.html'); 
