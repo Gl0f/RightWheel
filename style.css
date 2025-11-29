@@ -3321,3 +3321,1411 @@ a.dropdown-item:active {
     -webkit-mask-image: -webkit-radial-gradient(white, black); /* Для Safari/Chrome */
     mask-image: radial-gradient(white, black); /* Стандартна властивість */
 }
+/* --- НОВИЙ МАКЕТ ФОРУМУ --- */
+
+.forum-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.forum-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr; /* Сайдбар 260px, решта контент */
+    gap: 30px;
+    align-items: start;
+}
+
+/* Сайдбар */
+.forum-sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.sidebar-block h3 {
+    margin: 0;
+    padding: 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #232d3b;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-scroll-area {
+    max-height: 500px; /* Обмеження висоти */
+    overflow-y: auto;  /* Вертикальна прокрутка */
+    padding: 5px 0;
+}
+
+/* Стиль скролбару для сайдбару */
+.sidebar-scroll-area::-webkit-scrollbar { width: 6px; }
+.sidebar-scroll-area::-webkit-scrollbar-track { background: var(--bg); }
+.sidebar-scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.sidebar-item {
+    padding: 10px 15px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover {
+    background: #2a2a2a;
+    color: white;
+}
+
+.sidebar-item.active {
+    background: rgba(228, 12, 43, 0.1);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+}
+
+/* Вкладки (Tabs) */
+.forum-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .forum-layout {
+        grid-template-columns: 1fr; /* Одна колонка */
+    }
+    .forum-sidebar {
+        margin-bottom: 20px;
+    }
+    .sidebar-scroll-area {
+        max-height: 200px; /* Менша висота на мобільному */
+    }
+}
+/* --- МОДАЛЬНЕ ВІКНО "СТВОРИТИ ТЕМУ" (ОПТИМІЗАЦІЯ) --- */
+
+/* Виправляємо контейнер, щоб не було скролу */
+#createTopicModal .modal {
+    max-width: 550px;
+    width: 100%;
+    padding: 30px;
+    background-color: #1A202C; /* Темний фон, як у сайту */
+    border: 1px solid #2D3748; /* Легка рамка */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Глибока тінь */
+    overflow: hidden; /* Прибираємо скролбари */
+}
+
+/* Стилізація заголовка */
+#createTopicModal .modal-header {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #2D3748;
+    padding-bottom: 15px;
+}
+
+#createTopicModal .modal-title {
+    font-size: 22px;
+    color: #E40C2B; /* Ваш акцентний червоний */
+    font-weight: 700;
+}
+
+/* Оптимізація полів вводу */
+#createTopicModal label {
+    display: block;
+    color: #A0AEC0; /* Світло-сірий текст */
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-left: 2px;
+}
+
+#createTopicModal .sp-input {
+    width: 100%;
+    background-color: #2D3748; /* Світліший за фон вікна */
+    border: 1px solid #4A5568;
+    color: #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    box-sizing: border-box; /* ВАЖЛИВО: Це прибирає горизонтальний скрол */
+}
+
+/* Ефект фокусу */
+#createTopicModal .sp-input:focus {
+    outline: none;
+    border-color: #E40C2B; /* Червона рамка при вводі */
+    background-color: #232936; /* Трохи темнішає */
+    box-shadow: 0 0 0 3px rgba(228, 12, 43, 0.15);
+}
+
+/* Поле вибору (Select) */
+#createTopicModal select.sp-input {
+    cursor: pointer;
+    appearance: none; /* Прибираємо стандартну стрілку браузера */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+}
+
+/* Текстова область */
+#createTopicModal textarea.sp-input {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* Кнопка "Опублікувати" */
+#createTopicModal .sp-btn-primary {
+    margin-top: 20px;
+    background: linear-gradient(135deg, #E40C2B 0%, #B8001C 100%);
+    border: none;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(228, 12, 43, 0.3);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+
+#createTopicModal .sp-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(228, 12, 43, 0.4);
+}
+
+#createTopicModal .sp-btn-primary:active {
+    transform: translateY(1px);
+}
+/* --- ВИПРАВЛЕННЯ КНОПКИ ЗАКРИТТЯ (ХРЕСТИК) --- */
+
+#createTopicModal .modal {
+    position: relative; /* Щоб кнопка позиціонувалася відносно вікна */
+}
+
+#createTopicModal .close-btn-abs {
+    /* Переміщуємо кнопку всередину вікна */
+    top: 25px; 
+    right: 25px;
+    
+    /* Стилізація */
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#createTopicModal .close-btn-abs:hover {
+    color: var(--text); /* Білий при наведенні */
+    transform: rotate(90deg); /* Ефект обертання */
+}
+
+#createTopicModal .close-btn-abs svg {
+    width: 24px;
+    height: 24px;
+}
+/* --- СТИЛІ ДЛЯ ПЕРЕГЛЯДУ ОГОЛОШЕННЯ --- */
+
+.view-ad-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr; /* Фото більше, інфо менше */
+    min-height: 500px;
+}
+
+@media (max-width: 800px) {
+    .view-ad-layout { grid-template-columns: 1fr; }
+}
+
+/* Галерея */
+.view-ad-gallery {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#viewAdMainImage {
+    width: 100%;
+    height: 400px;
+    object-fit: contain; /* Щоб фото не обрізалося */
+}
+
+.view-ad-thumbnails {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+    overflow-x: auto;
+    background: #111;
+}
+
+.view-ad-thumbnails img {
+    height: 60px;
+    width: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.7;
+}
+.view-ad-thumbnails img:hover, .view-ad-thumbnails img.active {
+    border-color: var(--accent);
+    opacity: 1;
+}
+
+/* Інфо */
+.view-ad-info {
+    padding: 25px;
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.view-ad-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--success);
+}
+
+.view-ad-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.view-ad-specs div {
+    display: flex;
+    flex-direction: column;
+}
+.view-ad-specs span { color: var(--muted); font-size: 12px; }
+
+.view-ad-description p {
+    white-space: pre-wrap; /* Зберігає абзаци */
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Продавець */
+.view-ad-seller {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.view-ad-seller .btn {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+.seller-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+/* --- СТИЛІ ДЛЯ ОКРЕМОЇ СТОРІНКИ ОГОЛОШЕННЯ --- */
+
+.view-ad-layout.full-page-mode {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr; /* Більше місця для фото */
+    gap: 30px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0; /* Прибираємо паддінг з контейнера, він буде у блоків */
+    overflow: hidden; /* Щоб кути закруглились */
+    align-items: start; /* Щоб права колонка не розтягувалась */
+}
+
+/* Галерея на сторінці */
+.view-ad-layout.full-page-mode .view-ad-gallery {
+    background: #000;
+    height: 100%; 
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-img-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+    height: 450px; /* Фіксована висота для головного фото */
+}
+
+.view-ad-layout.full-page-mode #viewAdMainImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Фото вписується, не обрізається */
+}
+
+/* Права частина на сторінці */
+.view-ad-layout.full-page-mode .view-ad-info {
+    padding: 30px;
+    background: var(--card);
+    overflow: visible; /* Прибираємо скрол, бо це сторінка */
+    max-height: none;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .view-ad-layout.full-page-mode {
+        grid-template-columns: 1fr;
+    }
+    .main-img-wrapper {
+        height: 300px;
+    }
+}
+/* Сердечко на картці оголошення */
+.ad-favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white; /* Колір контуру */
+    transition: all 0.2s ease;
+    z-index: 5; /* Щоб було поверх фото */
+}
+
+.ad-favorite-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.ad-favorite-btn.active {
+    color: #E40C2B; /* Червоний колір активного */
+}
+
+.ad-favorite-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none; /* За замовчуванням пусте */
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.ad-favorite-btn.active svg {
+    fill: #E40C2B; /* Заливаємо червоним */
+    stroke: #E40C2B;
+}
+/* --- СТИЛІ ДЛЯ МОДАЛКИ ЗБЕРЕЖЕНИХ --- */
+
+/* Грід на 2 колонки */
+.favorites-grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Дві рівні колонки */
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+/* Адаптивність: на телефонах 1 колонка */
+@media (max-width: 700px) {
+    .favorites-grid-2-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Модифікація карток всередині модалки */
+.favorites-grid-2-col .ad-card {
+    border: 1px solid #4A5568;
+    box-shadow: none; /* Менше тіней всередині вікна */
+}
+
+.favorites-grid-2-col .ad-image {
+    height: 160px; /* Трохи менша висота фото */
+}
+
+.favorites-grid-2-col .ad-title {
+    font-size: 15px;
+}
+
+.favorites-grid-2-col .ad-price {
+    font-size: 18px;
+}
+
+/* Кнопка видалення (смітник) */
+.delete-fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(229, 62, 62, 0.9); /* Червоний фон */
+    border-radius: 50%;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: transform 0.2s;
+}
+
+.delete-fav-btn:hover {
+    transform: scale(1.1);
+    background: #c53030;
+}
+/* --- ОПТИМІЗАЦІЯ ВІКНА ПРОДАЖУ (SELL MODAL) --- */
+
+/* 1. Виправлення контейнера модалки */
+#sellModal .modal {
+    max-width: 650px;
+    width: 100%;
+    background-color: #1A202C; /* Темний фон */
+    border: 1px solid #2D3748;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    
+    /* Важливо для скролу */
+    max-height: 90vh; /* Максимальна висота - 90% екрану */
+    overflow-y: auto; /* Вертикальний скрол тільки якщо треба */
+    overflow-x: hidden; /* Прибираємо горизонтальний скрол */
+}
+
+/* 2. Стилізація скролбару (робимо його тонким і темним) */
+#sellModal .modal::-webkit-scrollbar {
+    width: 8px;
+}
+#sellModal .modal::-webkit-scrollbar-track {
+    background: #1A202C;
+}
+#sellModal .modal::-webkit-scrollbar-thumb {
+    background-color: #4A5568;
+    border-radius: 4px;
+}
+
+/* 3. Покращення полів вводу */
+#sellModal label {
+    color: #A0AEC0; /* Світло-сірий */
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+#sellModal .sp-input {
+    background-color: #2D3748; /* Світліший фон для контрасту */
+    border: 1px solid #4A5568;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box; /* Фікс горизонтального скролу */
+    transition: all 0.2s;
+}
+
+#sellModal .sp-input:focus {
+    border-color: #E40C2B;
+    background-color: #232936;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(228, 12, 43, 0.15);
+}
+
+/* Кастомна стрілочка для Select */
+#sellModal select.sp-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+/* 4. Зона завантаження фото (виглядає як зона, а не помилка) */
+#sellModal .upload-box {
+    border: 2px dashed #4A5568; /* Сіра рамка за замовчуванням */
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#sellModal .upload-box:hover {
+    border-color: #E40C2B; /* Червона тільки при наведенні */
+    background-color: rgba(228, 12, 43, 0.05);
+}
+
+#sellModal .upload-box span {
+    color: #A0AEC0;
+    font-weight: 500;
+}
+
+#sellModal .upload-box:hover span {
+    color: #E40C2B;
+}
+
+/* 5. Кнопка закриття */
+#sellModal .close-btn-abs {
+    top: 25px;
+    right: 25px;
+    color: #A0AEC0;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+#sellModal .close-btn-abs:hover {
+    color: #fff;
+}
+/* --- НОВИЙ ДИЗАЙН: НОМЕР ТА VIN (PILL STYLE) --- */
+
+.identifiers-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; /* Дозволяє перенос на новий рядок, якщо не влазить */
+    width: 100%;
+}
+
+/* --- НОМЕРНИЙ ЗНАК (Точна копія) --- */
+
+.plate-box {
+    flex-shrink: 0; /* Забороняє стискати номер */
+    min-width: min-content; /* Ширина завжди по контенту */
+    display: inline-flex;
+    height: 34px;               /* Оптимальна висота */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;         /* Акуратне закруглення */
+    overflow: hidden;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.plate-flag {
+    width: 30px;                /* Ширина смужки */
+    background: linear-gradient(to bottom, #0057B8 50%, #FFD700 50%); /* Прапор України */
+    position: relative;
+    flex-shrink: 0;
+    border-right: 1px solid #ccc;
+}
+
+/* Текст UA */
+.plate-flag::after {
+    content: 'UA';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+}
+
+.plate-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;             
+    color: #1A202C;             /* Чорний текст */
+    font-family: monospace, sans-serif; /* Моноширинний шрифт для схожості */
+    font-weight: 700;           
+    font-size: 18px;            
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* --- VIN КОД (Темна пігулка) --- */
+
+.vin-box {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    background-color: #2D3748; /* Темно-сірий фон */
+    border-radius: 6px; 
+    padding: 0 12px;
+    gap: 8px;
+    color: #A0AEC0; /* Сірий текст */
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Зелена галочка */
+.vin-box svg {
+    color: #38A169; /* Зелений колір */
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* Сам код */
+.vin-text {
+    font-family: monospace; 
+    letter-spacing: 0.5px;
+    color: #E2E8F0; /* Світліший текст для самого коду */
+}
+/* --- НОВИЙ ДИЗАЙН ДЕТАЛЕЙ ОГОЛОШЕННЯ (RIA STYLE) --- */
+
+/* 1. Заголовок і Ціна */
+.auto-header-block {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+}
+
+.auto-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.auto-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: #38A169; /* Зелений колір ціни */
+    margin-bottom: 10px;
+}
+
+.auto-meta-line {
+    display: flex;
+    gap: 15px;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.auto-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auto-meta-item svg {
+    color: var(--muted);
+}
+
+/* 2. Сітка характеристик (Як на скріншоті 1) */
+.auto-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Дві колонки */
+    gap: 20px 40px; /* Відступи */
+    margin-bottom: 30px;
+}
+
+.spec-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-label {
+    font-size: 13px;
+    color: #A0AEC0; /* Світло-сірий колір заголовка */
+    margin-bottom: 4px;
+}
+
+.spec-value {
+    font-size: 15px;
+    color: #E2E8F0; /* Білий колір значення */
+    font-weight: 500;
+}
+
+/* 3. Списки комплектації (Як на скріншоті 3) */
+.equipment-section {
+    margin-top: 30px;
+}
+
+.equipment-group {
+    margin-bottom: 20px;
+}
+
+.equipment-title {
+    font-size: 16px;
+    color: var(--accent); /* Червоний або інший акцент */
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.equipment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+}
+
+.equipment-item {
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    width: 45%; /* По два в рядок */
+}
+
+.equipment-item::before {
+    content: '•';
+    color: var(--muted);
+    margin-right: 8px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* 4. Опис */
+.seller-description-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+}
+
+/* Адаптивність */
+@media (max-width: 600px) {
+    .auto-specs-grid { grid-template-columns: 1fr; } /* Одна колонка на мобільному */
+    .equipment-item { width: 100%; }
+}
+/* Стилі для чекбоксів у формі */
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+}
+.checkbox-item input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+}
+/* --- RIA-STYLE LAYOUT (Оновлений) --- */
+
+/* Головний контейнер */
+.ria-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px; /* Фото гнучке, сайдбар фіксований */
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Ліва колонка (Галерея) */
+.ria-gallery-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ria-main-image {
+    width: 100%;
+    /* Співвідношення сторін 4:3 або 16:10 */
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #000;
+}
+
+.ria-thumbnails {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.ria-thumbnails img {
+    width: 100px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.ria-thumbnails img:hover, .ria-thumbnails img.active {
+    opacity: 1;
+    border: 2px solid var(--accent);
+}
+
+/* Права колонка (Інфо + Продавець) */
+.ria-sidebar-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Заголовок і Ціна */
+.ria-title-block h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.ria-price-block {
+    margin-bottom: 15px;
+}
+
+.ria-price-usd {
+    font-size: 28px;
+    font-weight: 700;
+    color: #38A169; /* Зелений */
+}
+
+.ria-price-uah {
+    font-size: 14px;
+    color: var(--muted);
+    margin-left: 8px;
+    font-weight: 400;
+}
+
+/* Характеристики в ряд */
+.ria-specs-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ria-spec-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ria-spec-item svg {
+    color: var(--muted);
+    width: 16px;
+    height: 16px;
+}
+
+/* Блок Продавця (Картка) */
+.ria-seller-card {
+    background: #EAFBF3; /* Світло-зелений фон (як на скріншоті) */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #C6F6D5;
+    color: #1A202C; /* Темний текст */
+}
+
+/* Для темної теми робимо фон темнішим */
+body[data-theme='dark'] .ria-seller-card, 
+body /* Якщо у вас завжди темна тема */ .ria-seller-card {
+    background: #1C2A24; /* Темно-зелений */
+    border-color: #276749;
+    color: #E2E8F0;
+}
+
+.seller-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.seller-avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+}
+.seller-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+.seller-name-box {
+    display: flex;
+    flex-direction: column;
+}
+.seller-role { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.seller-name { font-weight: 700; font-size: 15px; }
+
+/* Кнопки зв'язку */
+.contact-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+}
+
+.btn-green {
+    background: #38A169;
+    color: white;
+    border: none;
+}
+.btn-green:hover { background: #2F855A; }
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+/* Теги (Торг, Перша реєстрація) */
+.ria-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ria-tag {
+    background: #2D3748;
+    color: #A0AEC0;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid #4A5568;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .ria-layout {
+        grid-template-columns: 1fr; /* Одна колонка */
+    }
+    .ria-sidebar-column {
+        order: 2; /* Інфо під фото */
+    }
+    .ria-gallery-column {
+        order: 1;
+    }
+}
+/* --- Аналітика ціни --- */
+.price-analytics-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid var(--border);
+}
+.price-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.price-badge.good { background: rgba(56, 161, 105, 0.2); color: #48BB78; } /* Зелений */
+.price-badge.fair { background: rgba(236, 201, 75, 0.2); color: #ECC94B; } /* Жовтий */
+.price-badge.high { background: rgba(229, 62, 62, 0.2); color: #F56565; } /* Червоний */
+
+.price-text { font-size: 13px; color: var(--muted); margin: 0 0 8px 0; }
+.price-bar-container { height: 6px; background: #4A5568; border-radius: 3px; overflow: hidden; position: relative; }
+.price-bar-fill { height: 100%; width: 50%; background: var(--text); position: absolute; left: 0; transition: width 0.5s; }
+
+/* --- Lightbox (Галерея) --- */
+.lightbox-modal {
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex; justify-content: center; align-items: center;
+}
+.lightbox-content {
+    max-width: 90%; max-height: 85vh;
+    object-fit: contain;
+    animation: zoom 0.3s;
+}
+.lightbox-close {
+    position: absolute; top: 20px; right: 35px;
+    color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1003;
+}
+.prev, .next {
+    cursor: pointer; position: absolute; top: 50%; width: auto; padding: 16px;
+    margin-top: -50px; color: white; font-weight: bold; font-size: 30px;
+    transition: 0.6s ease; user-select: none; z-index: 1003;
+}
+.next { right: 20px; border-radius: 3px 0 0 3px; }
+.prev { left: 20px; border-radius: 0 3px 3px 0; }
+.prev:hover, .next:hover { background-color: rgba(228, 12, 43, 0.8); }
+
+@keyframes zoom { from {transform:scale(0)} to {transform:scale(1)} }
+/* --- RIA-STYLE LAYOUT (Оновлений під скріншоти) --- */
+
+/* Головний контейнер */
+.ria-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px; /* Фото гнучке, сайдбар фіксований 340px */
+    gap: 30px;
+    margin-bottom: 30px;
+    align-items: start;
+}
+
+/* Ліва колонка (Галерея + Опис + Характеристики) */
+.ria-gallery-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ria-main-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #000;
+    cursor: zoom-in;
+}
+
+.ria-thumbnails {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.ria-thumbnails img {
+    width: 100px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s, border-color 0.2s;
+    border: 2px solid transparent;
+}
+.ria-thumbnails img:hover, .ria-thumbnails img.active {
+    opacity: 1;
+    border-color: var(--accent);
+}
+
+/* Рядок іконок під фото (Пробіг, Коробка, Паливо, Місто) */
+.ria-specs-line {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 рівні колонки */
+    gap: 10px;
+    background: var(--card);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.ria-spec-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.ria-spec-item svg {
+    color: var(--muted);
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+}
+
+/* Права колонка (Сайдбар: Ціна, Продавець) */
+.ria-sidebar-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 90px; /* Прилипає при скролі */
+}
+
+/* Заголовок і Ціна */
+.ria-title-block h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.ria-sub-title {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.ria-price-block {
+    margin-bottom: 20px;
+}
+
+.ria-price-usd {
+    font-size: 32px; /* Великий шрифт як на скріні */
+    font-weight: 700;
+    color: #38A169; /* Зелений колір AUTO.RIA */
+    display: block;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.ria-price-uah {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 400;
+}
+
+/* Блок Продавця */
+.ria-seller-card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.seller-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.seller-avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.seller-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+.seller-name-box {
+    display: flex;
+    flex-direction: column;
+}
+.seller-role { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.seller-name { font-weight: 700; font-size: 16px; color: var(--text); }
+
+/* Кнопки зв'язку */
+.contact-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    border: none;
+}
+
+.btn-green {
+    background: #38A169; /* Зелений */
+    color: white;
+}
+.btn-green:hover { background: #2F855A; transform: translateY(-1px); }
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 500;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+/* Детальні характеристики (сітка параметрів) */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.detail-group h4 {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.detail-item {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.detail-label { color: var(--muted); }
+.detail-val { color: var(--text); font-weight: 600; margin-left: 5px; }
+
+/* VIN і Номер */
+.identifiers-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.plate-box {
+    display: inline-flex;
+    height: 28px;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    align-items: center;
+    font-weight: 700;
+    color: black;
+    font-family: monospace;
+    border: 1px solid #ccc;
+}
+.plate-flag { width: 20px; height: 100%; background: linear-gradient(to bottom, #0057B8 50%, #FFD700 50%); margin-right: 5px; }
+.plate-number { padding-right: 8px; letter-spacing: 1px; font-size: 14px;}
+
+.vin-box {
+    display: inline-flex;
+    height: 28px;
+    align-items: center;
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 10px;
+    font-size: 13px;
+    color: var(--muted);
+    gap: 5px;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .ria-layout {
+        grid-template-columns: 1fr; /* Одна колонка */
+    }
+    /* На мобільному спочатку заголовок і ціна, потім фото */
+    .ria-sidebar-column { order: 1; position: static; gap: 10px; }
+    .ria-gallery-column { order: 2; }
+    
+    .ria-seller-card { margin-top: 20px; } /* Продавець внизу на мобільному */
+    
+    /* Ховаємо блок продавця нагорі, показуємо внизу */
+    .desktop-only-sidebar { display: none; }
+}
+/* --- ДОДАТОК ДЛЯ MARKET-DETAIL --- */
+
+/* 1. Аналітика ціни */
+.price-analytics-box {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid var(--border);
+}
+.price-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.price-badge.good { background: rgba(56, 161, 105, 0.2); color: #48BB78; border: 1px solid #48BB78; }
+.price-badge.fair { background: rgba(236, 201, 75, 0.2); color: #ECC94B; border: 1px solid #ECC94B; }
+.price-badge.high { background: rgba(229, 62, 62, 0.2); color: #F56565; border: 1px solid #F56565; }
+
+.price-text { font-size: 13px; color: var(--muted); margin: 0 0 8px 0; }
+.price-bar-container { height: 6px; background: #4A5568; border-radius: 3px; overflow: hidden; position: relative; }
+.price-bar-fill { height: 100%; width: 50%; background: var(--text); position: absolute; left: 0; transition: width 0.5s; }
+
+/* 2. Lightbox (Галерея) */
+.lightbox-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex; justify-content: center; align-items: center;
+}
+.lightbox-content {
+    max-width: 90%; max-height: 90vh;
+    object-fit: contain;
+    animation: zoom 0.3s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.lightbox-close {
+    position: absolute; top: 20px; right: 30px;
+    color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 10001;
+}
+.prev, .next {
+    cursor: pointer; position: absolute; top: 50%; width: auto; padding: 20px;
+    margin-top: -50px; color: white; font-weight: bold; font-size: 30px;
+    transition: 0.3s ease; user-select: none; z-index: 10001;
+    background: rgba(0,0,0,0.3); border-radius: 50%;
+}
+.next { right: 20px; }
+.prev { left: 20px; }
+.prev:hover, .next:hover { background-color: rgba(228, 12, 43, 0.8); }
+
+@keyframes zoom { from {transform:scale(0.8); opacity: 0;} to {transform:scale(1); opacity: 1;} }
+
+/* 3. Стиль карток для "Схожих" (щоб вони виглядали як в каталозі) */
+.similar-ad-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    transition: transform 0.2s; cursor: pointer; display: flex; flex-direction: column;
+}
+.similar-ad-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+.similar-ad-card img { width: 100%; height: 180px; object-fit: cover; }
+.similar-ad-content { padding: 15px; }
+.similar-ad-price { font-size: 18px; font-weight: 700; color: var(--success); margin-bottom: 5px; }
+.similar-ad-title { font-size: 15px; font-weight: 600; color: var(--text); }

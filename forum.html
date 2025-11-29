@@ -27,6 +27,8 @@
       
       <a href="news.html" class="nav-link-forum">Новини</a>
 
+      <a href="market.html" class="nav-link-forum">Автобазар</a>
+
     </div>
     
     <div class="controls">
@@ -71,49 +73,91 @@
     </div>
 </header>
   
-  <div class="container">
+<div class="container">
     <main>
-    <div style="max-width: 1200px; margin: 0 auto;">
         
-        <h2 style="margin-bottom: 20px;">Форум спільноти</h2>
-
-        <div class="forum-actions-bar">
-             </div>
-
-        <div id="newPostContainer" class="forum-form-container" style="display: none; margin-bottom: 30px; background: #2D3748; padding: 20px; border-radius: 8px;">
-            <h3 style="margin-top: 0;">Створити нову тему</h3>
-            <form id="newPostForm" class="form-content">
-              <div class="form-group">
-                <input id="postTitle" type="text" placeholder="Заголовок теми" required style="background: #1A202C; border: 1px solid #4A5568;" />
-              </div>
-              <div class="form-group">
-                <textarea id="postContent" placeholder="Напишіть повідомлення..." rows="4" required style="background: #1A202C; border: 1px solid #4A5568;"></textarea>
-              </div>
-              <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                  <button class="btn primary" type="submit">Опублікувати тему</button>
-              </div>
-            </form>
-        </div>
-        
-        <div id="loginToPostMessage" class="empty-state" style="display: none; margin-bottom: 20px; border: 1px dashed #4A5568;">
-            <p>Хочете долучитися до обговорення? <a href="#" id="loginLink" style="color: #E40C2B;">Увійдіть</a>, щоб створити тему.</p>
+        <div class="forum-header-section">
+            <h2 style="margin: 0;">Форум спільноти</h2>
+            <button id="openCreateTopicModalBtn" class="btn primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Створити тему
+            </button>
         </div>
 
-        <div class="forum-table-wrapper">
-            <div class="forum-header-row">
-                <div></div> <div>Тема / Автор</div>
-                <div style="text-align: center;">Статистика</div>
-                <div style="text-align: right;">Створено</div>
+        <div class="forum-layout">
+            <aside class="forum-sidebar">
+                <div class="sidebar-block">
+                    <h3>Категорії марок</h3>
+                    <div class="sidebar-scroll-area" id="brandsFilterList">
+                        <div class="sidebar-item active" data-brand-id="">Всі марки</div>
+                        </div>
+                </div>
+            </aside>
+
+            <div class="forum-content">
+                
+                <div class="forum-tabs">
+                    <button class="tab-btn active" data-tab="latest">Останні</button>
+                    <button class="tab-btn" data-tab="popular">Популярні</button>
+                    <button class="tab-btn" data-tab="my">Мої пости</button>
+                </div>
+
+                <div class="forum-header-row">
+                    <div></div> 
+                    <div>Тема / Автор</div>
+                    <div style="text-align: center;">Статистика</div>
+                    <div style="text-align: right;">Створено</div>
+                </div>
+
+                <div id="topicsListContainer" class="topics-list-container">
+                    <p style="padding: 20px; color: #A0AEC0;">Завантаження тем...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<div id="createTopicModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Нова тема</h2>
+            <button id="closeCreateTopicModalBtn" class="close-btn-abs">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form id="newPostForm" class="form-content" style="margin-top: 0;">
+            
+            <div class="form-group">
+                <label for="postTitle">Заголовок теми</label>
+                <input id="postTitle" type="text" placeholder="Коротко про суть обговорення..." class="sp-input" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="postBrandSelect">Марка авто (необов'язково)</label>
+                <select id="postBrandSelect" class="sp-input">
+                    <option value="">Загальна тема (без прив'язки до марки)</option>
+                    </select>
             </div>
 
-            <div id="topicsListContainer" class="topics-list-container">
-                <p style="padding: 20px; color: #A0AEC0;">Завантаження тем...</p>
+            <div class="form-group">
+                <label for="postContent">Повідомлення</label>
+                <textarea id="postContent" rows="5" placeholder="Опишіть ваше питання або поділіться досвідом..." class="sp-input" required></textarea>
             </div>
-        </div>
-
+            
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button type="button" id="cancelCreateTopicBtn" class="btn secondary" style="flex: 1; border-radius: 8px;">
+                    Скасувати
+                </button>
+                
+                <button class="btn sp-btn-primary" type="submit" style="flex: 2; margin-top: 0;">
+                    Опублікувати тему
+                </button>
+            </div>
+        </form>
     </div>
-</main>
-  </div>
+</div>
 
   <div id="infoModal" class="modal-root" style="display:none">
   <div class="modal-back" id="infoModalBack"></div>
