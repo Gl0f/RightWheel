@@ -596,7 +596,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     generationId: sCar.generation_id,
                     generationName: sCar.generation_name || `${sCar.year_start}-${sCar.year_end || 'н.ч.'}`
                 });
-                return `<a href="car.html?${params.toString()}" class="similar-car-card"><div class="similar-car-title">${sCar.make_name} ${sCar.model_name}</div><div class="similar-car-details"><span>${sCar.year}</span><span>${sCar.name}</span></div></a>`;
+                
+                // Картинка або заглушка
+                const imgUrl = sCar.image_url || `https://via.placeholder.com/100x60?text=${encodeURIComponent(sCar.model_name)}`;
+
+                return `
+                <a href="car.html?${params.toString()}" class="similar-car-card">
+                    <div class="similar-car-image">
+                        <img src="${imgUrl}" alt="${sCar.make_name} ${sCar.model_name}">
+                    </div>
+                    <div class="similar-car-info">
+                        <div class="similar-car-title">${sCar.make_name} ${sCar.model_name}</div>
+                        <div class="similar-car-meta">
+                            <span class="similar-year">${sCar.year}</span>
+                            <span class="similar-trim">${sCar.name}</span>
+                        </div>
+                    </div>
+                </a>`;
             }).join('');
             container.innerHTML = `<h4>Схожі автомобілі</h4><div class="similar-cars-grid">${cardsHTML}</div>`;
         } catch (error) { container.innerHTML = ''; }

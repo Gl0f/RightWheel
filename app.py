@@ -492,7 +492,7 @@ def get_similar_trims(trim_id):
     current_year = current_trim[0]['year']
 
     query = """
-        SELECT t.id, t.year, t.name, t.engine,
+        SELECT t.id, t.year, t.name, t.engine, t.image_url, 
                m.name as model_name, b.name as make_name,
                m.id as model_id, b.id as brand_id, g.id as generation_id,
                g.name as generation_name, g.year_start, g.year_end

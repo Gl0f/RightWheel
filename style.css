@@ -362,14 +362,104 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 .empty-state h3 { margin: 0 0 10px 0; color: var(--muted); }
 .empty-state p { margin: 0; color: var(--muted); }
 
-.similar-cars-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); }
-.similar-cars-section h4 { margin: 0 0 15px 0; color: var(--muted); font-weight: 600; }
-.similar-cars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-.similar-car-card { background: #2a2a2a; padding: 10px; border-radius: var(--radius); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; }
-.similar-car-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
-.similar-car-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.similar-car-details { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
-.similar-car-price { font-weight: 600; color: var(--success); margin-top: 5px; font-size: 14px; }
+.similar-cars-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.similar-cars-section h4 {
+    margin: 0 0 15px 0;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.similar-cars-grid {
+    display: grid;
+    /* Адаптивна сітка: 1 колонка на мобільних, 2 на більших екранах */
+    grid-template-columns: 1fr; 
+    gap: 12px;
+}
+
+/* Картка */
+.similar-car-card {
+    display: flex; /* Розміщуємо фото і текст в рядок */
+    align-items: center;
+    gap: 12px;
+    
+    background-color: var(--card); /* #2D3748 */
+    border: 1px solid var(--border); /* #4A5568 */
+    border-radius: 8px;
+    padding: 10px;
+    
+    text-decoration: none; /* Прибираємо підкреслення посилань */
+    transition: all 0.2s ease;
+}
+
+.similar-car-card:hover {
+    border-color: var(--accent); /* Червона рамка при наведенні */
+    transform: translateX(5px); /* Легкий зсув вправо */
+    background-color: #353f50; /* Трохи світліший фон */
+}
+
+/* Картинка */
+.similar-car-image {
+    width: 80px;
+    height: 55px;
+    flex-shrink: 0; /* Щоб фото не сплющувалось */
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.similar-car-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Інформація */
+.similar-car-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; /* Щоб текст не вилазив */
+}
+
+.similar-car-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text); /* Світлий текст (#E2E8F0) */
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.similar-car-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted); /* Сірий текст */
+}
+
+.similar-year {
+    background-color: rgba(255,255,255,0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.similar-trim {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .comparison-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); color: var(--text); z-index: 999; display: flex; justify-content: center; align-items: center; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); transform: translateY(100%); transition: transform 0.3s ease-in-out; border-top: 1px solid var(--border); }
 .comparison-bar.visible { transform: translateY(0); }
