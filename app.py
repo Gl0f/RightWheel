@@ -81,7 +81,8 @@ def login_user():
     if not username or not password:
         return jsonify({"error": "Потрібно ввести логін та пароль"}), 400
 
-    user_data, _ = fetch_query("SELECT id, password_hash FROM users WHERE username = %s", (username,))
+    # ОНОВЛЕНО: Дістаємо також avatar_url
+    user_data, _ = fetch_query("SELECT id, password_hash, avatar_url FROM users WHERE username = %s", (username,))
     
     if not user_data:
         return jsonify({"error": "Невірний логін або пароль"}), 401
@@ -90,7 +91,12 @@ def login_user():
 
     if check_password_hash(user['password_hash'], password):
         access_token = create_access_token(identity=str(user['id']))
-        return jsonify(access_token=access_token)
+        # ОНОВЛЕНО: Повертаємо avatar_url
+        return jsonify(
+            access_token=access_token, 
+            username=username,
+            avatar_url=user['avatar_url'] 
+        )
     else:
         return jsonify({"error": "Невірний логін або пароль"}), 401
 
@@ -1280,7 +1286,15 @@ def google_login():
         conn.close()
 
         access_token = create_access_token(identity=str(user_id))
-        return jsonify(access_token=access_token, username=username)
+        # ОНОВЛЕНО: Повертаємо avatar_url
+        # (google_picture ми отримали вище в коді, або current_avatar)
+        final_avatar = current_avatar if 'current_avatar' in locals() and current_avatar else google_picture
+
+        return jsonify(
+            access_token=access_token, 
+            username=username,
+            avatar_url=final_avatar
+        )
 
     except ValueError as e:
         print(f"Token verification failed: {e}")

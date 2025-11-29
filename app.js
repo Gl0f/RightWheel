@@ -221,22 +221,24 @@ async function handleLogin(e) {
 
         const data = await response.json();
 
+        // Всередині handleLogin, після отримання data:
+
         if (!response.ok) {
-            // Якщо сервер повернув помилку (401, 400), показуємо її
             throw new Error(data.error || 'Невідома помилка');
         }
 
-    
         localStorage.setItem('RightWheel_access_token', data.access_token);
         localStorage.setItem('RightWheel_loggedInUser', username);
-        
-        // Ховаємо модалку перед перезавантаженням
-        if (elements.loginModal) elements.loginModal.style.display = 'none';
 
-        // === ОНОВЛЕНО ===
-        // Примусово перезавантажуємо сторінку.
-        // Це гарантує, що всі елементи (напр., кнопки "Обране")
-        // завантажаться з урахуванням нового статусу логіну.
+        // --- ДОДАНО ---
+        if (data.avatar_url) {
+            localStorage.setItem('RightWheel_userAvatar', data.avatar_url);
+        } else {
+            localStorage.removeItem('RightWheel_userAvatar');
+        }
+        // --------------
+
+        if (elements.loginModal) elements.loginModal.style.display = 'none';
         window.location.reload();
 
     } catch (error) {
@@ -348,28 +350,19 @@ function checkLoginStatus() {
         // 4. Оновлюємо ім'я в хедері
         if (elements.headerUsername) elements.headerUsername.textContent = username || 'Користувач';
 
-        // 5. Оновлюємо аватарку в хедері (Швидкий запит або локально)
-        // Можна спробувати підтягнути аватарку, якщо вона є десь в localStorage,
-        // або зробити запит на /api/me/account.
-        // Поки що поставимо заглушку з ініціалами:
+        // 5. Оновлюємо аватарку в хедері
         if (elements.headerAvatarImg) {
-             const initial = (username || 'U').charAt(0).toUpperCase();
-             // Якщо хочете реальну аватарку, треба робити fetch тут, але поки заглушка:
-             // Краще викликати окрему функцію updateHeaderAvatar()
-             elements.headerAvatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=E40C2B&color=fff&size=64&bold=true`;
-             
-             // СПРОБУЄМО ПІДТЯГНУТИ РЕАЛЬНУ АВАТАРКУ
-             fetch('http://127.0.0.1:5000/api/me/account', {
-                headers: { 'Authorization': `Bearer ${token}` }
-             })
-             .then(res => res.json())
-             .then(data => {
-                 if(data.user && data.user.avatar_url) {
-                     const url = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `http://127.0.0.1:5000${data.user.avatar_url}`;
-                     elements.headerAvatarImg.src = url;
-                 }
-             })
-             .catch(e => console.log('Avatar load error', e));
+            const savedAvatar = localStorage.getItem('RightWheel_userAvatar');
+            
+            if (savedAvatar && savedAvatar !== 'null') {
+                // Якщо є збережена аватарка - показуємо її
+                const url = savedAvatar.startsWith('http') ? savedAvatar : `http://127.0.0.1:5000${savedAvatar}`;
+                elements.headerAvatarImg.src = url;
+            } else {
+                // Якщо немає - генеруємо літеру
+                const initial = (username || 'U').charAt(0).toUpperCase();
+                elements.headerAvatarImg.src = `https://ui-avatars.com/api/?name=${initial}&background=E40C2B&color=fff&size=64&bold=true`;
+            }
         }
 
     } else {
@@ -1209,6 +1202,11 @@ async function handleGoogleCredentialResponse(response) {
             // Зберігаємо токен і логін
             localStorage.setItem('RightWheel_access_token', data.access_token);
             localStorage.setItem('RightWheel_loggedInUser', data.username);
+
+            // --- ДОДАНО ---
+            if (data.avatar_url) {
+                localStorage.setItem('RightWheel_userAvatar', data.avatar_url);
+            }
             
             showInfoModal('Успіх', 'Вхід через Google виконано успішно!', 'success');
             
@@ -1295,6 +1293,33 @@ async function init() {
         elements.recentlyViewedCars?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
 
+// --- ЛОГІКА МЕНЮ КОРИСТУВАЧА (ВСТАВИТИ ТУТ, ДО RETURN) ---
+    if (elements.userMenuTrigger) {
+        // Видаляємо старі, щоб не дублювати
+        const newTrigger = elements.userMenuTrigger.cloneNode(true);
+        elements.userMenuTrigger.parentNode.replaceChild(newTrigger, elements.userMenuTrigger);
+        elements.userMenuTrigger = newTrigger; // Оновлюємо посилання
+
+        elements.userMenuTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            elements.userMenuContainer.classList.toggle('active');
+        });
+    }
+
+    // Закриття при кліку поза меню
+    document.addEventListener('click', (e) => {
+        if (elements.userMenuContainer && elements.userMenuContainer.classList.contains('active')) {
+            if (!elements.userMenuContainer.contains(e.target)) {
+                elements.userMenuContainer.classList.remove('active');
+            }
+        }
+    });
+
+    if (elements.logoutBtnDropdown) {
+        elements.logoutBtnDropdown.addEventListener('click', handleLogout);
+    }
+    // -----------------------------------------------------------
+
 
     // === 2. ЛОГІКА ТІЛЬКИ ДЛЯ main.html ===
     
@@ -1310,42 +1335,7 @@ async function init() {
     // Запускаємо логіку пошуку
     await initAdvancedSearch(); 
 
-    // --- User Dropdown Logic (ВИПРАВЛЕНО) ---
     
-    // 1. Знаходимо елементи заново (на випадок, якщо змінні зверху старі)
-    const menuTrigger = document.getElementById('userMenuTrigger');
-    const menuContainer = document.getElementById('userMenuContainer');
-    const logoutDropdownBtn = document.getElementById('logoutBtnDropdown');
-
-    if (menuTrigger && menuContainer) {
-        // Видаляємо старі слухачі (клонуванням), щоб не дублювати кліки
-        const newTrigger = menuTrigger.cloneNode(true);
-        menuTrigger.parentNode.replaceChild(newTrigger, menuTrigger);
-
-        // Додаємо новий слухач
-        newTrigger.addEventListener('click', (e) => {
-            e.stopPropagation(); // Зупиняємо вспливання
-            console.log("Клік по меню профілю!"); // Перевірка в консолі
-            menuContainer.classList.toggle('active');
-        });
-
-        // Закриття при кліку поза меню
-        document.addEventListener('click', (e) => {
-            if (menuContainer.classList.contains('active')) {
-                // Якщо клікнули не по меню і не по кнопці
-                if (!menuContainer.contains(e.target)) {
-                    menuContainer.classList.remove('active');
-                }
-            }
-        });
-    } else {
-        console.error("Елементи меню профілю не знайдені в DOM!");
-    }
-
-    // Слухач для кнопки виходу в меню
-    if (logoutDropdownBtn) {
-        logoutDropdownBtn.addEventListener('click', handleLogout);
-    }
 
     // Додаємо слухачі, специфічні для main.html
     elements.logoHomeLink?.addEventListener('click', () => window.location.href = 'main.html'); 

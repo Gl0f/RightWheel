@@ -219,6 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.avatarImg.src = `http://127.0.0.1:5000${data.avatar_url}?t=${new Date().getTime()}`;
                 }
 
+                // --- ДОДАНО: Оновлюємо пам'ять і хедер ---
+                localStorage.setItem('RightWheel_userAvatar', data.avatar_url);
+                const headerImg = document.getElementById('headerAvatarImg');
+                if(headerImg) headerImg.src = `http://127.0.0.1:5000${data.avatar_url}`;
+                // -----------------------------------------
+
             } catch (error) {
                 showInfoModal('Помилка', error.message, 'error');
             } finally {
