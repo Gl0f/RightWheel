@@ -50,7 +50,7 @@ def allowed_file(filename):
 
 # --- ЗАМІНИТИ СТАРЕ НАЛАШТУВАННЯ CORS НА ЦЕ ---
 CORS(app, 
-     resources={r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500"]}}, 
+     resources={r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500","https://rightwheel.onrender.com"]}}, 
      allow_headers=["Content-Type", "Authorization"], 
      supports_credentials=True)
 # ---------------------------------------------
