@@ -21,6 +21,8 @@ import re
 # --- ІМПОРТИ ДЛЯ НОВИН ---
 import requests 
 import trafilatura # <--- ВИКОРИСТОВУЄМО ЦЮ БІБЛІОТЕКУ ЗАМІСТЬ NEWSPAPER
+import base64
+import hashlib
 # -------------------------
 
 app = Flask(__name__)
@@ -55,9 +57,13 @@ CORS(app,
 # ... далі твій код ...
 app.json.ensure_ascii = False
 app.config['JSON_AS_ASCII'] = False
+# === ДОДАЙТЕ ЦІ РЯДКИ ===
+# Налаштування секретного ключа для JWT
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY") 
 
-app.config["JWT_SECRET_KEY"] = "vova-secret-key-for-project-2025"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+# Також бажано додати загальний ключ Flask (для сесій)
+app.config["SECRET_KEY"] = os.getenv("JWT_SECRET_KEY") 
+# ========================
 
 jwt = JWTManager(app)
 
@@ -68,6 +74,25 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 # Наприклад:
 # DATABASE_URL = "postgresql://postgres:mysecretpassword@localhost:5432/rightwheel_db"
+# --- НАЛАШТУВАННЯ LIQPAY ---
+LIQPAY_PUBLIC_KEY = os.getenv('LIQPAY_PUBLIC_KEY')
+LIQPAY_PRIVATE_KEY = os.getenv('LIQPAY_PRIVATE_KEY')
+
+# Перевірка (опціонально, щоб знати, якщо забули додати в .env)
+if not LIQPAY_PUBLIC_KEY or not LIQPAY_PRIVATE_KEY:
+    print("УВАГА: Ключі LiqPay не знайдені в .env файлі!")
+# ---------------------------
+
+# Допоміжні функції для LiqPay (щоб не тягнути бібліотеку)
+def liqpay_encode(params):
+    json_str = json.dumps(params)
+    data = base64.b64encode(json_str.encode('utf-8')).decode('utf-8')
+    return data
+
+def liqpay_sign(data, private_key):
+    sign_str = private_key + data + private_key
+    signature = base64.b64encode(hashlib.sha1(sign_str.encode('utf-8')).digest()).decode('utf-8')
+    return signature
 
 def get_db_connection():
     """Створює з'єднання з базою даних."""
@@ -1483,7 +1508,7 @@ def upload_avatar():
 
 @app.route('/api/market/ads', methods=['GET'])
 def get_market_ads():
-    # Отримуємо всі параметри фільтрації
+    # Отримуємо всі параметри фільтрації з URL
     brand_id = request.args.get('brand_id')
     model_id = request.args.get('model_id')
     price_min = request.args.get('price_min')
@@ -1493,12 +1518,14 @@ def get_market_ads():
     mileage_max = request.args.get('mileage_max')
     transmission = request.args.get('transmission')
     engine = request.args.get('engine')
-    body_type = request.args.get('body_type')
+    body_type = request.args.get('body_type')  # <-- Новий фільтр
     sort = request.args.get('sort', 'newest')
 
-    # === ОНОВЛЕНИЙ ЗАПИТ (ВИПРАВЛЕНО ФОТО) ===
-    # Ми змінили підзапит для image_url: ORDER BY is_main DESC, id ASC LIMIT 1
-    # Це означає: "Дай мені головне фото, а якщо його немає — дай найперше завантажене".
+    # === SQL ЗАПИТ ===
+    # 1. Вибираємо всі дані оголошення (l.*)
+    # 2. Підтягуємо назви бренду та моделі (JOIN brands, models)
+    # 3. Підтягуємо дані продавця (JOIN users)
+    # 4. Підзапит для фото: бере головне (is_main=TRUE), або найперше завантажене, якщо головного немає.
     query = """
         SELECT l.*, 
                b.name as brand_name, 
@@ -1515,34 +1542,44 @@ def get_market_ads():
         JOIN brands b ON l.brand_id = b.id
         JOIN models m ON l.model_id = m.id
         JOIN users u ON l.user_id = u.id
-        WHERE l.is_active = TRUE
+        WHERE l.is_active = TRUE AND l.is_paid = TRUE
     """
+    
     params = []
 
+    # --- ДИНАМІЧНІ ФІЛЬТРИ ---
     if brand_id:
         query += " AND l.brand_id = %s"
         params.append(brand_id)
+    
     if model_id: 
         query += " AND l.model_id = %s"
         params.append(model_id)
+        
     if price_min:
         query += " AND l.price >= %s"
         params.append(price_min)
+        
     if price_max:
         query += " AND l.price <= %s"
         params.append(price_max)
+        
     if year_min:
         query += " AND l.year >= %s"
         params.append(year_min)
+        
     if year_max:
         query += " AND l.year <= %s"
         params.append(year_max)
+        
     if mileage_max:
         query += " AND l.mileage <= %s"
         params.append(mileage_max)
+        
     if transmission:
         query += " AND l.transmission = %s"
         params.append(transmission)
+        
     if engine:
         query += " AND l.engine_type = %s"
         params.append(engine)
@@ -1551,6 +1588,7 @@ def get_market_ads():
         query += " AND l.body_type = %s"
         params.append(body_type)
 
+    # --- СОРТУВАННЯ ---
     if sort == 'cheaper':
         query += " ORDER BY l.price ASC"
     elif sort == 'expensive':
@@ -1558,8 +1596,11 @@ def get_market_ads():
     else:
         query += " ORDER BY l.created_at DESC"
 
+    # Виконуємо запит
     ads, error = fetch_query(query, tuple(params))
-    if error: return jsonify({"error": error}), 500
+    
+    if error:
+        return jsonify({"error": error}), 500
     
     return jsonify(ads)
 
@@ -1596,6 +1637,13 @@ def create_market_ad():
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+
+        # 1. ПЕРЕВІРКА ЛІМІТУ (Скільки вже є оголошень?)
+        cursor.execute("SELECT COUNT(*) FROM listings WHERE user_id = %s", (user_id,))
+        count = cursor.fetchone()[0]
+        
+        # Перші 2 - безкоштовно (True), далі - платно (False)
+        is_paid = True if count < 2 else False
         
         # ОНОВЛЕНИЙ INSERT
         cursor.execute("""
@@ -1603,15 +1651,17 @@ def create_market_ad():
                 user_id, brand_id, model_id, year, price, mileage, 
                 engine_type, transmission, location, phone, description,
                 license_plate, vin_code, color, engine_volume, equipment, drive,
-                body_type, fuel_consumption
+                body_type, fuel_consumption, 
+                is_paid, is_active
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             user_id, brand_id, model_id, year, price, mileage, 
             engine, transmission, location, phone, description, 
             license_plate, vin_code, color, engine_volume, equipment, drive,
-            body_type, fuel_consumption
+            body_type, fuel_consumption,
+            is_paid, True # Активне одразу, але фільтруватиметься по is_paid
         ))
         listing_id = cursor.fetchone()[0]
         
@@ -2202,6 +2252,65 @@ def fetch_user_ads(user_id):
         return jsonify({"error": error}), 500
         
     return jsonify(ads)
+
+@app.route('/api/payment/liqpay_data', methods=['POST'])
+@jwt_required()
+def get_liqpay_data():
+    data = request.get_json()
+    listing_id = data.get('listing_id')
+    amount = 100 # Вартість 100 грн
+    
+    # Параметри для LiqPay
+    params = {
+        'action': 'pay',
+        'amount': amount,
+        'currency': 'UAH',
+        'description': f'Розміщення авто (ID: {listing_id})',
+        'order_id': f'ad_pay_{listing_id}_{int(datetime.now().timestamp())}',
+        'version': '3',
+        'public_key': LIQPAY_PUBLIC_KEY,
+        'result_url': 'http://127.0.0.1:5500/market.html', # Куди повернути юзера після оплати
+        'server_url': 'http://YOUR_NGROK_URL/api/payment/callback' # Webhook (потрібен реальний IP або ngrok)
+    }
+    
+    # Кодуємо дані
+    data_encoded = liqpay_encode(params)
+    signature = liqpay_sign(data_encoded, LIQPAY_PRIVATE_KEY)
+    
+    return jsonify({
+        "data": data_encoded,
+        "signature": signature,
+        "url": "https://www.liqpay.ua/api/3/checkout"
+    })
+
+# Webhook (Тут LiqPay звітує про оплату)
+@app.route('/api/payment/callback', methods=['POST'])
+def payment_callback():
+    data = request.form.get('data')
+    signature = request.form.get('signature')
+    
+    # Перевірка підпису
+    expected_sign = liqpay_sign(data, LIQPAY_PRIVATE_KEY)
+    if signature != expected_sign:
+        return "Invalid signature", 400
+        
+    # Декодування даних
+    import base64
+    decoded_json = base64.b64decode(data).decode('utf-8')
+    payment_info = json.loads(decoded_json)
+    
+    if payment_info.get('status') == 'success':
+        # Витягуємо ID оголошення з order_id (ad_pay_123_timestamp)
+        order_id = payment_info.get('order_id')
+        listing_id = int(order_id.split('_')[2])
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE listings SET is_paid = TRUE WHERE id = %s", (listing_id,))
+        conn.commit()
+        conn.close()
+        
+    return "OK", 200
 
 # --- ЗАПУСК СЕРВЕРА ---
 if __name__ == '__main__':

@@ -522,9 +522,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
             const data = await res.json();
+            
             if (!res.ok) throw new Error(data.error);
-            alert('Оголошення додано!'); closeSellModal(); elements.sellForm.reset(); elements.photoPreview.innerHTML = ''; loadAds();
-        } catch (error) { alert(error.message); } finally { btn.textContent = 'Розмістити оголошення'; btn.disabled = false; }
+            
+            closeSellModal();
+            elements.sellForm.reset();
+            elements.photoPreview.innerHTML = '';
+
+            // --- ЛОГІКА ОПЛАТИ ---
+            if (data.status === 'payment_required') {
+                if(confirm(`Ліміт безкоштовних оголошень вичерпано. \nПерейти до оплати розміщення (100 грн)?`)) {
+                    // Отримуємо дані для LiqPay
+                    const payRes = await fetch('http://127.0.0.1:5000/api/payment/liqpay_data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ listing_id: data.listing_id })
+                    });
+                    const payData = await payRes.json();
+                    
+                    // Створюємо і відправляємо форму LiqPay динамічно
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = payData.url;
+                    
+                    const inputData = document.createElement('input');
+                    inputData.type = 'hidden';
+                    inputData.name = 'data';
+                    inputData.value = payData.data;
+                    
+                    const inputSign = document.createElement('input');
+                    inputSign.type = 'hidden';
+                    inputSign.name = 'signature';
+                    inputSign.value = payData.signature;
+                    
+                    form.appendChild(inputData);
+                    form.appendChild(inputSign);
+                    document.body.appendChild(form);
+                    form.submit(); // Перехід на LiqPay
+                }
+            } else {
+                // Безкоштовне розміщення
+                showInfoModal('Успіх', data.message, 'success');
+                loadAds();
+            }
+
+        } catch (error) { 
+            alert(error.message); 
+        } finally { 
+            btn.textContent = 'Розмістити оголошення'; 
+            btn.disabled = false; 
+        }
     });
     elements.openSellModalBtn.addEventListener('click', openSellModal);
     elements.closeSellModalBtn.addEventListener('click', closeSellModal);

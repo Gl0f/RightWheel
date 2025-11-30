@@ -530,12 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Перевіряємо, чи БУВ автомобіль у списку ДО кліку
         const wasCompared = state.comparisonList.includes(trimIdStr);
 
-        // Перевірка ліміту (якщо ми намагаємося додати новий)
-        if (!wasCompared && state.comparisonList.length >= 4) {
-            showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-            return; // Не даємо додати
-        }
-
         // Викликаємо глобальну функцію, яка оновить localStorage та нижній бар
         updateComparisonList(trimIdStr, !wasCompared);
 
