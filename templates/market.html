@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Автобазар — RightWheel</title>
+  <link rel="icon" href="https://e7.pngegg.com/pngimages/629/366/png-clipart-car-wheel-car-wheel.png" type="image/png" />
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+      /* Додаткові стилі для маркету */
+      .market-layout { display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
+      .market-sidebar { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid var(--border); height: fit-content; }
+      .ad-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform 0.2s; position: relative; }
+      .ad-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+      .ad-image { height: 180px; width: 100%; object-fit: cover; background: #000; }
+      .ad-content { padding: 15px; }
+      .ad-price { font-size: 20px; font-weight: 700; color: #38A169; margin-bottom: 5px; }
+      .ad-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+      .ad-meta { font-size: 13px; color: var(--muted); display: flex; gap: 10px; margin-bottom: 10px; }
+      .ad-location { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+      
+      .sell-btn-large {
+          background: linear-gradient(45deg, #E40C2B, #ff4b1f);
+          color: white; width: 100%; padding: 12px; border: none; border-radius: 8px;
+          font-weight: 700; cursor: pointer; text-transform: uppercase; margin-bottom: 20px;
+      }
+      .upload-box { border: 2px dashed var(--border); padding: 20px; text-align: center; cursor: pointer; margin-bottom: 15px; }
+      
+      @media (max-width: 900px) { .market-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="logo-nav">
+        <div class="logo"><a href="main.html" style="text-decoration: none; color: inherit;"><h1>Right Wheel</h1></a></div>
+        <a href="forum.html" class="nav-link-forum">Форум</a>
+        <a href="news.html" class="nav-link-forum">Новини</a>
+        <a href="market.html" class="nav-link-forum active-link">Автоплощадка</a>
+      </div>
+      <div class="controls">
+  
+      <a href="favorites.html" id="showFavoritesBtn" class="btn secondary" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="btn-text">Обране</span>
+      </a>
+
+      <button id="showLoginModalBtn" class="btn primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Увійти
+      </button>
+
+      <div id="userMenuContainer" class="user-menu-container" style="display: none;">
+          
+          <div id="userMenuTrigger" class="user-menu-trigger">
+              <span id="headerUsername" class="header-username">Користувач</span>
+              <div class="header-avatar">
+                  <img id="headerAvatarImg" src="" alt="Avatar">
+              </div>
+              <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+
+          <div id="userDropdown" class="user-dropdown">
+              <a href="account.html" class="dropdown-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Мій кабінет
+              </a>
+              <a href="comparison.html" class="dropdown-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6M12 8v11M6 16v3"/></svg>
+                  Список порівнянь
+              </a>
+              <div class="dropdown-divider"></div>
+              <button id="logoutBtnDropdown" class="dropdown-item danger-text">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Вийти
+              </button>
+          </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="container">
+    <main>
+        <div class="market-layout">
+            <aside>
+                <button id="openSellModalBtn" class="sell-btn-large">+ Продати авто</button>
+                
+                <button id="showMarketFavoritesBtn" class="btn secondary full-width" style="margin-bottom: 20px; border: 1px solid var(--accent); color: var(--accent);">
+                    ❤️ Збережені оголошення
+                </button>
+
+                <button id="openChatsModalBtn" class="btn secondary full-width" style="margin-bottom: 20px; border: 1px solid var(--text); position: relative;">
+                    💬 Мої повідомлення
+                    <span id="unreadBadge" class="notification-badge" style="display: none;">0</span>
+                </button>
+                
+                <div class="market-sidebar">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;">Фільтри</h3>
+                        <button id="resetFiltersBtn" style="background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline;">Скинути</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="sp-label">Марка</label>
+                        <select id="filterBrand" class="sp-input">
+                            <option value="">Всі марки</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Модель</label>
+                        <select id="filterModel" class="sp-input" disabled>
+                            <option value="">Оберіть марку...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Тип кузова</label>
+                        <select id="filterBodyType" class="sp-input">
+                            <option value="">Будь-який</option>
+                            <option value="Седан">Седан</option>
+                            <option value="Позашляховик">Позашляховик / Кросовер</option>
+                            <option value="Універсал">Універсал</option>
+                            <option value="Хетчбек">Хетчбек</option>
+                            <option value="Купе">Купе</option>
+                            <option value="Кабріолет">Кабріолет</option>
+                            <option value="Мінівен">Мінівен</option>
+                            <option value="Пікап">Пікап</option>
+                            <option value="Ліфтбек">Ліфтбек</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Рік випуску</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input id="filterYearMin" type="number" placeholder="Від" class="sp-input">
+                            <input id="filterYearMax" type="number" placeholder="До" class="sp-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Ціна ($)</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input id="filterPriceMin" type="number" placeholder="Від" class="sp-input">
+                            <input id="filterPriceMax" type="number" placeholder="До" class="sp-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Пробіг (тис. км)</label>
+                        <input id="filterMileageMax" type="number" placeholder="До" class="sp-input">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Коробка передач</label>
+                        <select id="filterTransmission" class="sp-input">
+                            <option value="">Будь-яка</option>
+                            <option value="Автомат">Автомат</option>
+                            <option value="Ручна">Ручна</option>
+                            <option value="Робот">Робот</option>
+                            <option value="Варіатор">Варіатор</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Паливо</label>
+                        <select id="filterFuel" class="sp-input">
+                            <option value="">Будь-яке</option>
+                            <option value="Бензин">Бензин</option>
+                            <option value="Дизель">Дизель</option>
+                            <option value="Гібрид">Гібрид</option>
+                            <option value="Електрика">Електрика</option>
+                            <option value="Газ">Газ</option>
+                        </select>
+                    </div>
+
+                    <button id="applyFiltersBtn" class="btn secondary full-width" style="margin-top: 20px;">Застосувати фільтри</button>
+                    
+                    <button id="saveSearchBtn" class="btn full-width" style="margin-top: 10px; background: transparent; border: 1px dashed var(--accent); color: var(--accent);">
+                        + Зберегти цей пошук
+                    </button>
+                </div>
+
+                
+            </aside>
+
+            <div class="market-content">
+                <div id="savedSearchesWrapper" style="display: none; margin-bottom: 20px;">
+                    <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">Мої збережені пошуки:</div>
+                    <div id="savedSearchesContainer" class="saved-searches-list">
+                        </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">Пропозиції продажу</h2>
+                    <select id="sortSelect" class="sp-input" style="width: auto;">
+                        <option value="newest">Найновіші</option>
+                        <option value="cheaper">Від дешевих</option>
+                        <option value="expensive">Від дорогих</option>
+                    </select>
+                </div>
+                
+                <div id="adsGrid" class="featured-cars-grid">
+                    <p>Завантаження оголошень...</p>
+                </div>
+            </div>
+        </div>
+        <div class="similar-market-section" id="similarAdsContainer" style="display:none; margin-top: 40px;">
+            <h3>Схожі пропозиції</h3>
+            <div class="featured-cars-grid" id="similarAdsGrid">
+                </div>
+        </div>
+    </main>
+  </div>
+
+  <div id="favoritesModal" class="modal-root" style="display:none">
+        <div class="modal-back"></div>
+        <div class="modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+            
+            <div class="modal-header">
+                <h2 class="modal-title">❤️ Збережені авто</h2>
+                <button id="closeFavoritesModalBtn" class="close-btn-abs">✕</button>
+            </div>
+
+            <div class="modal-content-scrollable" style="overflow-y: auto; padding-right: 5px;">
+                <div id="favAdsGridModal" class="favorites-grid-2-col">
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+  <div id="sellModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Додати оголошення</h2>
+            <button id="closeSellModalBtn" class="close-btn-abs">✕</button>
+        </div>
+        <form id="sellCarForm" class="form-content" style="margin-top:0;">
+            
+            <div class="form-group grid-2">
+                <div>
+                    <label for="sellBrand">Марка</label>
+                    <select name="brand_id" id="sellBrand" class="sp-input" required>
+                        <option value="">Оберіть марку</option>
+                        </select>
+                </div>
+
+                <div>
+                    <label for="sellModel">Модель</label>
+                    <select name="model_id" id="sellModel" class="sp-input" required disabled>
+                        <option value="">Спочатку оберіть марку</option>
+                        </select>
+                </div>
+
+                
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label>Держ. номер</label>
+                    <input name="license_plate" type="text" class="sp-input" placeholder="AA 1234 BB" style="text-transform: uppercase;">
+                </div>
+                <div>
+                    <label>VIN-код</label>
+                    <input name="vin_code" type="text" class="sp-input" placeholder="17 символів" maxlength="17" style="text-transform: uppercase;">
+                </div>
+            </div>
+
+            <div class="form-group grid-3">
+                <div><label>Рік</label><input name="year" type="number" class="sp-input" placeholder="2018" required></div>
+                <div><label>Пробіг (тис. км)</label><input name="mileage" type="number" class="sp-input" required></div>
+                <div><label>Ціна ($)</label><input name="price" type="number" class="sp-input" required></div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label>Двигун (Тип)</label>
+                    <select name="engine" class="sp-input">
+                        <option>Бензин</option>
+                        <option>Дизель</option>
+                        <option>Гібрид</option>
+                        <option>Електро</option>
+                        <option>Газ/Бензин</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Об'єм (л)</label> <input name="engine_volume" type="number" step="0.1" class="sp-input" placeholder="Напр. 3.0">
+                </div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label>Коробка</label>
+                    <select name="transmission" class="sp-input">
+                        <option>Автомат</option>
+                        <option>Ручна</option>
+                        <option>Робот</option>
+                        <option>Варіатор</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Привід</label> <select name="drive" class="sp-input">
+                        <option value="Повний">Повний</option>
+                        <option value="Передній">Передній</option>
+                        <option value="Задній">Задній</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Колір</label> <select name="color" class="sp-input">
+                        <option value="Сірий">Сірий</option>
+                        <option value="Чорний">Чорний</option>
+                        <option value="Білий">Білий</option>
+                        <option value="Синій">Синій</option>
+                        <option value="Червоний">Червоний</option>
+                        <option value="Зелений">Зелений</option>
+                        <option value="Коричневий">Коричневий</option>
+                        <option value="Бежевий">Бежевий</option>
+                        <option value="Жовтий">Жовтий</option>
+                        <option value="Срібний">Срібний</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label>Тип кузова</label>
+                    <select name="body_type" class="sp-input" required>
+                        <option value="">Оберіть...</option>
+                        <option value="Седан">Седан</option>
+                        <option value="Позашляховик">Позашляховик / Кросовер</option>
+                        <option value="Універсал">Універсал</option>
+                        <option value="Хетчбек">Хетчбек</option>
+                        <option value="Купе">Купе</option>
+                        <option value="Кабріолет">Кабріолет</option>
+                        <option value="Мінівен">Мінівен</option>
+                        <option value="Пікап">Пікап</option>
+                        <option value="Ліфтбек">Ліфтбек</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Витрата палива (змішана, л/100км)</label>
+                    <input name="fuel_consumption" type="number" step="0.1" class="sp-input" placeholder="Напр. 8.5">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Фотографії (перше буде головним)</label>
+                <div class="upload-box" onclick="document.getElementById('sellPhotos').click()">
+                    <span style="color: var(--accent);">+ Натисніть, щоб обрати фото</span>
+                    <input type="file" name="photos" id="sellPhotos" multiple accept="image/*" style="display: none;">
+                </div>
+                <div id="photoPreview" style="display: flex; gap: 10px; overflow-x: auto;"></div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div><label>Місто</label><input name="location" type="text" class="sp-input" required></div>
+                <div><label>Телефон</label><input name="phone" type="text" class="sp-input" placeholder="+380..." required></div>
+            </div>
+
+            <div class="form-group">
+                <label style="margin-bottom: 10px; display: block;">Комплектація</label>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <div class="equipment-group-select">
+                        <h4 style="color: var(--accent); font-size: 14px; margin-bottom: 10px;">Безпека</h4>
+                        <div class="checkbox-list">
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="ABS"> ABS</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="ESP"> ESP</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="Імобілайзер"> Імобілайзер</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="Подушки безпеки"> Подушки безпеки</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="Центральний замок"> Центр. замок</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_security" value="Сигналізація"> Сигналізація</label>
+                        </div>
+                    </div>
+
+                    <div class="equipment-group-select">
+                        <h4 style="color: var(--accent); font-size: 14px; margin-bottom: 10px;">Комфорт</h4>
+                        <div class="checkbox-list">
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Кондиціонер"> Кондиціонер</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Клімат-контроль"> Клімат-контроль</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Круїз-контроль"> Круїз-контроль</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Підігрів сидінь"> Підігрів сидінь</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Сенсор дощу"> Сенсор дощу</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Датчик світла"> Датчик світла</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Шкіряний салон"> Шкіряний салон</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_comfort" value="Люк / Панорама"> Люк / Панорама</label>
+                        </div>
+                    </div>
+
+                    <div class="equipment-group-select" style="grid-column: 1 / -1;">
+                        <h4 style="color: var(--accent); font-size: 14px; margin-bottom: 10px;">Мультимедіа</h4>
+                        <div class="checkbox-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="Bluetooth"> Bluetooth</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="USB"> USB</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="Навігація"> Навігація</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="CarPlay / Android Auto"> CarPlay / Android Auto</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="Акустика"> Акустика</label>
+                            <label class="checkbox-item"><input type="checkbox" name="opt_media" value="Камера заднього виду"> Камера заднього виду</label>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Опис</label>
+                <textarea name="description" rows="4" class="sp-input"></textarea>
+            </div>
+
+            <button type="submit" class="btn sp-btn-primary full-width">Розмістити оголошення</button>
+        </form>
+    </div>
+  </div>
+
+
+
+  <div id="infoModal" class="modal-root" style="display:none">
+  <div class="modal-back" id="infoModalBack"></div>
+  <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+      <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
+      </div>
+      <div class="form-content" style="gap: 20px;">
+      <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="infoModalOkBtn" class="btn primary">OK</button>
+      </div>
+      </div>
+  </div>
+  </div>
+
+
+ <div id="loginModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal login-theme"> <div class="modal-header-center">
+        <h2 class="modal-title-large">Раді вітати<br>вас знову</h2>
+        <button id="closeLoginModalBtn" class="close-btn-abs">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="loginForm" class="form-content sp-form">
+        
+        <div class="form-group">
+          <label for="loginUsername" class="sp-label">Ел. пошта або ім'я користувача</label>
+          <input id="loginUsername" type="text" placeholder="Ел. пошта або логін" class="sp-input" required />
+        </div>
+        
+        <div class="form-group">
+           <label for="loginPassword" class="sp-label">Пароль</label>
+           <input id="loginPassword" type="password" placeholder="Пароль" class="sp-input" required />
+        </div>
+
+        <div class="sp-checkbox-wrapper">
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="captchaCheck" required />
+                <label for="captchaCheck">Я не робот</label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="consentCheck" required />
+                <label for="consentCheck">Згода на обробку даних</label>
+            </div>
+        </div>
+         
+        <button class="btn sp-btn-primary full-width" type="submit">Увійти</button>
+
+        <div class="auth-divider">
+           <span>або</span>
+        </div>
+
+        <div id="googleButtonDiv" style="width: 100%; display: flex; justify-content: center; margin-top: 15px;"></div>
+
+        <div class="modal-footer-link">
+            <span style="color: #a7a7a7;">Немає акаунта?</span>
+            <a href="#" class="form-link white-link" id="showRegisterBtnFromLogin">Зареєструватися</a>
+        </div>
+         
+      </form>
+    </div>
+  </div>
+
+  <div id="registerModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Реєстрація в RightWheel</h2>
+        <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <form id="registerForm" class="form-content">
+        <div class="form-group">
+          <label for="registerUsername">Логін</label>
+          <input id="registerUsername" type="text" placeholder="Придумайте логін" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="Ваш email" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Пароль</label>
+          <input id="registerPassword" type="password" placeholder="Придумайте пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Підтвердження пароля</label>
+          <input id="registerConfirmPassword" type="password" placeholder="Повторіть пароль" required />
+        </div>
+        <div class="form-group">
+          <div class="captcha-container">
+            <div class="captcha-text">Я не робот</div>
+            <input type="checkbox" id="registerCaptchaCheck" required />
+            <label for="registerCaptchaCheck">Підтвердити</label>
+          </div>
+        </div>
+        <button class="btn primary full-width" type="submit">Зареєструватися</button>
+      </form>
+
+      <div class="modal-footer-link">
+        <span>Вже є акаунт?</span>
+        <a href="#" class="form-link" id="showLoginBtnFromRegister">Увійти</a>
+      </div>
+
+    </div>
+  </div>
+    <div id="lightboxModal" class="modal-root lightbox-modal" style="display:none;">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImage">
+        <div class="lightbox-caption"></div>
+        <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+        <a class="next" onclick="changeSlide(1)">&#10095;</a>
+    </div>
+
+    <div id="chatsModal" class="modal-root" style="display:none;">
+        <div class="modal-back"></div>
+        <div class="modal chat-modal-window">
+            <div class="chat-layout">
+                <div class="chat-list-sidebar">
+                    <div class="chat-header-sl">
+                        <h3>Повідомлення</h3>
+                        <button id="closeChatsModalBtn" class="close-btn-abs" style="position:static;">✕</button>
+                    </div>
+                    <div id="chatsList" class="chats-scroll-area">
+                        <p style="padding:10px; color:#aaa;">Завантаження...</p>
+                    </div>
+                </div>
+
+                <div class="chat-room" id="chatRoom" style="display:none;">
+                    <div class="chat-room-header">
+                        <div id="chatRoomHeaderInfo">
+                            <span id="chatInterlocutorName" style="font-weight:700;">User</span>
+                            <span id="chatCarName" style="font-size:12px; color:#aaa; display:block;">Car</span>
+                        </div>
+                        <button class="btn small secondary" onclick="document.getElementById('chatRoom').style.display='none'">Назад</button>
+                    </div>
+
+                    <div id="messagesArea" class="messages-area"></div>
+
+                    <form id="sendMessageForm" class="chat-input-area">
+                        <input type="text" id="messageInput" placeholder="Напишіть повідомлення..." autocomplete="off">
+                        <button type="submit" class="btn primary">→</button>
+                    </form>
+                </div>
+
+                <div id="chatPlaceholder" class="chat-placeholder">
+                    <p>Оберіть чат ліворуч, щоб почати спілкування</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="modal-root" style="display:none; z-index: 2000;">
+        <div class="modal-back"></div>
+        <div class="modal" style="max-width: 400px; text-align: center; padding: 30px;">
+            <h3 style="margin-top: 0; color: #E2E8F0; font-size: 20px;">Підтвердження дії</h3>
+            <p id="customConfirmMessage" style="color: #A0AEC0; margin: 15px 0; line-height: 1.5;">
+                Ви впевнені?
+            </p>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <button id="confirmCancelBtn" class="btn secondary" style="min-width: 100px;">Скасувати</button>
+                <button id="confirmOkBtn" class="btn primary" style="background-color: #E53E3E; border-color: #E53E3E; min-width: 100px;">Видалити</button>
+            </div>
+        </div>
+    </div>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/market.js"></script> <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

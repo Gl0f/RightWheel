@@ -50,7 +50,7 @@ def allowed_file(filename):
 
 # --- ЗАМІНИТИ СТАРЕ НАЛАШТУВАННЯ CORS НА ЦЕ ---
 CORS(app, 
-     resources={r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500","https://rightwheel.onrender.com"]}}, 
+     resources={r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500","https://rightwheel.onrender.com",'http://127.0.0.1:5000']}}, 
      allow_headers=["Content-Type", "Authorization"], 
      supports_credentials=True)
 # ---------------------------------------------
@@ -189,18 +189,31 @@ def get_all_brands():
 
 @app.route('/api/brands/<int:brand_id>/models')
 def get_models_by_brand(brand_id):
+    # Беремо моделі і сортуємо за назвою
     query = "SELECT id, name, image_url, year_start, year_end FROM models WHERE brand_id = %s ORDER BY name ASC"
     models, error = fetch_query(query, (brand_id,))
+    
     if error:
+        print(f"Error fetching models: {error}")
         return jsonify({"error": error}), 500
+        
     return jsonify(models)
 
 @app.route('/api/models/<int:model_id>/generations')
 def get_generations_by_model(model_id):
-    query = "SELECT id, name, year_start, year_end, body_style, image_url FROM generations g WHERE model_id = %s ORDER BY year_start DESC, name ASC"
+    # Беремо покоління, сортуємо від нових до старих
+    query = """
+        SELECT id, name, year_start, year_end, body_style, image_url 
+        FROM generations 
+        WHERE model_id = %s 
+        ORDER BY year_start DESC
+    """
     generations, error = fetch_query(query, (model_id,))
+    
     if error:
+        print(f"Error fetching generations: {error}")
         return jsonify({"error": error}), 500
+        
     return jsonify(generations)
 
 @app.route('/api/generations/<int:generation_id>/trims')
@@ -693,6 +706,30 @@ def get_generation_details(generation_id):
             conn.close()
 
     return jsonify(result)
+
+@app.route('/api/trims/latest')
+def get_latest_trims_catalog():
+    # Беремо останні 6 доданих комплектацій з Енциклопедії
+    # Сортуємо за ID (найновіші ID = останні додані)
+    query = """
+        SELECT t.*, g.name as generation_name, g.year_start, g.year_end,
+            m.id as model_id, m.name as model_name,
+            b.id as brand_id, b.name as make_name, b.country
+        FROM trims t
+        JOIN generations g ON t.generation_id = g.id
+        JOIN models m ON g.model_id = m.id
+        JOIN brands b ON m.brand_id = b.id
+        ORDER BY t.id DESC
+        LIMIT 6
+    """
+    
+    latest_trims, error = fetch_query(query)
+    
+    if error:
+        print(f"Latest trims error: {error}")
+        return jsonify({"error": error}), 500
+        
+    return jsonify(latest_trims)
 
 @app.route('/api/forum/topics', methods=['GET'])
 def get_forum_topics():
@@ -2311,6 +2348,26 @@ def payment_callback():
         conn.close()
         
     return "OK", 200
+
+from flask import render_template, send_from_directory
+
+# 1. Головна сторінка
+@app.route('/')
+def index():
+    return render_template('main.html')
+
+# 2. Універсальний маршрут для інших HTML сторінок
+# (щоб працювали посилання типу /market.html, /forum.html)
+@app.route('/<path:filename>')
+def serve_html(filename):
+    # Дозволяємо відкривати тільки .html файли з папки templates
+    if filename.endswith('.html'):
+        return render_template(filename)
+    return "File not found", 404
+
+# 3. Маршрут для завантажених файлів (фото авто/аватари)
+# Flask за замовчуванням роздає static, але uploads треба налаштувати, якщо вони всередині static
+# Якщо папка uploads лежить в static/uploads, то додатковий код не потрібен.
 
 # --- ЗАПУСК СЕРВЕРА ---
 if __name__ == '__main__':
