@@ -93,6 +93,11 @@
                 <button id="showMarketFavoritesBtn" class="btn secondary full-width" style="margin-bottom: 20px; border: 1px solid var(--accent); color: var(--accent);">
                     ❤️ Збережені оголошення
                 </button>
+
+                <button id="openChatsModalBtn" class="btn secondary full-width" style="margin-bottom: 20px; border: 1px solid var(--text); position: relative;">
+                    💬 Мої повідомлення
+                    <span id="unreadBadge" class="notification-badge" style="display: none;">0</span>
+                </button>
                 
                 <div class="market-sidebar">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -295,6 +300,28 @@
                         <option value="Жовтий">Жовтий</option>
                         <option value="Срібний">Срібний</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label>Тип кузова</label>
+                    <select name="body_type" class="sp-input" required>
+                        <option value="">Оберіть...</option>
+                        <option value="Седан">Седан</option>
+                        <option value="Позашляховик">Позашляховик / Кросовер</option>
+                        <option value="Універсал">Універсал</option>
+                        <option value="Хетчбек">Хетчбек</option>
+                        <option value="Купе">Купе</option>
+                        <option value="Кабріолет">Кабріолет</option>
+                        <option value="Мінівен">Мінівен</option>
+                        <option value="Пікап">Пікап</option>
+                        <option value="Ліфтбек">Ліфтбек</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Витрата палива (змішана, л/100км)</label>
+                    <input name="fuel_consumption" type="number" step="0.1" class="sp-input" placeholder="Напр. 8.5">
                 </div>
             </div>
 
@@ -534,6 +561,58 @@
         <div class="lightbox-caption"></div>
         <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
         <a class="next" onclick="changeSlide(1)">&#10095;</a>
+    </div>
+
+    <div id="chatsModal" class="modal-root" style="display:none;">
+        <div class="modal-back"></div>
+        <div class="modal chat-modal-window">
+            <div class="chat-layout">
+                <div class="chat-list-sidebar">
+                    <div class="chat-header-sl">
+                        <h3>Повідомлення</h3>
+                        <button id="closeChatsModalBtn" class="close-btn-abs" style="position:static;">✕</button>
+                    </div>
+                    <div id="chatsList" class="chats-scroll-area">
+                        <p style="padding:10px; color:#aaa;">Завантаження...</p>
+                    </div>
+                </div>
+
+                <div class="chat-room" id="chatRoom" style="display:none;">
+                    <div class="chat-room-header">
+                        <div id="chatRoomHeaderInfo">
+                            <span id="chatInterlocutorName" style="font-weight:700;">User</span>
+                            <span id="chatCarName" style="font-size:12px; color:#aaa; display:block;">Car</span>
+                        </div>
+                        <button class="btn small secondary" onclick="document.getElementById('chatRoom').style.display='none'">Назад</button>
+                    </div>
+
+                    <div id="messagesArea" class="messages-area"></div>
+
+                    <form id="sendMessageForm" class="chat-input-area">
+                        <input type="text" id="messageInput" placeholder="Напишіть повідомлення..." autocomplete="off">
+                        <button type="submit" class="btn primary">→</button>
+                    </form>
+                </div>
+
+                <div id="chatPlaceholder" class="chat-placeholder">
+                    <p>Оберіть чат ліворуч, щоб почати спілкування</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="modal-root" style="display:none; z-index: 2000;">
+        <div class="modal-back"></div>
+        <div class="modal" style="max-width: 400px; text-align: center; padding: 30px;">
+            <h3 style="margin-top: 0; color: #E2E8F0; font-size: 20px;">Підтвердження дії</h3>
+            <p id="customConfirmMessage" style="color: #A0AEC0; margin: 15px 0; line-height: 1.5;">
+                Ви впевнені?
+            </p>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <button id="confirmCancelBtn" class="btn secondary" style="min-width: 100px;">Скасувати</button>
+                <button id="confirmOkBtn" class="btn primary" style="background-color: #E53E3E; border-color: #E53E3E; min-width: 100px;">Видалити</button>
+            </div>
+        </div>
     </div>
 
   <script src="app.js"></script>

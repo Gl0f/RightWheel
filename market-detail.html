@@ -115,6 +115,12 @@
             Завантаження оголошення...
         </div>
 
+        <div class="similar-market-section" id="similarAdsContainer" style="display:none; margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <h3 style="font-size: 22px; margin-bottom: 20px; color: var(--text);">Вас також можуть зацікавити</h3>
+            <div class="featured-cars-grid" id="similarAdsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                </div>
+        </div>
+
     </main>
   </div>
 
@@ -227,6 +233,118 @@
 
     </div>
   </div>
+
+  <div id="editAdModal" class="modal-root" style="display:none; z-index: 2000;">
+    <div class="modal-back"></div>
+    <div class="modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h2 class="modal-title">Редагування оголошення</h2>
+            <button id="closeEditModalBtn" class="close-btn-abs">✕</button>
+        </div>
+        <form id="editAdForm" class="form-content" style="margin-top: 0;">
+            
+            <div class="form-group grid-2">
+                <div><label class="sp-label">Ціна ($)</label><input name="price" id="editPrice" type="number" class="sp-input" required></div>
+                <div><label class="sp-label">Пробіг (тис. км)</label><input name="mileage" id="editMileage" type="number" class="sp-input" required></div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="sp-label">Двигун</label>
+                    <select name="engine" id="editEngineType" class="sp-input">
+                        <option>Бензин</option><option>Дизель</option><option>Гібрид</option><option>Електро</option><option>Газ/Бензин</option>
+                    </select>
+                </div>
+                <div><label class="sp-label">Об'єм (л)</label><input name="engine_volume" id="editEngineVol" type="number" step="0.1" class="sp-input"></div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="sp-label">Коробка</label>
+                    <select name="transmission" id="editTransmission" class="sp-input">
+                        <option>Автомат</option><option>Ручна</option><option>Робот</option><option>Варіатор</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="sp-label">Привід</label>
+                    <select name="drive" id="editDrive" class="sp-input">
+                        <option value="Повний">Повний</option><option value="Передній">Передній</option><option value="Задній">Задній</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="sp-label">Тип кузова</label>
+                    <select name="body_type" id="editBodyType" class="sp-input">
+                        <option value="">Оберіть...</option>
+                        <option value="Седан">Седан</option>
+                        <option value="Позашляховик">Позашляховик</option>
+                        <option value="Універсал">Універсал</option>
+                        <option value="Хетчбек">Хетчбек</option>
+                        <option value="Купе">Купе</option>
+                        <option value="Кабріолет">Кабріолет</option>
+                        <option value="Мінівен">Мінівен</option>
+                        <option value="Пікап">Пікап</option>
+                        <option value="Ліфтбек">Ліфтбек</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="sp-label">Витрата (л/100км)</label>
+                    <input name="fuel_consumption" id="editFuelCons" type="number" step="0.1" class="sp-input">
+                </div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div>
+                    <label class="sp-label">Колір</label>
+                    <select name="color" id="editColor" class="sp-input">
+                        <option value="Сірий">Сірий</option><option value="Чорний">Чорний</option><option value="Білий">Білий</option><option value="Синій">Синій</option><option value="Червоний">Червоний</option><option value="Зелений">Зелений</option><option value="Інший">Інший</option>
+                    </select>
+                </div>
+                <div><label class="sp-label">Місто</label><input name="location" id="editLocation" type="text" class="sp-input" required></div>
+            </div>
+
+            <div class="form-group grid-2">
+                <div><label class="sp-label">Телефон</label><input name="phone" id="editPhone" type="text" class="sp-input" required></div>
+                <div><label class="sp-label">Номер авто</label><input name="license_plate" id="editPlate" type="text" class="sp-input"></div>
+            </div>
+            <div class="form-group">
+                <label class="sp-label">VIN-код</label>
+                <input name="vin_code" id="editVin" type="text" class="sp-input">
+            </div>
+
+            <div class="form-group" id="existingPhotosContainer" style="display:none;">
+                <label class="sp-label">Видалити фото</label>
+                <div id="existingPhotosGrid" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                    </div>
+                <input type="hidden" name="photos_to_delete" id="photosToDeleteInput">
+            </div>
+
+            <div class="form-group">
+                <label class="sp-label">Додати нові фото</label>
+                
+                <div class="upload-box" onclick="document.getElementById('editPhotos').click()">
+                    <span>📸 Натисніть, щоб обрати файли</span>
+                    <input type="file" name="photos" id="editPhotos" class="sp-input" multiple accept="image/*" style="display: none;">
+                </div>
+
+                <div id="editPhotoPreview" style="display: flex; gap: 10px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px;"></div>
+                
+                <div style="font-size: 11px; color: #A0AEC0; margin-top: 5px;">* Нові фото додадуться до існуючих.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="sp-label">Опис</label>
+                <textarea name="description" id="editDescription" rows="5" class="sp-input" style="resize: vertical;"></textarea>
+            </div>
+
+            <div style="font-size: 12px; color: #A0AEC0; margin-bottom: 10px;">* Марку, модель та рік випуску змінювати не можна.</div>
+
+            <button type="submit" class="btn sp-btn-primary full-width">Зберегти зміни</button>
+        </form>
+    </div>
+</div>
 
   <script src="app.js"></script>
   <script src="market-detail.js"></script> <script src="https://accounts.google.com/gsi/client" async defer></script>

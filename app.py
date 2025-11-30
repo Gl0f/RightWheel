@@ -1467,13 +1467,21 @@ def get_market_ads():
     engine = request.args.get('engine')
     sort = request.args.get('sort', 'newest')
 
-    # ОНОВЛЕНИЙ ЗАПИТ: Додано JOIN models та m.name as model_name
+    # === ОНОВЛЕНИЙ ЗАПИТ (ВИПРАВЛЕНО ФОТО) ===
+    # Ми змінили підзапит для image_url: ORDER BY is_main DESC, id ASC LIMIT 1
+    # Це означає: "Дай мені головне фото, а якщо його немає — дай найперше завантажене".
     query = """
         SELECT l.*, 
                b.name as brand_name, 
                m.name as model_name, 
                u.username, u.avatar_url as user_avatar,
-               (SELECT image_url FROM listing_images li WHERE li.listing_id = l.id AND li.is_main = TRUE LIMIT 1) as main_image
+               (
+                   SELECT image_url 
+                   FROM listing_images li 
+                   WHERE li.listing_id = l.id 
+                   ORDER BY li.is_main DESC, li.id ASC 
+                   LIMIT 1
+               ) as main_image
         FROM listings l
         JOIN brands b ON l.brand_id = b.id
         JOIN models m ON l.model_id = m.id
@@ -1485,8 +1493,6 @@ def get_market_ads():
     if brand_id:
         query += " AND l.brand_id = %s"
         params.append(brand_id)
-    
-    # Фільтруємо по ID
     if model_id: 
         query += " AND l.model_id = %s"
         params.append(model_id)
@@ -1512,7 +1518,6 @@ def get_market_ads():
         query += " AND l.engine_type = %s"
         params.append(engine)
 
-    # Сортування
     if sort == 'cheaper':
         query += " ORDER BY l.price ASC"
     elif sort == 'expensive':
@@ -1530,7 +1535,7 @@ def get_market_ads():
 def create_market_ad():
     user_id = get_jwt_identity()
     
-    # Отримуємо дані з форми (multipart/form-data)
+    # Отримуємо дані
     brand_id = request.form.get('brand_id')
     model_id = request.form.get('model_id')
     year = request.form.get('year')
@@ -1548,6 +1553,10 @@ def create_market_ad():
     equipment = request.form.get('equipment')
     drive = request.form.get('drive')
     
+    # НОВІ ПОЛЯ
+    body_type = request.form.get('body_type')
+    fuel_consumption = request.form.get('fuel_consumption')
+    
     if not all([brand_id, model_id, year, price, phone]):
         return jsonify({"error": "Заповніть обов'язкові поля"}), 400
 
@@ -1555,23 +1564,25 @@ def create_market_ad():
     try:
         cursor = conn.cursor()
         
-        # 1. Створюємо оголошення
+        # ОНОВЛЕНИЙ INSERT
         cursor.execute("""
             INSERT INTO listings (
                 user_id, brand_id, model_id, year, price, mileage, 
                 engine_type, transmission, location, phone, description,
-                license_plate, vin_code, color, engine_volume, equipment, drive
+                license_plate, vin_code, color, engine_volume, equipment, drive,
+                body_type, fuel_consumption
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             user_id, brand_id, model_id, year, price, mileage, 
             engine, transmission, location, phone, description, 
-            license_plate, vin_code, color, engine_volume, equipment, drive
+            license_plate, vin_code, color, engine_volume, equipment, drive,
+            body_type, fuel_consumption
         ))
         listing_id = cursor.fetchone()[0]
         
-        # 2. Зберігаємо фото
+        # Збереження фото (без змін)
         files = request.files.getlist('photos')
         for i, file in enumerate(files):
             if file and allowed_file(file.filename):
@@ -1579,17 +1590,12 @@ def create_market_ad():
                 filename = secure_filename(f"ad_{listing_id}_{i}_{int(datetime.now().timestamp())}.{ext}")
                 save_path = os.path.join(app.config['MARKET_UPLOAD_FOLDER'], filename)
                 file.save(save_path)
-                
                 db_path = f"/static/uploads/market/{filename}"
-                is_main = (i == 0) # Перше фото - головне
-                
                 cursor.execute("INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, %s)", 
-                               (listing_id, db_path, is_main))
+                               (listing_id, db_path, (i == 0)))
         
         conn.commit()
-        cursor.close()
         return jsonify({"message": "Оголошення успішно додано!"}), 201
-        
     except Exception as e:
         conn.rollback()
         print(e)
@@ -1627,10 +1633,16 @@ def get_market_ad_details(ad_id):
             
         result = dict(ad_data)
         
-        # 2. Фотографії
-        cursor.execute("SELECT image_url FROM listing_images WHERE listing_id = %s ORDER BY is_main DESC, id ASC", (ad_id,))
-        images = [row['image_url'] for row in cursor.fetchall()]
-        result['images'] = images if images else ['https://via.placeholder.com/600x400?text=No+Photo']
+        # 2. Фотографії (ОНОВЛЕНО: Отримуємо ID та URL)
+        cursor.execute("SELECT id, image_url FROM listing_images WHERE listing_id = %s ORDER BY is_main DESC, id ASC", (ad_id,))
+        rows = cursor.fetchall()
+        
+        # Формуємо список з ID
+        images_data = [{'id': r['id'], 'url': r['image_url']} for r in rows]
+        
+        result = dict(ad_data)
+        result['images_data'] = images_data  # <--- ЦЕ ПОЛЕ ОБОВ'ЯЗКОВЕ
+        result['images'] = [img['url'] for img in images_data]
 
         cursor.close()
         return jsonify(result)
@@ -1679,17 +1691,23 @@ def toggle_market_favorite():
 @jwt_required()
 def get_my_market_favorites():
     user_id = get_jwt_identity()
-    # Складний запит, щоб отримати дані оголошення + головне фото
+    
+    # ОНОВЛЕНИЙ ЗАПИТ: Додано JOIN models m та m.name as model_name
     query = """
-        SELECT l.*, b.name as brand_name, u.username,
+        SELECT l.*, 
+               b.name as brand_name, 
+               m.name as model_name,
+               u.username,
                (SELECT image_url FROM listing_images li WHERE li.listing_id = l.id AND li.is_main = TRUE LIMIT 1) as main_image
         FROM market_favorites mf
         JOIN listings l ON mf.listing_id = l.id
         JOIN brands b ON l.brand_id = b.id
+        JOIN models m ON l.model_id = m.id
         JOIN users u ON l.user_id = u.id
         WHERE mf.user_id = %s AND l.is_active = TRUE
         ORDER BY mf.created_at DESC
     """
+    
     ads, error = fetch_query(query, (user_id,))
     if error: return jsonify({"error": error}), 500
     return jsonify(ads)
@@ -1732,6 +1750,323 @@ def delete_market_ad(ad_id):
         return jsonify({"error": str(e)}), 500
     finally:
         if conn: conn.close()
+
+
+# --- CHAT API ---
+
+@app.route('/api/chats/start', methods=['POST'])
+@jwt_required()
+def start_chat():
+    current_user_id = int(get_jwt_identity())
+    data = request.get_json()
+    listing_id = data.get('listing_id')
+    
+    if not listing_id:
+        return jsonify({"error": "No listing ID"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    try:
+        # 1. Дізнаємось хто продавець
+        cursor.execute("SELECT user_id FROM listings WHERE id = %s", (listing_id,))
+        listing = cursor.fetchone()
+        if not listing:
+            return jsonify({"error": "Оголошення не знайдено"}), 404
+        
+        seller_id = listing['user_id']
+        
+        if seller_id == current_user_id:
+            return jsonify({"error": "Ви не можете писати самі собі"}), 400
+
+        # 2. Перевіряємо, чи чат вже існує
+        cursor.execute("""
+            SELECT id FROM chats 
+            WHERE listing_id = %s AND buyer_id = %s
+        """, (listing_id, current_user_id))
+        chat = cursor.fetchone()
+        
+        if chat:
+            return jsonify({"chat_id": chat['id']}) # Чат вже є, повертаємо ID
+            
+        # 3. Створюємо новий чат
+        cursor.execute("""
+            INSERT INTO chats (listing_id, buyer_id, seller_id)
+            VALUES (%s, %s, %s) RETURNING id
+        """, (listing_id, current_user_id, seller_id))
+        new_chat_id = cursor.fetchone()[0]
+        
+        conn.commit()
+        return jsonify({"chat_id": new_chat_id})
+        
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/chats', methods=['GET'])
+@jwt_required()
+def get_my_chats():
+    user_id = int(get_jwt_identity())
+    
+    conn = get_db_connection()
+    if not conn: return jsonify({"error": "Database error"}), 500
+    
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # ОНОВЛЕНИЙ ЗАПИТ: Надійніший вибір фото
+    query = """
+        SELECT 
+            c.id as chat_id,
+            l.id as listing_id,
+            b.name || ' ' || m.name as car_name,
+            (
+                SELECT image_url 
+                FROM listing_images li 
+                WHERE li.listing_id = l.id 
+                ORDER BY li.is_main DESC, li.id ASC 
+                LIMIT 1
+            ) as car_image,
+            CASE 
+                WHEN c.buyer_id = %s THEN s.username 
+                ELSE buyer.username 
+            END as interlocutor_name,
+            (SELECT content FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message
+        FROM chats c
+        JOIN listings l ON c.listing_id = l.id
+        JOIN brands b ON l.brand_id = b.id
+        JOIN models m ON l.model_id = m.id
+        JOIN users s ON c.seller_id = s.id
+        JOIN users buyer ON c.buyer_id = buyer.id
+        WHERE c.buyer_id = %s OR c.seller_id = %s
+        ORDER BY c.created_at DESC
+    """
+    
+    try:
+        cursor.execute(query, (user_id, user_id, user_id))
+        chats = [dict(row) for row in cursor.fetchall()]
+        return jsonify(chats)
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/chats/<int:chat_id>/messages', methods=['GET'])
+@jwt_required()
+def get_messages(chat_id):
+    user_id = int(get_jwt_identity())
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    try:
+        # Перевірка доступу до чату
+        cursor.execute("SELECT 1 FROM chats WHERE id = %s AND (buyer_id = %s OR seller_id = %s)", (chat_id, user_id, user_id))
+        if not cursor.fetchone():
+            return jsonify({"error": "Access denied"}), 403
+            
+        cursor.execute("""
+            SELECT m.*, u.username 
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE chat_id = %s
+            ORDER BY m.created_at ASC
+        """, (chat_id,))
+        messages = [dict(row) for row in cursor.fetchall()]
+        return jsonify(messages)
+    finally:
+        conn.close()
+
+@app.route('/api/chats/<int:chat_id>/messages', methods=['POST'])
+@jwt_required()
+def send_message(chat_id):
+    user_id = int(get_jwt_identity())
+    data = request.get_json()
+    content = data.get('content')
+    
+    if not content: return jsonify({"error": "Empty message"}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO messages (chat_id, sender_id, content) VALUES (%s, %s, %s)", 
+                       (chat_id, user_id, content))
+        conn.commit()
+        return jsonify({"status": "sent"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/chats/<int:chat_id>', methods=['DELETE'])
+@jwt_required()
+def delete_chat(chat_id):
+    user_id = int(get_jwt_identity())
+    conn = get_db_connection()
+    if not conn: return jsonify({"error": "Database error"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Перевірка прав
+        cursor.execute("SELECT 1 FROM chats WHERE id = %s AND (buyer_id = %s OR seller_id = %s)", 
+                       (chat_id, user_id, user_id))
+        if not cursor.fetchone():
+            return jsonify({"error": "Чат не знайдено або немає прав"}), 403
+            
+        # Видалення
+        cursor.execute("DELETE FROM chats WHERE id = %s", (chat_id,))
+        conn.commit()
+        
+        return jsonify({"message": "Чат видалено"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/market/ads/<int:ad_id>', methods=['PUT'])
+@jwt_required()
+def update_market_ad(ad_id):
+    current_user_id = int(get_jwt_identity())
+    data = request.form
+    
+    conn = get_db_connection()
+    if not conn: return jsonify({"error": "Database error"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        # 1. Перевірка прав
+        cursor.execute("SELECT user_id FROM listings WHERE id = %s", (ad_id,))
+        listing = cursor.fetchone()
+        if not listing or listing[0] != current_user_id:
+            return jsonify({"error": "Доступ заборонено"}), 403
+
+        # === ВИПРАВЛЕННЯ: Обробка числових полів ===
+        # Якщо прийшов пустий рядок, замінюємо його на None (SQL NULL)
+        def clean_num(val):
+            return val if val and val.strip() else None
+
+        engine_vol = clean_num(data.get('engine_volume'))
+        fuel_cons = clean_num(data.get('fuel_consumption'))
+        price = clean_num(data.get('price'))
+        mileage = clean_num(data.get('mileage'))
+        # ============================================
+
+        # 2. Оновлення текстових полів
+        query = """
+            UPDATE listings 
+            SET price = %s, mileage = %s, description = %s, phone = %s, location = %s,
+                engine_type = %s, engine_volume = %s, transmission = %s, drive = %s,
+                color = %s, vin_code = %s, license_plate = %s,
+                body_type = %s, fuel_consumption = %s
+            WHERE id = %s
+        """
+        cursor.execute(query, (
+            price, mileage, data.get('description'), 
+            data.get('phone'), data.get('location'), data.get('engine'), 
+            engine_vol, data.get('transmission'), data.get('drive'), 
+            data.get('color'), data.get('vin_code'), data.get('license_plate'),
+            data.get('body_type'), fuel_cons,
+            ad_id
+        ))
+        
+        # ... (ДАЛІ ЙДЕ КОД ДЛЯ ФОТО, ВІН ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН) ...
+        # (Просто скопіюйте сюди блок "3. ВИДАЛЕННЯ ФОТО" і "4. Додавання НОВИХ фото" з минулої версії)
+        
+        # --- ПОЧАТОК БЛОКУ ФОТО ---
+        photos_to_delete_str = data.get('photos_to_delete', '')
+        if photos_to_delete_str:
+            photo_ids = [int(x) for x in photos_to_delete_str.split(',') if x.strip()]
+            if photo_ids:
+                placeholders = ','.join(['%s'] * len(photo_ids))
+                cursor.execute(f"SELECT image_url FROM listing_images WHERE id IN ({placeholders}) AND listing_id = %s", (*photo_ids, ad_id))
+                rows = cursor.fetchall()
+                base_dir = os.path.abspath(os.path.dirname(__file__))
+                for row in rows:
+                    try:
+                        file_path = os.path.join(base_dir, row[0].lstrip('/'))
+                        if os.path.exists(file_path): os.remove(file_path)
+                    except Exception as e: print(f"Error deleting file: {e}")
+                cursor.execute(f"DELETE FROM listing_images WHERE id IN ({placeholders}) AND listing_id = %s", (*photo_ids, ad_id))
+
+        files = request.files.getlist('photos')
+        for i, file in enumerate(files):
+            if file and allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"ad_{ad_id}_upd_{int(datetime.now().timestamp())}_{i}.{ext}")
+                save_path = os.path.join(app.config['MARKET_UPLOAD_FOLDER'], filename)
+                file.save(save_path)
+                db_path = f"/static/uploads/market/{filename}"
+                cursor.execute("INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, FALSE)", (ad_id, db_path))
+        # --- КІНЕЦЬ БЛОКУ ФОТО ---
+
+        conn.commit()
+        return jsonify({"message": "Оголошення оновлено"}), 200
+
+    except Exception as e:
+        conn.rollback()
+        print(f"Update error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+# --- ДОДАТИ В app.py ---
+
+@app.route('/api/chats/unread', methods=['GET'])
+@jwt_required()
+def get_unread_count():
+    user_id = int(get_jwt_identity())
+    conn = get_db_connection()
+    if not conn: return jsonify({"count": 0})
+    
+    try:
+        cursor = conn.cursor()
+        # Рахуємо повідомлення, де:
+        # 1. Отримувач - це поточний юзер (тобто відправник НЕ ми)
+        # 2. Повідомлення належить до чату, де ми є учасником
+        # 3. is_read = FALSE
+        query = """
+            SELECT COUNT(m.id)
+            FROM messages m
+            JOIN chats c ON m.chat_id = c.id
+            WHERE m.is_read = FALSE 
+              AND m.sender_id != %s 
+              AND (c.buyer_id = %s OR c.seller_id = %s)
+        """
+        cursor.execute(query, (user_id, user_id, user_id))
+        count = cursor.fetchone()[0]
+        return jsonify({"count": count})
+    except Exception as e:
+        print(f"Error counting unread: {e}")
+        return jsonify({"count": 0})
+    finally:
+        conn.close()
+
+@app.route('/api/chats/<int:chat_id>/read', methods=['POST'])
+@jwt_required()
+def mark_chat_read(chat_id):
+    user_id = int(get_jwt_identity())
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        # Позначаємо прочитаними всі повідомлення в цьому чаті, 
+        # які відправив НЕ поточний користувач
+        cursor.execute("""
+            UPDATE messages 
+            SET is_read = TRUE 
+            WHERE chat_id = %s AND sender_id != %s
+        """, (chat_id, user_id))
+        conn.commit()
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
 
 # --- ЗАПУСК СЕРВЕРА ---
 if __name__ == '__main__':

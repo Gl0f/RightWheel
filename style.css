@@ -4729,3 +4729,580 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
 .similar-ad-content { padding: 15px; }
 .similar-ad-price { font-size: 18px; font-weight: 700; color: var(--success); margin-bottom: 5px; }
 .similar-ad-title { font-size: 15px; font-weight: 600; color: var(--text); }
+/* --- CHAT STYLES --- */
+.chat-modal-window {
+    max-width: 900px !important;
+    height: 80vh;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #1A202C;
+}
+
+.chat-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: 100%;
+}
+
+/* Список чатів */
+.chat-list-sidebar {
+    background: #232936;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-sl {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.chat-header-sl h3 { margin: 0; font-size: 18px; color: var(--text); }
+
+.chats-scroll-area {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.chat-item {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.chat-item:hover, .chat-item.active { background: #2D3748; }
+
+.chat-item-img {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000;
+}
+.chat-item-info { flex: 1; overflow: hidden; }
+.chat-item-name { font-weight: 600; color: var(--text); font-size: 14px; }
+.chat-item-car { font-size: 12px; color: var(--accent); }
+.chat-item-last { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Окно переписки */
+.chat-room {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #1A202C;
+}
+
+.chat-room-header {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #232936;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messages-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Бульбашки повідомлень */
+.message-bubble {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-bubble.my {
+    align-self: flex-end;
+    background: var(--accent);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.message-bubble.other {
+    align-self: flex-start;
+    background: #2D3748;
+    color: var(--text);
+    border-bottom-left-radius: 2px;
+}
+
+.chat-input-area {
+    padding: 15px;
+    border-top: 1px solid var(--border);
+    background: #232936;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: #1A202C;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.chat-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    height: 100%;
+}
+
+@media (max-width: 700px) {
+    .chat-layout { grid-template-columns: 1fr; }
+    .chat-room { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+}
+/* --- Стилі для кнопки видалення чату --- */
+
+.chat-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-chat-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.delete-chat-btn:hover {
+    color: var(--danger); /* Червоний при наведенні */
+    background: rgba(229, 62, 62, 0.1);
+}
+
+/* Виправлення відступів для інфо */
+.chat-item-info { 
+    flex: 1; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+/* --- СТИЛІЗОВАНА ЗОНА ЗАВАНТАЖЕННЯ --- */
+.upload-box {
+    border: 2px dashed #4A5568;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #A0AEC0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.upload-box:hover {
+    border-color: #E40C2B; /* Червоний акцент */
+    color: #E40C2B;
+    background-color: rgba(228, 12, 43, 0.05);
+}
+
+.upload-box span {
+    pointer-events: none; /* Щоб клік проходив крізь текст */
+}
+/* Стиль для фото в редагуванні */
+.edit-photo-item {
+    position: relative;
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+
+.edit-photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Кнопка видалення (червоний хрестик) */
+.remove-photo-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    background: rgba(229, 62, 62, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.remove-photo-btn:hover {
+    transform: scale(1.2);
+    background: #c53030;
+}
+
+/* Клас для позначення видаленого фото (візуально) */
+.edit-photo-item.deleted {
+    opacity: 0.4;
+    filter: grayscale(100%);
+    border-color: var(--danger);
+}
+/* Стиль карток для "Схожих" */
+.similar-ad-card {
+    background: var(--card); 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    overflow: hidden;
+    transition: transform 0.2s; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column;
+}
+.similar-ad-card:hover { 
+    transform: translateY(-5px); 
+    border-color: var(--accent); 
+}
+.similar-ad-card img { 
+    width: 100%; 
+    height: 180px; 
+    object-fit: cover; 
+}
+.similar-ad-content { 
+    padding: 15px; 
+}
+.similar-ad-price { 
+    font-size: 18px; 
+    font-weight: 700; 
+    color: #38A169; /* Зелений */
+    margin-bottom: 5px; 
+}
+.similar-ad-title { 
+    font-size: 15px; 
+    font-weight: 600; 
+    color: var(--text); 
+}
+/* --- ОПТИМІЗАЦІЯ ВІКНА РЕДАГУВАННЯ --- */
+
+/* 1. Виправляємо контейнер (прибираємо горизонтальний скрол) */
+#editAdModal .modal {
+    max-width: 650px;
+    width: 95%; /* Трохи відступу від країв екрану на мобільних */
+    padding: 30px;
+    box-sizing: border-box; /* ВАЖЛИВО: щоб padding не розширював блок */
+    overflow-x: hidden; /* Ховаємо нижній скрол */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Кастомізація вертикального скролу (тонкий і темний) */
+#editAdModal .modal::-webkit-scrollbar {
+    width: 6px;
+}
+#editAdModal .modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+#editAdModal .modal::-webkit-scrollbar-thumb {
+    background-color: #4A5568;
+    border-radius: 3px;
+}
+#editAdModal .modal::-webkit-scrollbar-thumb:hover {
+    background-color: #718096;
+}
+
+/* 3. Покращення сітки полів */
+#editAdModal .form-group.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; /* Більше простору між колонками */
+    margin-bottom: 15px;
+}
+
+/* На мобільних - одна колонка */
+@media (max-width: 600px) {
+    #editAdModal .form-group.grid-2 {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* 4. Стилізація інпутів (більш контрастні) */
+#editAdModal .sp-input {
+    width: 100%;
+    box-sizing: border-box; /* Фікс ширини */
+    background-color: #232936; /* Трохи світліший фон для полів */
+    border: 1px solid #4A5568;
+    height: 42px; /* Зручніша висота */
+    padding: 0 12px;
+}
+
+#editAdModal .sp-input:focus {
+    border-color: #E40C2B;
+    background-color: #2D3748;
+    box-shadow: 0 0 0 2px rgba(228, 12, 43, 0.1);
+}
+
+/* Для textarea висота авто */
+#editAdModal textarea.sp-input {
+    height: auto;
+    padding: 10px;
+}
+
+/* 5. Заголовок */
+#editAdModal .modal-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #4A5568;
+}
+
+#editAdModal .modal-title {
+    font-size: 22px;
+    color: #E40C2B;
+}
+/* --- ВИПРАВЛЕННЯ КНОПКИ ЗАКРИТТЯ В РЕДАГУВАННІ --- */
+
+/* Робимо заголовок гнучким контейнером */
+#editAdModal .modal-header {
+    display: flex;
+    justify-content: space-between; /* Текст зліва, кнопка справа */
+    align-items: center;
+}
+
+/* Скидаємо абсолютне позиціонування для кнопки */
+#editAdModal .close-btn-abs {
+    position: static; /* Кнопка стає звичайним елементом */
+    background: transparent;
+    border: none;
+    font-size: 28px; /* Робимо хрестик більшим */
+    line-height: 1;
+    color: #A0AEC0;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 15px; /* Відступ від тексту */
+    transition: color 0.2s;
+}
+
+#editAdModal .close-btn-abs:hover {
+    color: #E40C2B; /* Червоний при наведенні */
+}
+/* --- ОПТИМІЗАЦІЯ ВІКНА "ЗБЕРЕЖЕНІ" --- */
+
+/* 1. Контейнер модалки */
+#favoritesModal .modal {
+    max-width: 800px;       /* Оптимальна ширина для 2 карток */
+    width: 95%;             /* Відступи на мобільних */
+    padding: 25px;
+    box-sizing: border-box; /* Фікс розмірів */
+    overflow: hidden;       /* Прибираємо скроли з самого контейнера */
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;       /* Обмеження висоти */
+}
+
+/* 2. Заголовок (фіксований зверху) */
+#favoritesModal .modal-header {
+    display: flex;
+    justify-content: space-between; /* Розводимо текст і хрестик */
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; /* Забороняємо заголовку стискатись */
+}
+
+#favoritesModal .modal-title {
+    font-size: 22px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Кнопка закриття (повертаємо на місце) */
+#favoritesModal .close-btn-abs {
+    position: static; /* Стає звичайним елементом */
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+#favoritesModal .close-btn-abs:hover {
+    color: var(--text);
+}
+
+/* 3. Область контенту (тільки вона скролиться) */
+.modal-content-scrollable {
+    overflow-y: auto;  /* Вертикальний скрол */
+    overflow-x: hidden; /* Ніякого горизонтального скролу! */
+    padding-right: 5px; /* Відступ для скролбару */
+    flex-grow: 1;
+}
+
+/* Кастомний скролбар */
+.modal-content-scrollable::-webkit-scrollbar { width: 6px; }
+.modal-content-scrollable::-webkit-scrollbar-track { background: transparent; }
+.modal-content-scrollable::-webkit-scrollbar-thumb { background: #4A5568; border-radius: 3px; }
+
+/* 4. Сітка карток */
+#favAdsGridModal {
+    display: grid;
+    /* Адаптивна сітка: мін. 320px на картку, заповнює простір */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 20px;
+    padding-bottom: 10px;
+}
+
+/* Стиль карток всередині модалки */
+#favAdsGridModal .ad-card {
+    margin: 0; /* Прибираємо можливі зовнішні відступи */
+    border: 1px solid var(--border);
+}
+
+/* На мобільних - одна колонка */
+@media (max-width: 700px) {
+    #favAdsGridModal {
+        grid-template-columns: 1fr;
+    }
+}
+/* --- Стиль для лічильника повідомлень --- */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #E53E3E; /* Червоний */
+    color: white;
+    border-radius: 50%;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    border: 2px solid var(--card); /* Щоб відділити від фону */
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+/* --- СТИЛІЗАЦІЯ СОРТУВАННЯ (Select) --- */
+
+#sortSelect {
+    /* 1. Прибираємо стандартний вигляд браузера */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* 2. Кольори та фон */
+    background-color: #2D3748; /* Колір карток */
+    color: #E2E8F0;            /* Світлий текст */
+    border: 1px solid #4A5568; /* Темна рамка */
+    border-radius: 8px;        /* Заокруглення */
+    
+    /* 3. Розміри та відступи */
+    padding: 8px 35px 8px 15px; /* 35px справа - місце для стрілки */
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    min-width: 140px;
+    
+    /* 4. Кастомна стрілочка (SVG) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    
+    /* 5. Анімація */
+    transition: all 0.2s ease;
+}
+
+/* Ефект наведення */
+#sortSelect:hover {
+    border-color: #A0AEC0;
+    background-color: #353F50; /* Трохи світліший фон */
+}
+
+/* Ефект фокусу (коли натиснули) */
+#sortSelect:focus {
+    border-color: #E40C2B; /* Червоний акцент */
+    box-shadow: 0 0 0 3px rgba(228, 12, 43, 0.15); /* Легке світіння */
+}
+
+/* Стилізація випадаючих опцій (працює в Chrome/Edge) */
+#sortSelect option {
+    background-color: #1A202C; /* Темний фон списку */
+    color: #E2E8F0;
+    padding: 10px;
+}
+/* --- СТИЛІЗАЦІЯ СОРТУВАННЯ (ВИПРАВЛЕНО) --- */
+
+#sortSelect {
+    /* ВАЖЛИВО: Це каже браузеру використовувати системну темну тему для цього елемента */
+    color-scheme: dark; 
+    
+    /* Прибираємо стандартний вигляд */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Дизайн */
+    background-color: #2D3748; 
+    color: #E2E8F0;            
+    border: 1px solid #4A5568; 
+    border-radius: 8px;
+    padding: 8px 35px 8px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    
+    /* Стрілочка */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    
+    transition: all 0.2s ease;
+}
+
+#sortSelect:hover {
+    border-color: #A0AEC0;
+    background-color: #353F50;
+}
+
+#sortSelect:focus {
+    border-color: #E40C2B;
+    box-shadow: 0 0 0 3px rgba(228, 12, 43, 0.15);
+}
+
+/* Стилізація опцій (додаткова спроба для браузерів, що це підтримують) */
+#sortSelect option {
+    background-color: #1A202C;
+    color: #E2E8F0;
+    padding: 10px;
+}

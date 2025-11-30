@@ -2,29 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const elements = {
         adsGrid: document.getElementById('adsGrid'),
         filterBrand: document.getElementById('filterBrand'),
-        filterModel: document.getElementById('filterModel'), // Нове
-        filterYearMin: document.getElementById('filterYearMin'), // Нове
-        filterYearMax: document.getElementById('filterYearMax'), // Нове
+        filterModel: document.getElementById('filterModel'),
+        filterYearMin: document.getElementById('filterYearMin'),
+        filterYearMax: document.getElementById('filterYearMax'),
         filterPriceMin: document.getElementById('filterPriceMin'),
         filterPriceMax: document.getElementById('filterPriceMax'),
-        filterMileageMax: document.getElementById('filterMileageMax'), // Нове
-        filterTransmission: document.getElementById('filterTransmission'), // Нове
-        filterFuel: document.getElementById('filterFuel'), // Нове
+        filterMileageMax: document.getElementById('filterMileageMax'),
+        filterTransmission: document.getElementById('filterTransmission'),
+        filterFuel: document.getElementById('filterFuel'),
         
         applyFiltersBtn: document.getElementById('applyFiltersBtn'),
-        resetFiltersBtn: document.getElementById('resetFiltersBtn'), // Нове
+        resetFiltersBtn: document.getElementById('resetFiltersBtn'),
         sortSelect: document.getElementById('sortSelect'),
         
-        // Кнопка відкриття збережених
         showFavoritesBtn: document.getElementById('showMarketFavoritesBtn'),
-        
-        // Модалка збережених
         favoritesModal: document.getElementById('favoritesModal'),
         favAdsGridModal: document.getElementById('favAdsGridModal'),
         closeFavoritesModalBtn: document.getElementById('closeFavoritesModalBtn'),
         favoritesModalBack: document.querySelector('#favoritesModal .modal-back'),
 
-        // Modal Sell
         openSellModalBtn: document.getElementById('openSellModalBtn'),
         sellModal: document.getElementById('sellModal'),
         closeSellModalBtn: document.getElementById('closeSellModalBtn'),
@@ -32,37 +28,47 @@ document.addEventListener('DOMContentLoaded', () => {
         sellBrand: document.getElementById('sellBrand'),
         sellPhotos: document.getElementById('sellPhotos'),
         photoPreview: document.getElementById('photoPreview'),
-        modalBack: document.querySelector('#sellModal .modal-back')
+        modalBack: document.querySelector('#sellModal .modal-back'),
+
+        // Чат елементи
+        chatsModal: document.getElementById('chatsModal'),
+        chatsList: document.getElementById('chatsList'),
+        chatRoom: document.getElementById('chatRoom'),
+        chatPlaceholder: document.getElementById('chatPlaceholder'),
+        messagesArea: document.getElementById('messagesArea'),
+        messageInput: document.getElementById('messageInput'),
+        sendMessageForm: document.getElementById('sendMessageForm'),
+        chatInterlocutorName: document.getElementById('chatInterlocutorName'),
+        chatCarName: document.getElementById('chatCarName'),
+        openChatsModalBtn: document.getElementById('openChatsModalBtn'),
+        closeChatsModalBtn: document.getElementById('closeChatsModalBtn')
     };
 
     let favoriteIds = [];
+    let activeChatId = null;
+    let chatInterval = null;
 
-    // --- 1. Завантаження даних ---
+    // --- 1. ЗАВАНТАЖЕННЯ ДАНИХ ---
 
     async function loadBrands() {
-        // У market.js додайте слухач для форми продажу
-        // market.js
+        // Логіка для селекту в формі продажу
         elements.sellBrand.addEventListener('change', async function() {
             const brandId = this.value;
             const modelSelect = document.getElementById('sellModel'); 
-            
-            // Очищуємо і блокуємо
             modelSelect.innerHTML = '<option value="">Завантаження...</option>';
             modelSelect.disabled = true;
-            
             if(brandId) {
                 try {
                     const res = await fetch(`http://127.0.0.1:5000/api/brands/${brandId}/models`);
                     const models = await res.json();
-                    
                     modelSelect.innerHTML = '<option value="">Оберіть модель</option>';
-                    models.forEach(m => {
-                        modelSelect.add(new Option(m.name, m.id));
-                    });
-                    modelSelect.disabled = false; // Розблокуємо
+                    models.forEach(m => modelSelect.add(new Option(m.name, m.id)));
+                    modelSelect.disabled = false;
                 } catch(e) { console.error(e); }
             }
         });
+
+        // Логіка для фільтрів
         try {
             const res = await fetch('http://127.0.0.1:5000/api/brands');
             const brands = await res.json();
@@ -84,46 +90,32 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error(e); }
     }
 
-    // Коли обрали марку -> вантажимо моделі
-    // Коли обрали марку -> вантажимо моделі
-// Коли обрали марку -> вантажимо моделі
+    // Зміна марки у фільтрі
     elements.filterBrand.addEventListener('change', async function() {
         const brandId = this.value;
         elements.filterModel.innerHTML = '<option value="">Всі моделі</option>';
-        
         if (brandId) {
             elements.filterModel.disabled = true;
             elements.filterModel.innerHTML = '<option>Завантаження...</option>';
-            
             try {
                 const res = await fetch(`http://127.0.0.1:5000/api/brands/${brandId}/models`);
-                if (!res.ok) throw new Error("Помилка");
-                
                 const models = await res.json();
-                
                 elements.filterModel.innerHTML = '<option value="">Всі моделі</option>';
                 elements.filterModel.disabled = false;
-
-                models.forEach(m => {
-                    // ВИПРАВЛЕНО: Value тепер m.id (число), а не m.name
-                    elements.filterModel.add(new Option(m.name, m.id)); 
-                });
-            } catch (e) { 
-                elements.filterModel.innerHTML = '<option value="">Помилка</option>';
-            }
+                models.forEach(m => elements.filterModel.add(new Option(m.name, m.id)));
+            } catch (e) { elements.filterModel.innerHTML = '<option value="">Помилка</option>'; }
         } else {
             elements.filterModel.disabled = true;
         }
     });
 
-    // --- 2. Завантаження оголошень з новими фільтрами ---
+    // --- 2. ЗАВАНТАЖЕННЯ ОГОЛОШЕНЬ ---
 
     async function loadAds() {
         elements.adsGrid.innerHTML = '<p>Завантаження...</p>';
-        
         const params = new URLSearchParams({
             brand_id: elements.filterBrand.value,
-            model_id: elements.filterModel.value, // <-- ВИПРАВЛЕНО: Тепер передаємо ID
+            model_id: elements.filterModel.value,
             year_min: elements.filterYearMin.value,
             year_max: elements.filterYearMax.value,
             price_min: elements.filterPriceMin.value,
@@ -138,9 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`http://127.0.0.1:5000/api/market/ads?${params}`);
             const ads = await res.json();
             renderAds(ads);
-        } catch (e) {
-            elements.adsGrid.innerHTML = '<p style="color:red">Помилка завантаження.</p>';
-        }
+        } catch (e) { elements.adsGrid.innerHTML = '<p style="color:red">Помилка завантаження.</p>'; }
     }
 
     function renderAds(ads) {
@@ -149,17 +139,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         elements.adsGrid.innerHTML = '';
-
         ads.forEach(ad => {
             const card = document.createElement('div');
             card.className = 'ad-card';
-            
-            const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
+            const uniqueParam = new Date().getTime();
+            const imgUrl = ad.main_image 
+                ? `${ad.main_image}?t=${uniqueParam}` 
+                : 'https://via.placeholder.com/300x200?text=No+Photo';
             const price = new Intl.NumberFormat('en-US').format(ad.price);
             const isFav = favoriteIds.includes(ad.id);
-            const vinBadge = ad.vin_code ? 
-                `<span style="font-size: 10px; background: #276749; color: #9AE6B4; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">✓ VIN</span>` 
-                : '';
+            const vinBadge = ad.vin_code ? `<span style="font-size: 10px; background: #276749; color: #9AE6B4; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">✓ VIN</span>` : '';
 
             card.innerHTML = `
                 <button class="ad-favorite-btn ${isFav ? 'active' : ''}" data-id="${ad.id}">
@@ -169,40 +158,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="ad-content">
                     <div class="ad-price">$ ${price}</div>
                     <div class="ad-title">${ad.brand_name} ${ad.model_name} ${ad.year}</div>
-                    <div class="ad-meta">
-                        ${vinBadge} <span>${ad.mileage} тис. км</span> • 
-                        <span>${ad.transmission}</span>
-                    </div>
-                    <div class="ad-location">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        ${ad.location}
-                    </div>
+                    <div class="ad-meta">${vinBadge} <span>${ad.mileage} тис. км</span> • <span>${ad.transmission}</span></div>
+                    <div class="ad-location"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${ad.location}</div>
                 </div>
             `;
-            
             card.addEventListener('click', (e) => {
-                if (!e.target.closest('.ad-favorite-btn')) {
-                    window.location.href = `market-detail.html?id=${ad.id}`;
-                }
+                if (!e.target.closest('.ad-favorite-btn')) window.location.href = `market-detail.html?id=${ad.id}`;
             });
-
             const favBtn = card.querySelector('.ad-favorite-btn');
-            favBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(ad.id, favBtn);
-            });
-            
+            favBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(ad.id, favBtn); });
             elements.adsGrid.appendChild(card);
         });
     }
 
     async function toggleFavorite(id, btn) {
         const token = localStorage.getItem('RightWheel_access_token');
-        if (!token) {
-            if(typeof showLoginModal === 'function') showLoginModal();
-            return;
-        }
-        
+        if (!token) { if(typeof showLoginModal === 'function') showLoginModal(); return; }
         btn.classList.toggle('active');
         try {
             const res = await fetch('http://127.0.0.1:5000/api/market/favorites', {
@@ -217,44 +188,255 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { btn.classList.toggle('active'); }
     }
 
-    // --- 2. ЛОГІКА МОДАЛЬНОГО ВІКНА ЗБЕРЕЖЕНИХ ---
+    // --- 3. ЧАТИ (Виправлено логіку видалення) ---
 
-    async function openFavoritesModal() {
+    // Функція підтвердження
+    function showCustomConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customConfirmModal');
+            
+            // Якщо модального вікна немає в HTML (забули додати), використовуємо звичайний confirm
+            if (!modal) {
+                const result = confirm(message);
+                resolve(result);
+                return;
+            }
+
+            const msgElement = document.getElementById('customConfirmMessage');
+            const btnOk = document.getElementById('confirmOkBtn');
+            const btnCancel = document.getElementById('confirmCancelBtn');
+            const back = modal.querySelector('.modal-back');
+
+            msgElement.textContent = message;
+            modal.style.display = 'flex';
+
+            // Очищуємо старі лісенери, клонуючи кнопки (щоб не натискалось 10 разів)
+            const newBtnOk = btnOk.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            const newBack = back.cloneNode(true);
+            
+            btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+            back.parentNode.replaceChild(newBack, back);
+
+            const close = (result) => {
+                modal.style.display = 'none';
+                resolve(result);
+            };
+
+            newBtnOk.addEventListener('click', () => close(true));
+            newBtnCancel.addEventListener('click', () => close(false));
+            newBack.addEventListener('click', () => close(false));
+        });
+    }
+
+    // Глобальна функція видалення (щоб можна було викликати з onclick в HTML)
+    window.deleteChat = async function(event, chatId) {
+        event.stopPropagation();
+        
+        const isConfirmed = await showCustomConfirm('Видалити цей чат? Історія буде втрачена.');
+        if (!isConfirmed) return;
+
         const token = localStorage.getItem('RightWheel_access_token');
-        if (!token) {
+        try {
+            const res = await fetch(`http://127.0.0.1:5000/api/chats/${chatId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                // Видаляємо з DOM
+                const item = document.getElementById(`chat-item-${chatId}`);
+                if (item) item.remove();
+                
+                // Якщо цей чат був відкритий - закриваємо
+                if (activeChatId == chatId) {
+                    elements.chatRoom.style.display = 'none';
+                    elements.chatPlaceholder.style.display = 'flex';
+                    activeChatId = null;
+                    if(chatInterval) clearInterval(chatInterval);
+                }
+            } else {
+                console.error(await res.json());
+                alert('Помилка видалення. Перевірте консоль.');
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    // Відкриття списку чатів
+    elements.openChatsModalBtn?.addEventListener('click', () => openChatsModal());
+    elements.closeChatsModalBtn?.addEventListener('click', () => {
+        elements.chatsModal.style.display = 'none';
+        if(chatInterval) clearInterval(chatInterval);
+    });
+
+    // Перевірка URL для відкриття конкретного чату
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('open_chat')) {
+        const chatId = urlParams.get('open_chat');
+        openChatsModal(chatId);
+        window.history.replaceState({}, document.title, "market.html");
+    }
+
+    async function openChatsModal(startChatId = null) {
+        if (!localStorage.getItem('RightWheel_access_token')) {
             if(typeof showLoginModal === 'function') showLoginModal();
             return;
         }
+        elements.chatsModal.style.display = 'flex';
+        await loadChatsList(startChatId);
+    }
 
+    async function loadChatsList(autoSelectId = null) {
+        const token = localStorage.getItem('RightWheel_access_token');
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/chats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const chats = await res.json();
+            
+            elements.chatsList.innerHTML = '';
+            if (chats.length === 0) {
+                elements.chatsList.innerHTML = '<p style="padding:15px; color:#aaa; text-align:center;">У вас немає активних чатів</p>';
+                return;
+            }
+
+            chats.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = 'chat-item';
+                item.id = `chat-item-${chat.chat_id}`;
+                if (activeChatId == chat.chat_id) item.classList.add('active');
+                
+                // === ВИПРАВЛЕННЯ: Додаємо timestamp, щоб оновити кеш ===
+                const uniqueParam = new Date().getTime();
+                const img = chat.car_image 
+                    ? `${chat.car_image}?t=${uniqueParam}` 
+                    : 'https://via.placeholder.com/40';
+                
+                item.innerHTML = `
+                    <img src="${img}" class="chat-item-img">
+                    <div class="chat-item-info">
+                        <div class="chat-item-header">
+                            <div class="chat-item-name">${chat.interlocutor_name}</div>
+                            <button class="delete-chat-btn" onclick="deleteChat(event, ${chat.chat_id})" title="Видалити чат">✕</button>
+                        </div>
+                        <div class="chat-item-car">${chat.car_name}</div>
+                        <div class="chat-item-last">${chat.last_message || '...'}</div>
+                    </div>
+                `;
+                
+                item.onclick = (e) => {
+                    if (!e.target.classList.contains('delete-chat-btn')) {
+                        openChatRoom(chat);
+                    }
+                };
+                elements.chatsList.appendChild(item);
+                
+                if (autoSelectId && chat.chat_id == autoSelectId) {
+                    openChatRoom(chat);
+                }
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function openChatRoom(chat) {
+        activeChatId = chat.chat_id;
+        elements.chatPlaceholder.style.display = 'none';
+        elements.chatRoom.style.display = 'flex';
+        
+        elements.chatInterlocutorName.textContent = chat.interlocutor_name;
+        elements.chatCarName.textContent = chat.car_name;
+        
+        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+        const activeItem = document.getElementById(`chat-item-${chat.chat_id}`);
+        if(activeItem) activeItem.classList.add('active');
+
+        loadMessages();
+        if(chatInterval) clearInterval(chatInterval);
+        chatInterval = setInterval(loadMessages, 3000);
+    }
+
+    async function loadMessages() {
+        if(!activeChatId) return;
+        const token = localStorage.getItem('RightWheel_access_token');
+        const myUsername = localStorage.getItem('RightWheel_loggedInUser');
+        
+        try {
+            const res = await fetch(`http://127.0.0.1:5000/api/chats/${activeChatId}/messages`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const messages = await res.json();
+            
+            const area = elements.messagesArea;
+            const wasScrolledBottom = area.scrollHeight - area.scrollTop === area.clientHeight;
+            
+            area.innerHTML = messages.map(msg => `
+                <div class="message-bubble ${msg.username === myUsername ? 'my' : 'other'}">
+                    ${msg.content}
+                </div>
+            `).join('');
+            
+            if (wasScrolledBottom || messages.length === 1) {
+                area.scrollTop = area.scrollHeight;
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    elements.sendMessageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = elements.messageInput.value.trim();
+        if(!text || !activeChatId) return;
+        
+        const token = localStorage.getItem('RightWheel_access_token');
+        const area = elements.messagesArea;
+        
+        // Оптимістичне додавання
+        area.innerHTML += `<div class="message-bubble my" style="opacity:0.5">${text}</div>`;
+        area.scrollTop = area.scrollHeight;
+        elements.messageInput.value = '';
+
+        try {
+            await fetch(`http://127.0.0.1:5000/api/chats/${activeChatId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ content: text })
+            });
+            loadMessages();
+        } catch(e) { console.error(e); }
+    });
+
+    // --- 4. ІНШІ ФУНКЦІЇ ---
+    
+    // Модалка збережених
+    async function openFavoritesModal() {
+        const token = localStorage.getItem('RightWheel_access_token');
+        if (!token) { if(typeof showLoginModal === 'function') showLoginModal(); return; }
         elements.favoritesModal.style.display = 'flex';
         elements.favAdsGridModal.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Завантаження...</p>';
-
         try {
             const res = await fetch('http://127.0.0.1:5000/api/market/favorites/list', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const ads = await res.json();
             renderFavoritesInModal(ads);
-        } catch (e) {
-            elements.favAdsGridModal.innerHTML = '<p style="color:red">Помилка завантаження</p>';
-        }
+        } catch (e) { elements.favAdsGridModal.innerHTML = '<p style="color:red">Помилка завантаження</p>'; }
     }
 
     function renderFavoritesInModal(ads) {
-        if (!ads.length) {
-            elements.favAdsGridModal.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--muted);">Список порожній</p>';
-            return;
-        }
-
+        if (!ads.length) { elements.favAdsGridModal.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--muted);">Список порожній</p>'; return; }
         elements.favAdsGridModal.innerHTML = '';
-
         ads.forEach(ad => {
             const card = document.createElement('div');
             card.className = 'ad-card';
-            card.id = `modal-fav-${ad.id}`; // Для видалення
+            card.id = `modal-fav-${ad.id}`;
             
             const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
             const price = new Intl.NumberFormat('en-US').format(ad.price);
+
+            // ВИПРАВЛЕННЯ ТУТ: Перевірка на undefined
+            const brand = ad.brand_name || '';
+            const model = ad.model_name || ''; // Якщо моделі немає, буде пустий рядок
+            const year = ad.year || '';
 
             card.innerHTML = `
                 <button class="delete-fav-btn" title="Видалити">
@@ -263,21 +445,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 <img src="${imgUrl}" class="ad-image" loading="lazy">
                 <div class="ad-content">
                     <div class="ad-price">$ ${price}</div>
-                    <div class="ad-title">${ad.brand_name} ${ad.model_name} ${ad.year}</div>
+                    <div class="ad-title">${brand} ${model} ${year}</div>
                     <div class="ad-meta">
                         <span>${ad.mileage} тис. км</span> • <span>${ad.transmission}</span>
                     </div>
                 </div>
             `;
-            
-            // Клік по картці
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('.delete-fav-btn')) {
                     window.location.href = `market-detail.html?id=${ad.id}`;
                 }
             });
 
-            // Клік по смітнику
             card.querySelector('.delete-fav-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 removeFromFavorites(ad.id);
@@ -289,15 +468,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function removeFromFavorites(id) {
         const token = localStorage.getItem('RightWheel_access_token');
-        
-        // Видаляємо з інтерфейсу модалки
         const cardModal = document.getElementById(`modal-fav-${id}`);
         if(cardModal) cardModal.remove();
-
-        // Оновлюємо основний список (знімаємо червоне сердечко)
         favoriteIds = favoriteIds.filter(fid => fid !== id);
-        loadAds(); // Перемальовуємо головний список
-
+        loadAds();
         try {
             await fetch('http://127.0.0.1:5000/api/market/favorites', {
                 method: 'POST',
@@ -308,23 +482,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeFavoritesModal() { elements.favoritesModal.style.display = 'none'; }
-
-    // Слухачі для модалки збережених
     if (elements.showFavoritesBtn) elements.showFavoritesBtn.addEventListener('click', openFavoritesModal);
     if (elements.closeFavoritesModalBtn) elements.closeFavoritesModalBtn.addEventListener('click', closeFavoritesModal);
     if (elements.favoritesModalBack) elements.favoritesModalBack.addEventListener('click', closeFavoritesModal);
 
-
-    // --- 3. Логіка форми продажу (без змін) ---
+    // Модалка продажу
     function openSellModal() {
-        if (!localStorage.getItem('RightWheel_access_token')) {
-            if(typeof showLoginModal === 'function') showLoginModal();
-            return;
-        }
+        if (!localStorage.getItem('RightWheel_access_token')) { if(typeof showLoginModal === 'function') showLoginModal(); return; }
         elements.sellModal.style.display = 'flex';
     }
     function closeSellModal() { elements.sellModal.style.display = 'none'; }
-    
     elements.sellPhotos.addEventListener('change', function() {
         elements.photoPreview.innerHTML = '';
         Array.from(this.files).forEach(file => {
@@ -335,87 +502,94 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         });
     });
-
-    // Відправка форми (ОНОВЛЕНО)
     elements.sellForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const formData = new FormData(elements.sellForm);
         const token = localStorage.getItem('RightWheel_access_token');
-        
-        // --- ЗБИРАЄМО КОМПЛЕКТАЦІЮ В JSON ---
-        const equipment = {
-            security: [],
-            comfort: [],
-            media: []
-        };
-
-        // Проходимось по всіх чекнутих чекбоксах
+        const equipment = { security: [], comfort: [], media: [] };
         elements.sellForm.querySelectorAll('input[name="opt_security"]:checked').forEach(el => equipment.security.push(el.value));
         elements.sellForm.querySelectorAll('input[name="opt_comfort"]:checked').forEach(el => equipment.comfort.push(el.value));
         elements.sellForm.querySelectorAll('input[name="opt_media"]:checked').forEach(el => equipment.media.push(el.value));
-
-        // Додаємо JSON стрічку в FormData
         formData.append('equipment', JSON.stringify(equipment));
-        // -------------------------------------
-
         const btn = elements.sellForm.querySelector('button[type="submit"]');
-        btn.textContent = 'Публікація...';
-        btn.disabled = true;
-
+        btn.textContent = 'Публікація...'; btn.disabled = true;
         try {
             const res = await fetch('http://127.0.0.1:5000/api/market/ads', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
-            
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            
-            showInfoModal('Успіх', 'Оголошення додано!', 'success');
-            closeSellModal();
-            elements.sellForm.reset();
-            elements.photoPreview.innerHTML = '';
-            loadAds();
-
-        } catch (error) {
-            showInfoModal('Помилка', error.message, 'error');
-        } finally {
-            btn.textContent = 'Розмістити оголошення';
-            btn.disabled = false;
-        }
+            alert('Оголошення додано!'); closeSellModal(); elements.sellForm.reset(); elements.photoPreview.innerHTML = ''; loadAds();
+        } catch (error) { alert(error.message); } finally { btn.textContent = 'Розмістити оголошення'; btn.disabled = false; }
     });
-
     elements.openSellModalBtn.addEventListener('click', openSellModal);
     elements.closeSellModalBtn.addEventListener('click', closeSellModal);
     elements.modalBack.addEventListener('click', closeSellModal);
     elements.applyFiltersBtn.addEventListener('click', () => loadAds());
+    elements.resetFiltersBtn?.addEventListener('click', () => {
+        elements.filterBrand.value = ""; elements.filterModel.innerHTML = '<option value="">Всі моделі</option>'; elements.filterModel.disabled = true;
+        elements.filterTransmission.value = ""; elements.filterFuel.value = ""; elements.filterYearMin.value = ""; elements.filterYearMax.value = "";
+        elements.filterPriceMin.value = ""; elements.filterPriceMax.value = ""; elements.filterMileageMax.value = ""; loadAds();
+    });
     elements.sortSelect.addEventListener('change', () => loadAds());
 
-    // --- Кнопка "Скинути фільтри" ---
-    if (elements.resetFiltersBtn) {
-        elements.resetFiltersBtn.addEventListener('click', () => {
-            // 1. Скидаємо селекти
-            elements.filterBrand.value = "";
+    // --- ОНОВЛЕННЯ ДЛЯ СПОВІЩЕНЬ ---
+
+    // 1. Функція перевірки непрочитаних (Polling)
+    async function checkUnreadMessages() {
+        const token = localStorage.getItem('RightWheel_access_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/chats/unread', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
             
-            // Спеціальна обробка для Моделі (блокуємо її)
-            elements.filterModel.innerHTML = '<option value="">Всі моделі</option>';
-            elements.filterModel.disabled = true; 
+            const badge = document.getElementById('unreadBadge');
+            if (data.count > 0) {
+                badge.style.display = 'inline-block';
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) { console.error("Error checking unread:", e); }
+    }
 
-            elements.filterTransmission.value = "";
-            elements.filterFuel.value = "";
+    // Запускаємо перевірку кожні 5 секунд
+    setInterval(checkUnreadMessages, 5000);
+    // І один раз при завантаженні
+    checkUnreadMessages();
 
-            // 2. Скидаємо інпути (числа)
-            elements.filterYearMin.value = "";
-            elements.filterYearMax.value = "";
-            elements.filterPriceMin.value = "";
-            elements.filterPriceMax.value = "";
-            elements.filterMileageMax.value = "";
 
-            // 3. Перезавантажуємо оголошення без фільтрів
-            loadAds();
+    // 2. Оновлюємо функцію openChatRoom, щоб позначати прочитаним
+    // Знайдіть існуючу функцію openChatRoom і додайте туди виклик API:
+    
+    // ... (початок функції openChatRoom)
+    async function openChatRoom(chat) {
+        activeChatId = chat.chat_id;
+        // ... (ваш старий код: відображення блоків, імен) ...
+        document.getElementById('chatPlaceholder').style.display = 'none';
+        document.getElementById('chatRoom').style.display = 'flex';
+        document.getElementById('chatInterlocutorName').textContent = chat.interlocutor_name;
+        document.getElementById('chatCarName').textContent = chat.car_name;
+        
+        // ВІДПРАВЛЯЄМО ЗАПИТ: "Я прочитав цей чат"
+        const token = localStorage.getItem('RightWheel_access_token');
+        fetch(`http://127.0.0.1:5000/api/chats/${chat.chat_id}/read`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).then(() => {
+            // Одразу оновлюємо лічильник (зменшуємо його)
+            checkUnreadMessages();
         });
+
+        // ... (решта вашого старого коду: loadMessages, setInterval) ...
+        loadMessages();
+        if(chatInterval) clearInterval(chatInterval);
+        chatInterval = setInterval(loadMessages, 3000);
     }
 
     // Старт
