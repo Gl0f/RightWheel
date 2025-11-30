@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filterMileageMax: document.getElementById('filterMileageMax'),
         filterTransmission: document.getElementById('filterTransmission'),
         filterFuel: document.getElementById('filterFuel'),
+        filterBodyType: document.getElementById('filterBodyType'),
         
         applyFiltersBtn: document.getElementById('applyFiltersBtn'),
         resetFiltersBtn: document.getElementById('resetFiltersBtn'),
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mileage_max: elements.filterMileageMax.value,
             transmission: elements.filterTransmission.value,
             engine: elements.filterFuel.value,
+            body_type: elements.filterBodyType.value,
             sort: elements.sortSelect.value
         });
 
@@ -530,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.applyFiltersBtn.addEventListener('click', () => loadAds());
     elements.resetFiltersBtn?.addEventListener('click', () => {
         elements.filterBrand.value = ""; elements.filterModel.innerHTML = '<option value="">Всі моделі</option>'; elements.filterModel.disabled = true;
-        elements.filterTransmission.value = ""; elements.filterFuel.value = ""; elements.filterYearMin.value = ""; elements.filterYearMax.value = "";
+        elements.filterTransmission.value = ""; elements.filterFuel.value = "";elements.filterBodyType.value = ""; elements.filterYearMin.value = ""; elements.filterYearMax.value = "";
         elements.filterPriceMin.value = ""; elements.filterPriceMax.value = ""; elements.filterMileageMax.value = ""; loadAds();
     });
     elements.sortSelect.addEventListener('change', () => loadAds());
@@ -591,6 +593,191 @@ document.addEventListener('DOMContentLoaded', () => {
         if(chatInterval) clearInterval(chatInterval);
         chatInterval = setInterval(loadMessages, 3000);
     }
+
+    // --- ЛОГІКА ЗБЕРЕЖЕНИХ ПОШУКІВ ---
+
+    const savedSearchesWrapper = document.getElementById('savedSearchesWrapper');
+    const savedSearchesContainer = document.getElementById('savedSearchesContainer');
+    const saveSearchBtn = document.getElementById('saveSearchBtn');
+
+    // 1. Завантаження списку при старті
+    async function loadSavedSearches() {
+        const token = localStorage.getItem('RightWheel_access_token');
+        if (!token) return;
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/me/searches', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const searches = await res.json();
+
+            if (searches.length > 0) {
+                savedSearchesWrapper.style.display = 'block';
+                savedSearchesContainer.innerHTML = searches.map(s => `
+                    <div class="search-chip" onclick="applySavedSearch('${encodeURIComponent(JSON.stringify(s.criteria))}')">
+                        <span>${s.title}</span>
+                        <button class="delete-search-btn" onclick="deleteSavedSearch(event, ${s.id})">✕</button>
+                    </div>
+                `).join('');
+            } else {
+                savedSearchesWrapper.style.display = 'none';
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // 2. Збереження поточного пошуку (АВТОМАТИЧНА НАЗВА)
+    if (saveSearchBtn) {
+        saveSearchBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('RightWheel_access_token');
+            if (!token) {
+                if(typeof showLoginModal === 'function') showLoginModal();
+                return;
+            }
+
+            // Збираємо критерії
+            const criteria = {
+                brand_id: elements.filterBrand.value,
+                model_id: elements.filterModel.value,
+                year_min: elements.filterYearMin.value,
+                year_max: elements.filterYearMax.value,
+                price_min: elements.filterPriceMin.value,
+                price_max: elements.filterPriceMax.value,
+                fuel: elements.filterFuel.value,
+                transmission: elements.filterTransmission.value,
+                body_type: elements.filterBodyType ? elements.filterBodyType.value : "" 
+            };
+
+            // --- ГЕНЕРАЦІЯ НАЗВИ ---
+            let titleParts = [];
+
+            // 1. Марка та Модель
+            const brandText = elements.filterBrand.options[elements.filterBrand.selectedIndex]?.text;
+            const modelText = elements.filterModel.options[elements.filterModel.selectedIndex]?.text;
+
+            if (elements.filterBrand.value) {
+                titleParts.push(brandText);
+                // Додаємо модель, тільки якщо обрана не "Всі моделі"
+                if (elements.filterModel.value) {
+                    titleParts.push(modelText);
+                }
+            } else {
+                titleParts.push("Всі авто");
+            }
+
+            // 2. Роки
+            const yMin = elements.filterYearMin.value;
+            const yMax = elements.filterYearMax.value;
+            if (yMin && yMax) {
+                titleParts.push(`${yMin}-${yMax}`);
+            } else if (yMin) {
+                titleParts.push(`від ${yMin} р.`);
+            } else if (yMax) {
+                titleParts.push(`до ${yMax} р.`);
+            }
+
+            // 3. Інше (опціонально, можна розкоментувати)
+            // if (elements.filterFuel.value) titleParts.push(elements.filterFuel.value);
+
+            const autoTitle = titleParts.join(" ");
+            // -----------------------
+
+            // Блокуємо кнопку на час запиту
+            const originalText = saveSearchBtn.textContent;
+            saveSearchBtn.textContent = "Збереження...";
+            saveSearchBtn.disabled = true;
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/me/searches', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ title: autoTitle, criteria: criteria })
+                });
+                
+                if (res.ok) {
+                    loadSavedSearches(); // Оновлюємо список чіпів
+                    // Використовуємо кастомне повідомлення замість alert
+                    if (typeof showInfoModal === 'function') {
+                        showInfoModal('Збережено', `Пошук "${autoTitle}" додано до швидкого доступу.`, 'success');
+                    }
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Помилка збереження');
+                }
+            } catch (e) { 
+                console.error(e); 
+            } finally {
+                saveSearchBtn.textContent = originalText;
+                saveSearchBtn.disabled = false;
+            }
+        });
+    }
+
+    // 3. Застосування збереженого пошуку (Оновлена версія)
+    window.applySavedSearch = async (criteriaStr) => {
+        const criteria = JSON.parse(decodeURIComponent(criteriaStr));
+        
+        // 1. Скидаємо всі фільтри
+        elements.resetFiltersBtn.click(); // Це очистить все і завантажить дефолтний список
+
+        // 2. Встановлюємо прості поля
+        if (criteria.year_min) elements.filterYearMin.value = criteria.year_min;
+        if (criteria.year_max) elements.filterYearMax.value = criteria.year_max;
+        if (criteria.price_min) elements.filterPriceMin.value = criteria.price_min;
+        if (criteria.price_max) elements.filterPriceMax.value = criteria.price_max;
+        if (criteria.fuel) elements.filterFuel.value = criteria.fuel;
+        if (criteria.body_type) elements.filterBodyType.value = criteria.body_type;
+        if (criteria.transmission) elements.filterTransmission.value = criteria.transmission;
+        if (criteria.mileage_max) elements.filterMileageMax.value = criteria.mileage_max; // Додано пробіг, якщо він є
+
+        // 3. Складна логіка для Марки та Моделі
+        if (criteria.brand_id) {
+            elements.filterBrand.value = criteria.brand_id;
+            
+            // Вручну викликаємо логіку завантаження моделей
+            elements.filterModel.innerHTML = '<option>Завантаження...</option>';
+            elements.filterModel.disabled = true;
+
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/api/brands/${criteria.brand_id}/models`);
+                const models = await res.json();
+                
+                elements.filterModel.innerHTML = '<option value="">Всі моделі</option>';
+                models.forEach(m => elements.filterModel.add(new Option(m.name, m.id)));
+                elements.filterModel.disabled = false;
+
+                // Тільки тепер, коли список готовий, вибираємо модель
+                if (criteria.model_id) {
+                    elements.filterModel.value = criteria.model_id;
+                }
+            } catch (e) {
+                console.error("Помилка завантаження моделей при автозаповненні:", e);
+            }
+        }
+
+        // 4. Завантажуємо оголошення з новими фільтрами
+        loadAds();
+        
+        // Візуал: прокрутка догори до результатів
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // 4. Видалення пошуку
+    window.deleteSavedSearch = async (event, id) => {
+        event.stopPropagation(); // Щоб не спрацював клік на сам чіп
+        if (!confirm('Видалити цей збережений пошук?')) return;
+        
+        const token = localStorage.getItem('RightWheel_access_token');
+        try {
+            await fetch(`http://127.0.0.1:5000/api/me/searches/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            loadSavedSearches();
+        } catch (e) { console.error(e); }
+    };
+
+    // Запускаємо при старті
+    loadSavedSearches();
 
     // Старт
     loadBrands();

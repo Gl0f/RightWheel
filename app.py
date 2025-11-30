@@ -14,8 +14,9 @@ from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import date, datetime, timezone, timedelta
 from werkzeug.utils import secure_filename
+import re
 
 # --- ІМПОРТИ ДЛЯ НОВИН ---
 import requests 
@@ -56,6 +57,8 @@ app.json.ensure_ascii = False
 app.config['JSON_AS_ASCII'] = False
 
 app.config["JWT_SECRET_KEY"] = "vova-secret-key-for-project-2025"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+
 jwt = JWTManager(app)
 
 load_dotenv()
@@ -1174,47 +1177,72 @@ def get_car_of_the_day():
 #        МАРШРУТИ ДЛЯ НОВИН (API)
 # ==========================================
 
+# --- ВСТАВИТИ В app.py ЗАМІСТЬ СТАРОЇ ФУНКЦІЇ get_news ---
+
 @app.route('/api/news')
 def get_news():
-    """
-    Отримує свіжі автомобільні новини з NewsAPI.
-    """
-    
-    # --- ВАЖЛИВО: Вставте свій API ключ нижче ---
+    # --- ВАШ API KEY ---
     NEWS_API_KEY = "65ef854a701444969fdb63b9e26a6b45"
-    # --------------------------------------------
-
-    if NEWS_API_KEY == "ТУТ_ВСТАВТЕ_ВАШ_КЛЮЧ":
-        print("УВАГА: Ви не вставили ключ NewsAPI в app.py!")
-        return jsonify([])
-
-    url = f"https://newsapi.org/v2/everything?q=автомобіль OR bmw OR toyota OR volkswagen&language=uk&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
+    
+    # Запит до API (шукаємо ширше, щоб потім відфільтрувати)
+    url = f"https://newsapi.org/v2/everything?q=автомобіль OR машина OR автопром OR кросовер OR електрокар OR bmw OR toyota&language=uk&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
 
     try:
         response = requests.get(url)
         data = response.json()
 
         if data.get('status') != 'ok':
-            print(f"NewsAPI Error: {data.get('message')}")
             return jsonify({"error": "Помилка зовнішнього API"}), 500
 
         articles = data.get('articles', [])
         
+        # --- СПИСОК ОБОВ'ЯЗКОВИХ СЛІВ (ФІЛЬТР) ---
+        # Новина попаде на сайт ТІЛЬКИ якщо в ній є хоча б одне з цих слів
+        CAR_KEYWORDS = [
+            "авто", "bmw", "audi", "toyota", "mercedes", "ford", "volkswagen", 
+            "honda", "tesla", "nissan", "hyundai", "mazda", "lexus", "volvo",
+            "двигун", "кросовер", "седан", "позашляховик",
+            "електрокар", "гібрид", "тест-драйв", "парковк", "водій", "штраф", "дтп", 
+            "палив", "бензин", "дизель", "ремонт", "гальм"
+        ]
+
         formatted_news = []
+        
         for index, article in enumerate(articles):
+            # 1. Пропускаємо видалені або без фото
             if not article.get('urlToImage') or article.get('title') == '[Removed]':
                 continue
-                
+            
+            title = (article.get('title') or "").lower()
+            desc = (article.get('description') or "").lower()
+            
+            # 2. ЖОРСТКА ПЕРЕВІРКА НА ТЕМУ АВТО
+            # Якщо жодного ключового слова немає ні в заголовку, ні в описі - пропускаємо
+            is_car_related = any(word in title for word in CAR_KEYWORDS) or \
+                             any(word in desc for word in CAR_KEYWORDS)
+            
+            if not is_car_related:
+                continue
+
+            # 3. Очищення тексту від сміття (як робили раніше)
+            raw_content = article['description'] or article['content'] or ""
+            if not re.search('[а-яА-Яa-zA-Z]', raw_content):
+                clean_content = "Натисніть, щоб переглянути деталі..."
+            else:
+                clean_content = raw_content
+
             formatted_news.append({
                 "id": index,
                 "title": article['title'],
-                "content": article['description'] or article['content'] or "",
+                "content": clean_content,
                 "image_url": article['urlToImage'],
                 "link_url": article['url'],
-                "published_at": article['publishedAt']
+                "published_at": article['publishedAt'],
+                "source": article['source']['name'] # Додамо джерело
             })
             
-            if len(formatted_news) >= 9:
+            # Обмежуємо кількість (наприклад, 12 новин)
+            if len(formatted_news) >= 12:
                 break
 
         return jsonify(formatted_news)
@@ -1465,6 +1493,7 @@ def get_market_ads():
     mileage_max = request.args.get('mileage_max')
     transmission = request.args.get('transmission')
     engine = request.args.get('engine')
+    body_type = request.args.get('body_type')
     sort = request.args.get('sort', 'newest')
 
     # === ОНОВЛЕНИЙ ЗАПИТ (ВИПРАВЛЕНО ФОТО) ===
@@ -1517,6 +1546,10 @@ def get_market_ads():
     if engine:
         query += " AND l.engine_type = %s"
         params.append(engine)
+
+    if body_type:
+        query += " AND l.body_type = %s"
+        params.append(body_type)
 
     if sort == 'cheaper':
         query += " ORDER BY l.price ASC"
@@ -2067,6 +2100,108 @@ def mark_chat_read(chat_id):
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
+# --- API ЗБЕРЕЖЕНИХ ПОШУКІВ ---
+
+@app.route('/api/me/searches', methods=['GET'])
+@jwt_required()
+def get_my_searches():
+    current_user_id = get_jwt_identity()
+    
+    query = "SELECT id, title, criteria, created_at FROM saved_searches WHERE user_id = %s ORDER BY created_at DESC"
+    searches, error = fetch_query(query, (current_user_id,))
+    
+    if error:
+        return jsonify({"error": error}), 500
+        
+    # Якщо база повертає criteria як рядок, треба розпарсити його назад у JSON
+    # Якщо ви використовуєте JSONB у Postgres і psycopg2.extras, це може робитись автоматично,
+    # але про всяк випадок додамо перевірку:
+    for s in searches:
+        if isinstance(s['criteria'], str):
+            try:
+                s['criteria'] = json.loads(s['criteria'])
+            except:
+                pass 
+
+    return jsonify(searches)
+
+@app.route('/api/me/searches', methods=['POST'])
+@jwt_required()
+def save_search():
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    title = data.get('title')
+    criteria = data.get('criteria') # Це словник (dict)
+
+    if not title or not criteria:
+        return jsonify({"error": "Неповні дані"}), 400
+
+    # Конвертуємо словник критеріїв у JSON-рядок для збереження
+    criteria_json = json.dumps(criteria)
+
+    query = "INSERT INTO saved_searches (user_id, title, criteria) VALUES (%s, %s, %s)"
+    success, error = db_execute(query, (current_user_id, title, criteria_json))
+
+    if not success:
+        return jsonify({"error": error}), 500
+
+    return jsonify({"message": "Пошук збережено"}), 201
+
+@app.route('/api/me/searches/<int:search_id>', methods=['DELETE'])
+@jwt_required()
+def delete_saved_search(search_id):
+    current_user_id = get_jwt_identity()
+    
+    # Видаляємо тільки якщо цей пошук належить поточному користувачу
+    query = "DELETE FROM saved_searches WHERE id = %s AND user_id = %s"
+    success, error = db_execute(query, (search_id, current_user_id))
+    
+    if not success:
+        return jsonify({"error": error}), 500
+        
+    return jsonify({"message": "Пошук видалено"}), 200
+
+# --- API ДЛЯ ОГОЛОШЕНЬ КОРИСТУВАЧА ---
+
+# 1. Для "Мого кабінету" (захищений, бере ID з токена)
+@app.route('/api/me/ads', methods=['GET'])
+@jwt_required()
+def get_my_ads():
+    current_user_id = get_jwt_identity()
+    return fetch_user_ads(current_user_id)
+
+# 2. Для Публічного профілю (відкритий, бере ID з URL)
+@app.route('/api/users/<int:user_id>/ads', methods=['GET'])
+def get_public_user_ads(user_id):
+    return fetch_user_ads(user_id)
+
+# Спільна функція для запиту до бази
+def fetch_user_ads(user_id):
+    query = """
+        SELECT l.id, l.price, l.year,
+               b.name as brand_name, 
+               m.name as model_name,
+               (
+                   SELECT image_url 
+                   FROM listing_images li 
+                   WHERE li.listing_id = l.id 
+                   ORDER BY li.is_main DESC, li.id ASC 
+                   LIMIT 1
+               ) as main_image
+        FROM listings l
+        JOIN brands b ON l.brand_id = b.id
+        JOIN models m ON l.model_id = m.id
+        WHERE l.user_id = %s
+        ORDER BY l.created_at DESC
+    """
+    ads, error = fetch_query(query, (user_id,))
+    
+    if error:
+        return jsonify({"error": error}), 500
+        
+    return jsonify(ads)
 
 # --- ЗАПУСК СЕРВЕРА ---
 if __name__ == '__main__':

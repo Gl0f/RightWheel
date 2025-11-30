@@ -805,11 +805,7 @@ function updateComparisonList(carId, isSelected) {
 
     if (isSelected) {
         if (index === -1) { // Якщо ще не додано
-            if (currentComparisonList.length >= 4) {
-                showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-                // Важливо: Не намагаємось знайти checkbox тут, бо ми можемо бути на іншій сторінці.
-                return; // Виходимо, якщо ліміт досягнуто
-            }
+            
             currentComparisonList.push(carIdStr); // Додаємо до актуального списку
             console.log('Додано до порівняння (в app.js):', carIdStr, 'Новий список:', currentComparisonList);
         } else {

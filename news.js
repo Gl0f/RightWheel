@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     async function loadAndRenderNews() {
-        const swiperWrapper = document.querySelector('#newsSwiper .swiper-wrapper');
-        const swiperContainer = document.getElementById('newsSwiper');
+        // Шукаємо контейнер сітки (Grid), а не слайдер
+        const newsGrid = document.getElementById('newsGrid');
 
-        if (!swiperWrapper || !swiperContainer) return;
+        if (!newsGrid) return;
 
-        swiperWrapper.innerHTML = '<div style="padding: 20px; color: var(--muted);">Завантаження свіжих новин...</div>';
+        // Стан завантаження
+        newsGrid.innerHTML = '<p style="padding: 20px; color: var(--muted); grid-column: 1/-1;">Завантаження свіжих новин...</p>';
 
         try {
             const response = await fetch('http://127.0.0.1:5000/api/news');
@@ -17,87 +18,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newsData = await response.json();
 
+            // Якщо новин немає
             if (!newsData || newsData.length === 0) {
-                swiperContainer.innerHTML = `
-                    <div class="empty-state" style="text-align: center; padding: 40px; width: 100%;">
+                newsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 40px;">
                         <h3 style="color: var(--muted);">Новин наразі немає.</h3>
                     </div>`;
-                swiperContainer.classList.remove('swiper'); 
                 return;
             }
 
-            // --- ГЕНЕРАЦІЯ СЛАЙДІВ ---
-            swiperWrapper.innerHTML = newsData.map(article => {
+            // --- ГЕНЕРАЦІЯ СІТКИ НОВИН ---
+            newsGrid.innerHTML = newsData.map(article => {
+                // Форматування дати
                 const articleDate = new Date(article.published_at).toLocaleDateString('uk-UA', {
                     day: 'numeric', month: 'long', year: 'numeric'
                 });
                 
+                // Обробка тексту
                 let description = article.content || '';
-                // Очищуємо зайві символи від API
-                description = description.replace(/\[\+\d+ chars\]$/, '');
+                description = description.replace(/\[\+\d+ chars\]$/, ''); // Прибираємо артефакти API
 
                 const imageUrl = article.image_url || 'https://via.placeholder.com/600x400?text=RightWheel+News';
 
-                // 1. СТВОРЮЄМО ВНУТРІШНЄ ПОСИЛАННЯ
-                // Ми передаємо дані про новину через URL параметри
+                // Ваша логіка для внутрішнього посилання
                 const internalLink = `news-detail.html?title=${encodeURIComponent(article.title)}&date=${encodeURIComponent(articleDate)}&image=${encodeURIComponent(imageUrl)}&content=${encodeURIComponent(description)}&link=${encodeURIComponent(article.link_url)}`;
 
-                // 2. ВИКОРИСТОВУЄМО ЙОГО В HREF ЗАМІСТЬ article.link_url
-                // Зверніть увагу: target="_self" відкриває в тому ж вікні (або приберіть target взагалі)
+                // Нова HTML структура для Grid (сітки)
                 return `
-                    <a href="${internalLink}" class="swiper-slide">
-                        <div class="news-card">
-                            <div class="news-card-image">
-                                <img src="${imageUrl}" alt="${article.title}" loading="lazy">
-                            </div>
-                            <div class="news-card-content">
-                                <span class="news-card-date">${articleDate}</span>
-                                <h3 class="news-card-title">${article.title}</h3>
-                                <p class="news-card-text">${description.substring(0, 100)}...</p>
+                    <div class="news-item">
+                        <div class="news-thumb-wrapper">
+                            <img src="${imageUrl}" alt="${article.title}" class="news-thumb" loading="lazy">
+                            <div class="news-date-badge">${articleDate}</div>
+                        </div>
+                        <div class="news-body">
+                            <div class="news-source">${article.source || 'Авто новини'}</div>
+                            <h3 class="news-title">${article.title}</h3>
+                            <p class="news-excerpt">${description.substring(0, 120)}...</p>
+                            
+                            <div class="news-footer">
+                                <a href="${internalLink}" class="read-more-link">
+                                    Читати далі 
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 `;
             }).join('');
 
-            initSwiper();
-
         } catch (error) {
             console.error("Помилка завантаження новин:", error);
-            swiperContainer.innerHTML = `<div style="padding: 20px; color: var(--danger); text-align:center;">Не вдалося завантажити новини: ${error.message}</div>`;
-            swiperContainer.classList.remove('swiper');
+            newsGrid.innerHTML = `<div style="padding: 20px; color: var(--danger); text-align:center; grid-column: 1/-1;">Не вдалося завантажити новини: ${error.message}</div>`;
         }
     }
 
-    function initSwiper() {
-        const existingSwiper = document.querySelector('#newsSwiper').swiper;
-        if (existingSwiper) existingSwiper.destroy();
-
-        new Swiper('#newsSwiper', {
-            loop: true,
-            spaceBetween: 30,
-            grabCursor: true,
-            slidesPerView: 1, 
-            breakpoints: {
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 }
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            autoplay: {
-              delay: 5000,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true
-            },
-        });
-    }
-
+    // Запускаємо функцію
     loadAndRenderNews();
 });

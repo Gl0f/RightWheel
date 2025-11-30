@@ -292,6 +292,51 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.goToComparisonBtn.onclick = () => window.location.href = 'comparison.html';
     }
 
+    async function loadMyAds() {
+        const adsContainer = document.getElementById('myAdsList');
+        if (!adsContainer || !authToken) return;
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/me/ads', {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const ads = await response.json();
+
+            if (ads.length === 0) {
+                adsContainer.innerHTML = '<p style="color: #718096; grid-column: 1/-1; text-align: center;">У вас немає активних оголошень.</p>';
+                return;
+            }
+
+            renderAdsGrid(adsContainer, ads);
+
+        } catch (error) {
+            console.error(error);
+            adsContainer.innerHTML = '<p style="color: red;">Помилка завантаження.</p>';
+        }
+    }
+
+    // Функція рендеру (спільна для обох сторінок, можна скопіювати сюди)
+    function renderAdsGrid(container, ads) {
+        container.innerHTML = ads.map(ad => {
+            const price = new Intl.NumberFormat('en-US').format(ad.price);
+            const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
+            
+            return `
+                <a href="market-detail.html?id=${ad.id}" style="text-decoration: none; display: block; background: #1A202C; border: 1px solid #4A5568; border-radius: 6px; overflow: hidden; transition: transform 0.2s;">
+                    <div style="height: 120px; overflow: hidden;">
+                        <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 10px;">
+                        <div style="color: #38A169; font-weight: 700; font-size: 15px; margin-bottom: 2px;">$ ${price}</div>
+                        <div style="font-size: 13px; font-weight: 500; color: #E2E8F0;">
+                            ${ad.brand_name} ${ad.model_name} ${ad.year}
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    }
+
     // --- ІНІЦІАЛІЗАЦІЯ ---
     function initAccountPage() {
         authToken = localStorage.getItem('RightWheel_access_token');
@@ -304,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMyTopics();
         loadComparisonList();
         setupAvatarUpload();
+        loadMyAds();
         
         if (elements.detailsForm) elements.detailsForm.addEventListener('submit', handleUpdateProfileDetails);
         if (elements.emailForm) elements.emailForm.addEventListener('submit', handleChangeEmail);

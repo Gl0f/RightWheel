@@ -669,11 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Перевіряємо актуальний стан у локальному списку
         const wasCompared = state.comparisonList.includes(trimIdStr);
 
-        // Перевірка ліміту (якщо ми намагаємося додати новий)
-        if (!wasCompared && state.comparisonList.length >= 4) {
-            showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-            return; 
-        }
+        
 
         // Оновлюємо ЛОКАЛЬНИЙ стан (state) сторінки
         if (wasCompared) {

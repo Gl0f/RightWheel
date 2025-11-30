@@ -120,6 +120,22 @@
                     </div>
 
                     <div class="form-group" style="margin-top: 10px;">
+                        <label class="sp-label">Тип кузова</label>
+                        <select id="filterBodyType" class="sp-input">
+                            <option value="">Будь-який</option>
+                            <option value="Седан">Седан</option>
+                            <option value="Позашляховик">Позашляховик / Кросовер</option>
+                            <option value="Універсал">Універсал</option>
+                            <option value="Хетчбек">Хетчбек</option>
+                            <option value="Купе">Купе</option>
+                            <option value="Кабріолет">Кабріолет</option>
+                            <option value="Мінівен">Мінівен</option>
+                            <option value="Пікап">Пікап</option>
+                            <option value="Ліфтбек">Ліфтбек</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
                         <label class="sp-label">Рік випуску</label>
                         <div style="display: flex; gap: 5px;">
                             <input id="filterYearMin" type="number" placeholder="Від" class="sp-input">
@@ -164,12 +180,21 @@
                     </div>
 
                     <button id="applyFiltersBtn" class="btn secondary full-width" style="margin-top: 20px;">Застосувати фільтри</button>
+                    
+                    <button id="saveSearchBtn" class="btn full-width" style="margin-top: 10px; background: transparent; border: 1px dashed var(--accent); color: var(--accent);">
+                        + Зберегти цей пошук
+                    </button>
                 </div>
 
                 
             </aside>
 
             <div class="market-content">
+                <div id="savedSearchesWrapper" style="display: none; margin-bottom: 20px;">
+                    <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">Мої збережені пошуки:</div>
+                    <div id="savedSearchesContainer" class="saved-searches-list">
+                        </div>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0;">Пропозиції продажу</h2>
                     <select id="sortSelect" class="sp-input" style="width: auto;">

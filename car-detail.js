@@ -478,10 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const wasCompared = state.comparisonList.includes(trimIdStr);
         
         if (typeof updateComparisonList === 'function' && typeof renderComparisonBar === 'function') {
-             if (!wasCompared && state.comparisonList.length >= 4) {
-                showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів.', 'info');
-                return;
-            }
+             
             if (wasCompared) state.comparisonList = state.comparisonList.filter(id => id !== trimIdStr);
             else state.comparisonList.push(trimIdStr);
             

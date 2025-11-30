@@ -124,6 +124,14 @@
                       <p style="padding: 20px; color: #A0AEC0;">Завантаження...</p>
                   </div>
               </div>
+              <div class="panel-card">
+                  <div class="panel-header">Оголошення користувача</div>
+                  <div class="panel-body" style="padding: 15px;">
+                      <div id="publicUserAds" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;">
+                          <p style="color: #A0AEC0;">Завантаження...</p>
+                      </div>
+                  </div>
+              </div>
 
           </div>
       </div>
@@ -344,6 +352,44 @@
                     }).join('');
                 } else {
                     topicsContainer.innerHTML = '<p style="padding: 20px; color: #718096; text-align: center;">Користувач ще не створював тем.</p>';
+                }
+
+                // --- Додати в скрипт внизу user-profile.html ---
+
+                // Завантаження оголошень
+                const adsContainer = document.getElementById('publicUserAds');
+                if (adsContainer && userId) {
+                    try {
+                        // Використовуємо наш новий публічний маршрут
+                        const response = await fetch(`http://127.0.0.1:5000/api/users/${userId}/ads`);
+                        const ads = await response.json();
+
+                        if (ads.length > 0) {
+                            adsContainer.innerHTML = ads.map(ad => {
+                                const price = new Intl.NumberFormat('en-US').format(ad.price);
+                                const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
+                                
+                                return `
+                                    <a href="market-detail.html?id=${ad.id}" style="text-decoration: none; display: block; background: #2D3748; border: 1px solid #4A5568; border-radius: 6px; overflow: hidden;">
+                                        <div style="height: 120px; overflow: hidden;">
+                                            <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div style="padding: 10px;">
+                                            <div style="color: #38A169; font-weight: 700; font-size: 15px; margin-bottom: 2px;">$ ${price}</div>
+                                            <div style="font-size: 13px; font-weight: 500; color: #E2E8F0;">
+                                                ${ad.brand_name} ${ad.model_name} ${ad.year}
+                                            </div>
+                                        </div>
+                                    </a>
+                                `;
+                            }).join('');
+                        } else {
+                            adsContainer.innerHTML = '<p style="color: #718096; grid-column: 1/-1; text-align: center;">Користувач не має активних оголошень.</p>';
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        adsContainer.innerHTML = '<p style="color: #718096;">Не вдалося завантажити.</p>';
+                    }
                 }
 
             } catch (error) {

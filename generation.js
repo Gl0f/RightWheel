@@ -394,12 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = state.comparisonList.indexOf(carIdStr);
         if (isSelected) {
             if (index === -1) {
-                if (state.comparisonList.length >= 4) {
-                    showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-                    const checkbox = document.querySelector(`.compare-checkbox[data-id="${carId}"]`);
-                    if (checkbox) checkbox.checked = false;
-                    return;
-                }
+                
                 state.comparisonList.push(carIdStr);
             }
         } else { if (index > -1) state.comparisonList.splice(index, 1); }
@@ -687,10 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const wasCompared = state.comparisonList.includes(trimIdStr);
 
         // Перевірка ліміту (якщо ми намагаємося додати новий)
-        if (!wasCompared && state.comparisonList.length >= 4) {
-            showInfoModal('Обмеження', 'Можна порівнювати не більше 4 автомобілів одночасно.', 'info');
-            return; // Не даємо додати
-        }
+        
 
         // Викликаємо глобальну функцію, яка оновить localStorage та нижній бар
         updateComparisonList(trimIdStr, !wasCompared);

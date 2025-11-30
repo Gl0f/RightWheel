@@ -67,6 +67,8 @@ body {
 }
 
 header {
+    top: 0;
+    z-index: 1000;
   background: var(--card);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -5305,4 +5307,543 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     background-color: #1A202C;
     color: #E2E8F0;
     padding: 10px;
+}
+/* --- SAVED SEARCHES CHIPS --- */
+
+.saved-searches-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-chip {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(228, 12, 43, 0.1); /* Легкий червоний фон */
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.search-chip:hover {
+    background-color: var(--accent);
+    color: white;
+}
+
+.search-chip span {
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.delete-search-btn {
+    background: transparent;
+    border: none;
+    color: inherit; /* Наслідує колір тексту */
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 0 0 5px;
+    border-left: 1px solid rgba(255,255,255,0.3);
+    margin-left: 5px;
+    opacity: 0.7;
+}
+
+.delete-search-btn:hover {
+    opacity: 1;
+}
+
+/* --- СТИЛЬ НОВИН (GRID) --- */
+
+.news-container {
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 25px;
+    padding-left: 15px;
+    border-left: 4px solid var(--accent); /* Червона лінія зліва */
+}
+
+/* Сітка адаптивна */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* Картка новини */
+.news-item {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.news-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent);
+}
+
+.news-thumb-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+}
+
+.news-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.news-date-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.news-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.news-source {
+    color: var(--accent);
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* style.css */
+
+.news-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    
+    /* Обрізання тексту (3 рядки) */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Для існуючих браузерів */
+    line-clamp: 3;         /* Стандартна властивість (щоб прибрати warning) */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-excerpt {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    
+    /* Обрізання тексту (4 рядки) */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Для існуючих браузерів */
+    line-clamp: 4;         /* Стандартна властивість */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-footer {
+    margin-top: auto;
+}
+
+.read-more-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.read-more-link:hover {
+    color: var(--accent);
+}
+
+.read-more-link svg {
+    margin-left: 5px;
+    transition: transform 0.2s;
+}
+
+.read-more-link:hover svg {
+    transform: translateX(5px);
+}
+/* 1. Фіксуємо висоту "шапки" таблиці, щоб все було рівно */
+/* style.css */
+
+/* 2. Фіксація ШАПКИ (Машини) - Верх */
+.comparison-table thead th {
+    position: sticky;
+    top: 0; /* Липне до верху контейнера */
+    background: #1A202C; /* Непрозорий фон */
+    z-index: 100; /* Високий пріоритет */
+    border-bottom: 2px solid var(--border);
+    border-top: 1px solid var(--border);
+    vertical-align: bottom;
+    height: 260px;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Тінь для об'єму */
+}
+
+/* --- COMPARISON PAGE STYLES --- */
+
+.comparison-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+    border-bottom: 0px solid var(--border);
+    padding-bottom: 10px;
+}
+
+/* 1. Контейнер таблиці */
+.comparison-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden; /* Щоб кути не стирчали */
+}
+/* 1. Верхній скрол (Фейковий) */
+
+/* --- 2. КОНТЕЙНЕР ТАБЛИЦІ --- */
+.table-scroll-container {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden; /* Прибираємо зайвий вертикальний скрол */
+    background-color: var(--card);
+}
+
+/* Відновлюємо нижній скрол */
+.table-scroll-container::-webkit-scrollbar {
+    height: 8px; /* Робимо його видимим */
+    display: block;
+}
+.table-scroll-container::-webkit-scrollbar-track {
+    background: #1A202C;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #4A5568;
+    border-radius: 4px;
+}
+.comparison-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate; /* ВАЖЛИВО для sticky */
+    border-spacing: 0;
+}
+
+/* 3. Шапка таблиці (Машини) - ТЕПЕР ПРОЗОРА, ЩОБ НЕ ПЕРЕКРИВАТИ */
+.comparison-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Менший пріоритет, ніж ліва колонка */
+    background: var(--card); /* Фон такий же, як у сторінки */
+    border-bottom: 2px solid var(--border);
+    padding: 0;
+    vertical-align: bottom;
+    height: auto; /* Висота по контенту */
+}
+
+
+
+/* 2. Оновлюємо лівий кут, щоб вмістити кнопку і текст */
+.empty-corner {
+    display: flex;
+    flex-direction: column; /* Елементи один під одним */
+    justify-content: space-between; /* Розтягуємо по висоті (кнопка зверху, текст знизу) */
+    align-items: flex-start;
+    height: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* 3. Шапка таблиці (Машини) */
+.comparison-table thead th {
+    position: sticky;
+    
+    top: px; 
+    
+    background: #1A202C;
+    z-index: 100;
+    
+    border-bottom: 2px solid var(--border);
+    border-top: 1px solid var(--border);
+    vertical-align: bottom;
+    
+    height: 170px; 
+    padding: 0;
+    
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Лівий верхній кут */
+.comparison-table thead th:first-child {
+    z-index: 150;
+    left: 0;
+    top: 0px; /* Теж 76px */
+}
+/* 4. Ліва колонка (Характеристики) */
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 50;
+    min-width: 200px;
+    max-width: 200px;
+    text-align: left;
+    background: #1A202C;
+    border-right: 2px solid var(--border);
+}
+/* 5. Лівий верхній кут (Кнопка) */
+.comparison-table thead th:first-child {
+    z-index: 150;
+    left: 0;
+    top: 84px;
+}
+
+/* Вміст лівого кута */
+.empty-corner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 10px 15px;
+    box-sizing: border-box;
+}
+
+.empty-corner span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+/* Кнопка очищення */
+.table-clear-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 5px;
+    align-self: flex-start;
+    transition: all 0.2s;
+}
+.table-clear-btn:hover {
+    background: rgba(229,62,62,0.1);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* 6. Червоні заголовки груп */
+.group-header td {
+    position: sticky;
+    left: 0;
+    z-index: 40;
+    background: #2D3748;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 8px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+
+/* --- ГОЛОВНА ЗМІНА: Фіксуємо ширину колонки авто --- */
+.compare-col-header, 
+.comparison-table td {
+    min-width: 280px;
+    max-width: 280px;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    box-sizing: border-box;
+    color: var(--text);
+}
+
+/* 8. Картка авто */
+.compare-car-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    padding: 8px; /* Трохи менші відступи */
+    box-sizing: border-box;
+    
+    /* Інтерактивність */
+    border: 1px solid transparent; /* Резервуємо місце під рамку */
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+/* Ефект наведення на всю картку */
+.compare-car-card:hover {
+    background-color: #232936; /* Трохи світліший фон */
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px); /* Легкий підйом */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+/* Посилання на всю зону (обгортка) */
+.car-link-wrapper {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Фото авто */
+.compare-car-card .img-wrapper {
+    width: 100%;
+    height: 90px;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: auto; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Для зуму */
+}
+
+.compare-car-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease; /* Плавний зум */
+}
+/* Зум фото при наведенні на картку */
+.compare-car-card:hover img {
+    transform: scale(1.08);
+}
+
+/* Тексти */
+.compare-car-card .car-title {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--text);
+    text-align: center;
+    
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 34px;
+    
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: 8px;
+    transition: color 0.2s;
+}
+.compare-car-card .car-trim {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+/* Рік */
+.compare-car-card .car-year {
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.compare-car-card:hover .car-year {
+    background: var(--accent-dark); /* Темнішає при наведенні */
+}
+/* Підсвітка тексту при наведенні */
+.compare-car-card:hover .car-title {
+    color: var(--accent);
+}
+
+/* Кнопка видалення (Хрестик) */
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(20, 20, 20, 0.6); /* Напівпрозорий чорний */
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    transition: all 0.2s;
+    padding-bottom: 2px;
+}
+
+.remove-btn:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    transform: scale(1.1) rotate(90deg); /* Крутиться при наведенні */
+}
+/* Підсвітка */
+.highlight-best { color: #48BB78; font-weight: 700; background: rgba(72,187,120,0.05); }
+.highlight-worst { color: #F56565; }
+.unit { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* 4. Фіксація ПЕРЕТИНУ (Верхній лівий кут) */
+.comparison-table thead th:first-child {
+    z-index: 150; /* Найвищий пріоритет, щоб перекривати все */
+    left: 0;
+    top: 0;
 }
