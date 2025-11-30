@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('RightWheel_access_token');
         if (!token) { state.favorites = []; return; }
         try {
-            const response = await fetch('/me/favorites/ids', {
+            const response = await fetch('/api/me/favorites/ids', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
