@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!authToken || !elements.topicsList) return;
 
         try {
-            const response = await fetch('/me/topics', {
+            const response = await fetch('/api/me/topics', {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (!response.ok) throw new Error('Помилка завантаження тем');
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
 
         try {
-            const response = await fetch('/me/account/details', {
+            const response = await fetch('/api/me/account/details', {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${authToken}`,
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (elements.avatarImg) elements.avatarImg.style.opacity = '0.5';
                 
-                const response = await fetch('/me/account/avatar', {
+                const response = await fetch('/api/me/account/avatar', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${authToken}` },
                     body: formData
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = elements.emailPasswordInput.value;
         
         try {
-            const response = await fetch('/me/account/email', {
+            const response = await fetch('/api/me/account/email', {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ new_email: newEmail, password: password })
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newP !== confP) { showInfoModal('Помилка', 'Паролі не співпадають', 'error'); return; }
         
         try {
-            const response = await fetch('/me/account/password', {
+            const response = await fetch('/api/me/account/password', {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ old_password: oldP, new_password: newP })
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!adsContainer || !authToken) return;
 
         try {
-            const response = await fetch('/me/ads', {
+            const response = await fetch('/api/me/ads', {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             const ads = await response.json();
