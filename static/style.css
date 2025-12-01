@@ -5933,17 +5933,18 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     /* --- 3. КАРТКА АВТО (ПОВНА КОПІЯ ПК ДИЗАЙНУ) --- */
     
     .ad-card, .featured-car-card, .similar-ad-card, .recent-car-card {
-        display: flex !important; /* Повертаємо Flex, як на ПК */
-        flex-direction: column !important; /* Вертикально */
+        display: flex !important;
+        flex-direction: column !important;
         width: 100% !important;
         min-width: 0 !important;
-        height: 100% !important;
+        height: auto !important; /* Дозволяємо розтягуватися */
+        min-height: 220px; /* Мінімальна висота */
         margin: 0 !important;
-        padding: 10px !important; /* Повертаємо відступи всередині */
-        background: linear-gradient(135deg, #252525 0%, #1a1a1a 100%) !important; /* Градієнт як на ПК */
+        padding: 0 !important; /* Фото на всю ширину */
+        background: linear-gradient(135deg, #252525 0%, #1a1a1a 100%) !important;
         border: 1px solid var(--border) !important;
         border-radius: 8px !important;
-        box-shadow: none !important; /* На мобільному тіні менше потрібні */
+        box-shadow: none !important;
     }
 
     /* Фото */
@@ -5963,25 +5964,27 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         border-radius: 0 !important;
     }
 
-    /* Контент */
+    /* Контент (з відступами) */
     .ad-content, .featured-car-content, .recent-car-content, .similar-ad-content {
-        padding: 0 !important; /* Прибираємо паддінг, бо він вже є у картки */
-        margin-top: 10px !important; /* Відступ від фото */
-        display: block !important; /* Скидаємо флекс, як на ПК */
+        padding: 10px !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
         flex-grow: 1;
     }
 
-    /* Заголовки */
+    /* ЗАГОЛОВКИ (ЧЕРВОНІ + ПЕРЕНОС) */
     .ad-title, .featured-car-content h4, .recent-car-content h4, .similar-ad-title {
-        font-size: 14px !important; /* Нормальний шрифт */
+        font-size: 13px !important;
         line-height: 1.3 !important;
-        margin-bottom: 5px !important;
-        height: auto !important; /* Висота по контенту */
-        white-space: normal !important;
+        margin-bottom: 6px !important;
+        height: auto !important; /* Автовисота */
+        white-space: normal !important; /* Вмикаємо перенос слів */
+        overflow: visible !important;   /* Показуємо весь текст */
         
-        /* Скидаємо мобільні фікси, повертаємо ПК стиль */
-        display: block !important; 
-        align-items: normal !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
     
     /* Назва авто */
@@ -6015,10 +6018,6 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         display: none !important; 
     }
 
-    /* Ховаємо зайве */
-    .list-header, .ad-meta, .ad-location, .mobile-card-info { display: none !important; }
-    .desktop-only { display: none !important; }
-    
     /* Кнопка сердечка */
     .ad-favorite-btn, .favorite-btn-overlay {
         top: 15px !important; /* Підганяємо під відступи картки */
@@ -6105,5 +6104,17 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     /* Ховаємо кнопки стрілок (на мобільному пальцем зручніше) */
     .recent-scroll-wrapper .scroll-btn {
         display: none !important;
+    }
+
+    .market-sidebar {
+        order: 0; 
+    }
+
+    /* 4. Пошук */
+    .search-section {
+        flex-direction: column;
+    }
+    .search-container, #advancedSearchBtn {
+        width: 100%;
     }
 }
