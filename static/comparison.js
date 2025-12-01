@@ -11,6 +11,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
+     * 1. НОВА ФУНКЦІЯ: Показує красиве модальне вікно замість confirm()
+     */
+    function showCustomConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customConfirmModal');
+            const msgElement = document.getElementById('customConfirmMessage');
+            const btnOk = document.getElementById('confirmOkBtn');
+            const btnCancel = document.getElementById('confirmCancelBtn');
+            const back = modal.querySelector('.modal-back');
+
+            msgElement.textContent = message;
+            modal.style.display = 'flex';
+
+            // Клонуємо кнопки, щоб очистити старі події (EventListener)
+            const newBtnOk = btnOk.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            const newBack = back.cloneNode(true);
+            
+            btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+            back.parentNode.replaceChild(newBack, back);
+
+            const close = (result) => {
+                modal.style.display = 'none';
+                resolve(result);
+            };
+
+            newBtnOk.addEventListener('click', () => close(true));
+            newBtnCancel.addEventListener('click', () => close(false));
+            newBack.addEventListener('click', () => close(false));
+        });
+    }
+
+    /**
      * Завантажує список ID з localStorage
      */
     function loadComparisonList() {
@@ -61,20 +95,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Очищає весь список
+     * 2. ОНОВЛЕНА ФУНКЦІЯ: Використовує await showCustomConfirm
      */
-    function clearAllComparison() {
-        if (!confirm('Ви впевнені, що хочете очистити список порівняння?')) return;
+    async function clearAllComparison() {
+        // Замість native confirm використовуємо нашу модалку
+        const isConfirmed = await showCustomConfirm('Ви впевнені, що хочете очистити весь список порівняння?');
+        
+        if (!isConfirmed) return;
         
         state.comparisonList = [];
         localStorage.removeItem('RightWheel_comparison');
         
-        // Оновлюємо бар внизу (з app.js)
         if (typeof renderComparisonBar === 'function') renderComparisonBar();
         
         updateUIState();
     }
 
+    // Прив'язка до кнопки (якщо вона є в DOM)
     if(elements.clearBtn) elements.clearBtn.addEventListener('click', clearAllComparison);
 
     function renderEmptyState() {

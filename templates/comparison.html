@@ -207,9 +207,133 @@
     </main>
   </div>
 
-  <div id="infoModal" class="modal-root" style="display:none"> ... </div>
-  <div id="loginModal" class="modal-root" style="display:none"> ... </div>
-  <div id="registerModal" class="modal-root" style="display:none"> ... </div>
+  <div id="customConfirmModal" class="modal-root" style="display:none; z-index: 2000;">
+      <div class="modal-back"></div>
+      <div class="modal" style="max-width: 400px; text-align: center; padding: 30px;">
+          
+          <h3 style="margin-top: 0; color: #E2E8F0; font-size: 20px;">Підтвердження дії</h3>
+          
+          <p id="customConfirmMessage" style="color: #A0AEC0; margin: 15px 0; line-height: 1.5;">
+              Ви впевнені?
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+              <button id="confirmCancelBtn" class="btn secondary" style="min-width: 100px;">Скасувати</button>
+              <button id="confirmOkBtn" class="btn primary" style="background-color: #E53E3E; border-color: #E53E3E; min-width: 100px;">Очистити</button>
+          </div>
+
+      </div>
+  </div>
+
+  <div id="infoModal" class="modal-root" style="display:none">
+  <div class="modal-back" id="infoModalBack"></div>
+  <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+      <h2 id="infoModalTitle" class="modal-title">Повідомлення</h2>
+      </div>
+      <div class="form-content" style="gap: 20px;">
+      <p id="infoModalMessage" style="font-size: 16px; margin: 0;">Текст повідомлення...</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="infoModalOkBtn" class="btn primary">OK</button>
+      </div>
+      </div>
+  </div>
+  </div>
+
+
+ <div id="loginModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal login-theme"> <div class="modal-header-center">
+        <h2 class="modal-title-large">Раді вітати<br>вас знову</h2>
+        <button id="closeLoginModalBtn" class="close-btn-abs">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="loginForm" class="form-content sp-form">
+        
+        <div class="form-group">
+          <label for="loginUsername" class="sp-label">Ел. пошта або ім'я користувача</label>
+          <input id="loginUsername" type="text" placeholder="Ел. пошта або логін" class="sp-input" required />
+        </div>
+        
+        <div class="form-group">
+           <label for="loginPassword" class="sp-label">Пароль</label>
+           <input id="loginPassword" type="password" placeholder="Пароль" class="sp-input" required />
+        </div>
+
+        <div class="sp-checkbox-wrapper">
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="captchaCheck" required />
+                <label for="captchaCheck">Я не робот</label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="consentCheck" required />
+                <label for="consentCheck">Згода на обробку даних</label>
+            </div>
+        </div>
+         
+        <button class="btn sp-btn-primary full-width" type="submit">Увійти</button>
+
+        <div class="auth-divider">
+           <span>або</span>
+        </div>
+
+        <div id="googleButtonDiv" style="width: 100%; display: flex; justify-content: center; margin-top: 15px;"></div>
+
+        <div class="modal-footer-link">
+            <span style="color: #a7a7a7;">Немає акаунта?</span>
+            <a href="#" class="form-link white-link" id="showRegisterBtnFromLogin">Зареєструватися</a>
+        </div>
+         
+      </form>
+    </div>
+  </div>
+
+  <div id="registerModal" class="modal-root" style="display:none">
+    <div class="modal-back"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Реєстрація в RightWheel</h2>
+        <button id="closeRegisterModalBtn" class="btn small secondary" style="margin-left: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <form id="registerForm" class="form-content">
+        <div class="form-group">
+          <label for="registerUsername">Логін</label>
+          <input id="registerUsername" type="text" placeholder="Придумайте логін" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="Ваш email" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Пароль</label>
+          <input id="registerPassword" type="password" placeholder="Придумайте пароль" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Підтвердження пароля</label>
+          <input id="registerConfirmPassword" type="password" placeholder="Повторіть пароль" required />
+        </div>
+        <div class="form-group">
+          <div class="captcha-container">
+            <div class="captcha-text">Я не робот</div>
+            <input type="checkbox" id="registerCaptchaCheck" required />
+            <label for="registerCaptchaCheck">Підтвердити</label>
+          </div>
+        </div>
+        <button class="btn primary full-width" type="submit">Зареєструватися</button>
+      </form>
+
+      <div class="modal-footer-link">
+        <span>Вже є акаунт?</span>
+        <a href="#" class="form-link" id="showLoginBtnFromRegister">Увійти</a>
+      </div>
+
+    </div>
+  </div>
   
   <script src="/static/app.js"></script> 
   <script src="/static/comparison.js"></script> 
