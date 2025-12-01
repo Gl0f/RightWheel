@@ -6190,3 +6190,216 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         height: 16px !important;
     }
 }
+/* ==========================================================================
+   ОПТИМІЗАЦІЯ ІНТЕРФЕЙСУ (HEADER, MARKET, FEATURED)
+   ========================================================================== */
+
+/* --- 1. ОПТИМІЗАЦІЯ ХЕДЕРА (HEADER) --- */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(45, 55, 72, 0.95); /* Напівпрозорий фон */
+    backdrop-filter: blur(10px);       /* Ефект розмиття (Blur) */
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 15px;
+}
+
+/* Логотип і навігація */
+.logo-nav {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex-grow: 1;
+}
+
+/* Кнопки праворуч */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0; /* Не стискати кнопки */
+}
+
+/* --- АДАПТАЦІЯ ХЕДЕРА ДЛЯ МОБІЛЬНИХ --- */
+@media (max-width: 768px) {
+    .header-content {
+        flex-wrap: wrap; /* Дозволяємо перенос */
+        padding: 10px;
+    }
+
+    .logo-nav {
+        order: 2; /* Навігація йде під логотип */
+        width: 100%;
+        overflow-x: auto; /* Горизонтальний скрол для меню */
+        padding-bottom: 5px;
+        gap: 15px;
+        -webkit-overflow-scrolling: touch;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+    
+    /* Приховуємо скролбар меню для краси */
+    .logo-nav::-webkit-scrollbar { display: none; }
+
+    .logo {
+        margin-right: auto; /* Логотип зліва */
+    }
+    
+    .controls {
+        margin-left: auto; /* Кнопки справа */
+    }
+
+    .nav-link-forum {
+        font-size: 15px;
+        white-space: nowrap; /* Текст в один рядок */
+    }
+}
+
+
+/* --- 2. ВИПРАВЛЕННЯ "ОСТАННІ ДОБАВЛЕНІ" --- */
+
+.featured-cars-section {
+    padding: 20px 0; /* Прибираємо внутрішні відступи контейнера */
+    background: transparent; /* Прибираємо фон секції */
+    box-shadow: none;
+    border: none;
+}
+
+.featured-cars-grid {
+    display: grid;
+    /* Адаптивна сітка: мінімум 280px, інакше розтягується */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    /* На телефонах - строго 1 колонка на всю ширину */
+    .featured-cars-grid {
+        grid-template-columns: 1fr; 
+    }
+}
+
+
+/* --- 3. АДАПТАЦІЯ АВТОБАЗАРУ (MARKET LIST) - ЯК НА ПК --- */
+
+/* Це перетворює рядки таблиці на гарні картки на мобільному */
+@media (max-width: 768px) {
+    /* Скидаємо грід сторінки */
+    .market-layout {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Сайдбар фільтрів */
+    .market-sidebar {
+        margin-bottom: 20px;
+    }
+
+    /* --- КАРТКА АВТО --- */
+    .list {
+        display: grid;
+        grid-template-columns: 1fr; /* Одна колонка */
+        gap: 15px;
+    }
+
+    .card {
+        display: flex !important; /* Використовуємо Flex замість Grid */
+        flex-direction: column;   /* Вертикально */
+        height: auto;
+        padding: 0 !important;    /* Прибираємо паддінги контейнера */
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Примусово показуємо всі приховані елементи */
+    .card > div {
+        display: block !important;
+        padding: 0 15px;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+
+    /* 1. Фото (на всю ширину зверху) */
+    .card .car-image-container {
+        width: 100%;
+        height: 200px;
+        padding: 0;
+        margin-bottom: 10px;
+        border-radius: 0;
+    }
+    .car-image-container img {
+        border-radius: 0;
+    }
+
+    /* 2. Заголовок */
+    .card .card-title {
+        font-size: 18px;
+        margin-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    /* 3. Ціна (робимо великою) */
+    .card > div:nth-child(3) { /* Це зазвичай ціна, якщо div-и йдуть по порядку */
+        /* Але у вас ціна формується динамічно. Краще прив'язатися до контенту */
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--success);
+        order: -1; /* Ціна під фото */
+        margin-left: 15px;
+        margin-top: 5px;
+    }
+
+    /* Стилізуємо характеристики як теги */
+    .card > div:not(.car-image-container):not(.card-title):not(.card-actions) {
+        display: inline-block !important;
+        width: auto;
+        font-size: 13px;
+        color: var(--muted);
+        background: rgba(255,255,255,0.05);
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-right: 5px;
+        margin-bottom: 10px;
+    }
+
+    /* Кнопки дій (сердечко, порівняння) */
+    .card .card-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 0;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .card .card-actions button {
+        background: rgba(0,0,0,0.6) !important;
+        color: white !important;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    /* Ховаємо пусті діви, якщо вони є */
+    .card > div:empty {
+        display: none !important;
+    }
+}
