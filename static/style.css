@@ -6753,7 +6753,6 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     /* 2. Задаємо кнопці "Увійти" ту саму висоту, що й іконкам (38px) */
     #showLoginModalBtn {
         height: 38px !important;
-        display: flex !important;
         align-items: center !important; /* Центруємо текст всередині кнопки */
         padding: 0 16px !important;     /* Відступи з боків */
         margin: 0 !important;           /* Прибираємо зовнішні відступи */
@@ -6764,5 +6763,46 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     #showLoginModalBtn svg {
         margin-top: 0 !important; 
         margin-bottom: 0 !important;
+    }
+}
+/* --- ВИПРАВЛЕННЯ ЗАГОЛОВКІВ НА ГОЛОВНІЙ (МОБІЛЬНА ВЕРСІЯ) --- */
+@media (max-width: 900px) {
+
+    /* 1. ОСТАННІ ДОБАВЛЕНІ (Featured) */
+    /* Вимоги: Червоний колір + текст у 2 рядки */
+    .featured-car-content h4 {
+        color: var(--accent) !important; /* Червоний */
+        
+        /* Логіка переносу тексту */
+        white-space: normal !important;   /* Дозволяємо перенос слів */
+        display: -webkit-box !important;  /* Вмикаємо режим блоку */
+        line-clamp: 2;            /* Обмеження: 2 рядки */
+        -webkit-box-orient: vertical;
+        overflow: hidden;                 /* Ховаємо зайве */
+        text-overflow: ellipsis;          /* Три крапки в кінці */
+        
+        /* Розміри */
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+        min-height: 36px !important;      /* Фіксуємо висоту під 2 рядки, щоб картки були рівними */
+        margin-bottom: 5px !important;
+        align-items: flex-start !important;
+    }
+
+    /* 2. НЕЩОДАВНО ПЕРЕГЛЯНУТІ (Recent) */
+    /* Вимоги: Білий колір */
+    .recent-car-content h4 {
+        color: var(--text) !important;    /* Білий (основний текст) */
+        
+        font-size: 14px !important;
+        margin-bottom: 5px !important;
+        white-space: nowrap !important;   /* В один рядок */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Додатково: прибираємо червоний колір у вкладених елементів, якщо вони є */
+    .recent-car-content h4 span {
+        color: var(--text) !important;
     }
 }
