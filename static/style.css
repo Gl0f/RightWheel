@@ -6626,3 +6626,54 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
 .car-gallery-container {
     margin-bottom: 0;
 }
+/* --- ОПТИМІЗАЦІЯ ФОТО НА СТОРІНЦІ АВТО (МОБІЛЬНА) --- */
+@media (max-width: 900px) {
+    
+    .media-viewer-container {
+        /* Змінюємо висоту з 500px на компактнішу */
+        height: 280px !important; 
+        
+        /* Опціонально: можна використовувати співвідношення сторін */
+        /* height: auto !important; */
+        /* aspect-ratio: 4 / 3; */
+    }
+
+    /* Гарантуємо, що фото заповнює цей простір */
+    .media-viewer-image {
+        object-fit: cover; /* Обрізає краї, щоб заповнити весь блок */
+        /* Якщо хочете бачити все авто цілком (з чорними смугами), змініть на: contain */
+    }
+
+    /* Ховаємо зайві відступи навколо галереї */
+    .car-gallery-container {
+        margin-bottom: 15px !important;
+    }
+}
+/* --- ВИДАЛЕННЯ ФІКСАЦІЇ ЛІВОЇ КОЛОНКИ В ПОРІВНЯННІ --- */
+
+/* 1. Скидаємо липкість для першої колонки (заголовки рядків) */
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+    position: static !important; /* Робить елемент звичайним */
+    left: auto !important;
+    z-index: auto !important;
+    box-shadow: none !important; /* Прибираємо тінь, якщо вона була */
+    background: transparent !important; /* Фон прозорий або як у рядка */
+    border-right: 1px solid var(--border); /* Лишаємо рамку для краси */
+}
+
+/* 2. Скидаємо липкість для заголовків груп (Двигун, Габарити тощо) */
+.group-header td {
+    position: static !important;
+    left: auto !important;
+    z-index: auto !important;
+}
+
+/* 3. Скидаємо липкість для верхнього лівого кута (кнопка очищення) */
+.comparison-table thead th:first-child {
+    position: static !important;
+    z-index: auto !important;
+    left: auto !important;
+    top: auto !important;
+    box-shadow: none !important;
+}
