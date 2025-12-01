@@ -6832,3 +6832,133 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         height: auto !important;
     }
 }
+/* --- МОДЕЛІ В 3 СТОВПЦЯ (BRAND.HTML) ДЛЯ МОБІЛЬНИХ --- */
+@media (max-width: 900px) {
+    
+    .models-grid {
+        display: grid !important;
+        /* Примусово 3 рівні колонки */
+        grid-template-columns: repeat(3, 1fr) !important;
+        /* Мінімальний відступ між ними (щоб влізло більше контенту) */
+        gap: 6px !important;
+        justify-content: center !important;
+    }
+
+    .model-item {
+        min-width: 0 !important; /* Дозволяє картці стискатись */
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Адаптуємо висоту картинки, щоб вона була пропорційною */
+    .model-item-image {
+        height: 70px !important; 
+        background-color: #000; /* Фон, якщо фото не завантажиться */
+    }
+
+    /* Зменшуємо шрифт назви, щоб вона влазила */
+    .model-item-name {
+        font-size: 11px !important;
+        padding: 5px 2px 0 2px !important; /* Зменшуємо внутрішні відступи */
+        line-height: 1.2 !important;
+        white-space: nowrap;       /* Текст в один рядок */
+        overflow: hidden;          /* Обрізаємо зайве */
+        text-overflow: ellipsis;   /* Додаємо три крапки... */
+    }
+
+    /* Зменшуємо шрифт року */
+    .model-item-year {
+        font-size: 10px !important;
+        padding: 2px 2px 6px 2px !important;
+        color: var(--muted);
+    }
+}
+/* --- ПОКОЛІННЯ В 2 СТОВПЦЯ (MODEL.HTML) ДЛЯ МОБІЛЬНИХ --- */
+@media (max-width: 900px) {
+
+    .generations-grid {
+        display: grid !important;
+        /* Примусово 2 рівні колонки */
+        grid-template-columns: repeat(2, 1fr) !important; 
+        /* Невеликий відступ, щоб зекономити місце */
+        gap: 10px !important; 
+    }
+
+    .generation-item {
+        min-width: 0 !important; /* Дозволяє картці стискатись */
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Зменшуємо висоту картинки, щоб картка була компактною */
+    .generation-item-image {
+        height: 110px !important; 
+        background-color: #000;
+    }
+
+    .generation-item-info {
+        padding: 8px !important;
+    }
+
+    /* Адаптуємо текст */
+    .gen-title {
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 4px !important;
+        /* Якщо назва довга, вона перенесеться, але не розламає сітку */
+        white-space: normal !important; 
+    }
+
+    .gen-years {
+        font-size: 12px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .gen-details {
+        font-size: 11px !important;
+        /* Обрізаємо занадто довгий опис */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+/* --- ФОРУМ ХЕДЕР: Заголовок зліва, Кнопка справа --- */
+@media (max-width: 900px) {
+
+    .forum-header-section {
+        flex-direction: row !important; /* Розміщуємо в один рядок */
+        justify-content: space-between !important; /* Розводимо по краях */
+        align-items: center !important; /* Центруємо по вертикалі */
+        
+        gap: 10px !important;
+        margin-bottom: 15px !important;
+        padding-bottom: 15px !important;
+    }
+
+    .forum-header-section h2 {
+        font-size: 18px !important; /* Трохи зменшуємо шрифт, щоб влізло */
+        text-align: left !important;
+        margin: 0 !important;
+        line-height: 1.1;
+    }
+
+    /* Компактна кнопка справа */
+    #openCreateTopicModalBtn {
+        width: auto !important;
+        min-width: auto !important; /* Прибираємо обмеження ширини */
+        
+        padding: 8px 12px !important; /* Менші відступи */
+        font-size: 13px !important;   /* Менший шрифт */
+        
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap; /* Щоб текст не розбивався */
+    }
+    
+    #openCreateTopicModalBtn svg {
+        width: 16px;
+        height: 16px;
+    }
+}
