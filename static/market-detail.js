@@ -195,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="seller-header" style="cursor: pointer;">
                         <div class="seller-avatar-circle"><img src="${avatarUrl}"></div>
                         <div class="seller-name-box">
-                            <span class="seller-role">Професійний продавець</span>
+                            <span class="seller-role">Продавець</span>
                             <span class="seller-name" style="text-decoration: underline; text-decoration-color: transparent; transition: 0.2s;">${ad.username}</span>
-                            <div style="font-size: 11px; color: #38A169; display: flex; align-items: center; gap: 4px;">✔ Перевірено банком</div>
+                            
                         </div>
                     </div>
                 </a>
