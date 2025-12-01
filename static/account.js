@@ -315,22 +315,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Функція рендеру (спільна для обох сторінок, можна скопіювати сюди)
+    // Функція рендеру карток у кабінеті
     function renderAdsGrid(container, ads) {
+        // Очищуємо inline-стилі контейнера, щоб керувати через CSS
+        container.removeAttribute('style'); 
+        container.className = 'my-ads-grid'; 
+
         container.innerHTML = ads.map(ad => {
             const price = new Intl.NumberFormat('en-US').format(ad.price);
-            const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
+            // Перевірка на наявність фото
+            const imgUrl = ad.main_image ? ad.main_image : 'https://via.placeholder.com/300x200?text=No+Photo';
             
             return `
-                <a href="market-detail.html?id=${ad.id}" style="text-decoration: none; display: block; background: #1A202C; border: 1px solid #4A5568; border-radius: 6px; overflow: hidden; transition: transform 0.2s;">
-                    <div style="height: 120px; overflow: hidden;">
-                        <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <div style="padding: 10px;">
-                        <div style="color: #38A169; font-weight: 700; font-size: 15px; margin-bottom: 2px;">$ ${price}</div>
-                        <div style="font-size: 13px; font-weight: 500; color: #E2E8F0;">
-                            ${ad.brand_name} ${ad.model_name} ${ad.year}
+                <a href="market-detail.html?id=${ad.id}" class="profile-ad-card">
+                    <div class="profile-ad-image">
+                        <img src="${imgUrl}" loading="lazy" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Photo';">
+                        <div class="profile-ad-badges">
+                            ${ad.is_paid ? '' : '<span class="badge-draft">Не сплачено</span>'}
                         </div>
+                    </div>
+                    <div class="profile-ad-content">
+                        <div class="profile-ad-price">$ ${price}</div>
+                        <div class="profile-ad-title">${ad.brand_name} ${ad.model_name}</div>
+                        <div class="profile-ad-year">${ad.year} р.</div>
                     </div>
                 </a>
             `;

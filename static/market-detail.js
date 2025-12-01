@@ -252,10 +252,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- ОБРОБНИКИ КНОПОК ---
         
+        // --- Додаємо функцію для виклику модалки ---
+        function showCustomConfirm(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                if (!modal) return resolve(confirm(message)); // Запасний варіант
+
+                const msgElement = document.getElementById('customConfirmMessage');
+                const btnOk = document.getElementById('confirmOkBtn');
+                const btnCancel = document.getElementById('confirmCancelBtn');
+                const back = modal.querySelector('.modal-back');
+
+                if(message) msgElement.textContent = message;
+                modal.style.display = 'flex';
+
+                // Очищуємо старі події через клонування кнопок
+                const newBtnOk = btnOk.cloneNode(true);
+                const newBtnCancel = btnCancel.cloneNode(true);
+                const newBack = back.cloneNode(true);
+                
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+                back.parentNode.replaceChild(newBack, back);
+
+                const close = (result) => {
+                    modal.style.display = 'none';
+                    resolve(result);
+                };
+
+                newBtnOk.addEventListener('click', () => close(true));
+                newBtnCancel.addEventListener('click', () => close(false));
+                newBack.addEventListener('click', () => close(false));
+            });
+        }
+
+        // --- ОНОВЛЕНИЙ ОБРОБНИК КНОПКИ ВИДАЛЕННЯ ---
         const deleteBtn = document.getElementById('deleteAdBtn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async () => {
-                if(confirm('Ви впевнені, що хочете видалити це оголошення?')) {
+                // Використовуємо нашу нову функцію з await
+                const isConfirmed = await showCustomConfirm('Ви впевнені, що хочете безповоротно видалити це оголошення?');
+                
+                if (isConfirmed) {
                     deleteBtn.disabled = true;
                     deleteBtn.textContent = "Видалення...";
                     const token = localStorage.getItem('RightWheel_access_token');
@@ -268,10 +306,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             showInfoModal('Успіх', 'Оголошення видалено!', 'success');
                             setTimeout(() => { window.location.href = 'market.html'; }, 1500);
                         } else {
-                            alert('Помилка видалення');
+                            const errData = await res.json();
+                            alert(errData.error || 'Помилка видалення');
                             deleteBtn.disabled = false;
+                            deleteBtn.textContent = "🗑 Видалити оголошення";
                         }
-                    } catch(e) { console.error(e); deleteBtn.disabled = false; }
+                    } catch(e) { 
+                        console.error(e); 
+                        deleteBtn.disabled = false; 
+                        deleteBtn.textContent = "🗑 Видалити оголошення";
+                    }
                 }
             });
         }

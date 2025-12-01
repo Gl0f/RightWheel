@@ -354,6 +354,24 @@
     </div>
 </div>
 
+    <div id="customConfirmModal" class="modal-root" style="display:none; z-index: 3000;">
+        <div class="modal-back"></div>
+        <div class="modal" style="max-width: 400px; text-align: center; padding: 30px;">
+            
+            <h3 style="margin-top: 0; color: #E2E8F0; font-size: 20px;">Видалення оголошення</h3>
+            
+            <p id="customConfirmMessage" style="color: #A0AEC0; margin: 15px 0; line-height: 1.5;">
+                Ви впевнені, що хочете видалити це оголошення? Цю дію неможливо скасувати.
+            </p>
+
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <button id="confirmCancelBtn" class="btn secondary" style="min-width: 100px;">Скасувати</button>
+                <button id="confirmOkBtn" class="btn primary" style="background-color: #E53E3E; border-color: #E53E3E; min-width: 100px;">Видалити</button>
+            </div>
+
+        </div>
+    </div>
+
   <script src="/static/app.js"></script>
   <script src="/static/market-detail.js"></script> <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
