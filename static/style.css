@@ -6377,3 +6377,95 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         grid-template-columns: 1fr !important;
     }
 }
+
+/* --- БРЕНДИ В 3 СТОВПЦЯ НА МОБІЛЬНОМУ --- */
+@media (max-width: 900px) {
+    
+    /* Робимо сітку 3 колонки */
+    .brands-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important; /* Менший проміжок між картками */
+    }
+
+    /* Адаптуємо саму картку бренду, щоб вона влізла */
+    .brand-item {
+        padding: 10px 4px !important; /* Зменшуємо внутрішні відступи */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Трохи зменшуємо кружечок логотипу */
+    .brand-logo-placeholder {
+        width: 45px !important;  /* Було 60px */
+        height: 45px !important;
+        font-size: 16px !important; /* Менша літера всередині */
+        margin-bottom: 5px !important;
+    }
+
+    /* Зменшуємо шрифт назви бренду */
+    .brand-item strong, .brand-item span {
+        font-size: 12px !important;
+        white-space: nowrap;      /* Забороняємо перенос слів */
+        overflow: hidden;         /* Ховаємо довгі назви */
+        text-overflow: ellipsis;  /* Додаємо три крапки... */
+        max-width: 100%;
+    }
+}
+/* --- ВИПРАВЛЕННЯ НАЗВ АВТО НА МОБІЛЬНОМУ --- */
+@media (max-width: 900px) {
+    
+    /* Таргетуємо заголовки карток */
+    .ad-title, 
+    .card-title,
+    .featured-car-content h4 {
+        /* 1. Робимо текст червоним */
+        color: var(--accent) !important; 
+        
+        /* 2. Налаштування тексту (щоб влазив) */
+        white-space: normal !important;   /* Дозволяємо перенос слів */
+        display: -webkit-box !important;  /* Вмикаємо режим "боксу" */
+        line-clamp: 2;            /* Обмежуємо висоту 2-ма рядками */
+        -webkit-box-orient: vertical;     /* Орієнтація по вертикалі */
+        overflow: hidden;                 /* Ховаємо те, що не влізло в 2 рядки */
+        text-overflow: ellipsis;          /* Додаємо три крапки... в кінці, якщо текст гігантський */
+        
+        /* 3. Розміри */
+        font-size: 13px !important;       /* Оптимальний розмір для мобільного */
+        line-height: 1.3 !important;      /* Висота рядка */
+        height: 34px !important;          /* Фіксуємо висоту під 2 рядки, щоб картки були рівними */
+        margin-bottom: 5px !important;
+    }
+
+    /* Якщо всередині заголовка є теги span, теж фарбуємо їх в червоний */
+    .ad-title span, 
+    .card-title span {
+        color: var(--accent) !important;
+    }
+}
+/* --- МОБІЛЬНІ ФІЛЬТРИ (MARKET) --- */
+@media (max-width: 900px) {
+
+    /* 1. Показуємо кнопку "Показати фільтри" */
+    #mobileFilterToggle {
+        display: block !important; /* !important перебиває inline-стиль display:none з HTML */
+    }
+
+    /* 2. За замовчуванням ХОВАЄМО сайдбар з фільтрами на мобільному */
+    #marketSidebar {
+        display: none;
+    }
+
+    /* 3. Коли JS додає клас .open — ПОКАЗУЄМО сайдбар */
+    #marketSidebar.open {
+        display: block;
+        animation: slideDown 0.3s ease-out; /* Плавна поява (опціонально) */
+    }
+
+    /* Анімація розгортання (для краси) */
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
