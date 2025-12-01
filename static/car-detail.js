@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const method = isFavorited ? 'DELETE' : 'POST';
         const url = isFavorited 
             ? `/api/me/favorites/${state.trimId}`
-            : '/me/favorites';
+            : '/api/me/favorites';
 
         // Блокуємо кнопку на час запиту
         if(detailFavoriteBtn) detailFavoriteBtn.disabled = true;
