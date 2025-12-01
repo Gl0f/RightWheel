@@ -6117,4 +6117,263 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     .search-container, #advancedSearchBtn {
         width: 100%;
     }
+
+    /* --- ВИПРАВЛЕННЯ VIN-КОДУ ТА НИЖНЬОГО РЯДКА --- */
+
+    .vin-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 20px; /* Фіксуємо висоту, щоб не розтягувало */
+        padding: 0 6px;
+        background-color: #276749;
+        color: #9AE6B4;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0; /* Забороняємо стискання */
+        border: 1px solid rgba(154, 230, 180, 0.3);
+        line-height: 1;
+    }
+
+    /* Контейнер для нижнього рядка (Місто + VIN) */
+    .card-bottom-row {
+        margin-top: auto; /* Притискає до низу */
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Розносить місто вліво, VIN вправо */
+        gap: 10px;
+        width: 100%;
+        padding-top: 5px;
+    }
+
+    /* Фікс для міста, щоб було рівно */
+    .card-location {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #777;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+
+/* ============================================================
+   ФІНАЛЬНА МОБІЛЬНА АДАПТАЦІЯ (CLEAN VERSION)
+   Вставити в самий кінець файлу style.css
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    /* --- 1. ГЛОБАЛЬНІ ВІДСТУПИ --- */
+    .container {
+        padding: 0 10px 80px 10px !important; /* Менші відступи з боків + місце знизу */
+        max-width: 100% !important;
+    }
+
+    /* --- 2. ХЕДЕР (Sticky + Scrollable) --- */
+    header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 8px 0;
+        background: var(--card); /* Щоб контент не просвічувався при скролі */
+    }
+
+    .header-content {
+        flex-direction: row; /* Завжди в рядок */
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 0 10px;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+        white-space: nowrap;
+    }
+
+    /* Горизонтальний скрол для меню біля логотипу */
+    .logo-nav {
+        flex: 1;
+        overflow-x: auto;
+        padding-bottom: 0; /* Прибираємо відступи скролу */
+        scrollbar-width: none; /* Firefox */
+        mask-image: linear-gradient(to right, black 90%, transparent 100%); /* Ефект згасання */
+    }
+    .logo-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+    .controls {
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    /* Ховаємо текст кнопок, залишаємо іконки або скорочуємо */
+    #showLoginModalBtn, #showFavoritesBtn {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    /* --- 3. СІТКА КАРТОК (2 КОЛОНКИ) --- */
+    /* Примусово робимо 2 колонки для всіх списків */
+    #adsGrid, 
+    .featured-cars-grid, 
+    .similar-cars-grid, 
+    .favorites-grid-2-col,
+    .brands-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important; /* Рівно 2 колонки */
+        gap: 10px !important;
+    }
+
+    /* --- 4. КАРТКА АВТО (Compact Mobile) --- */
+    .ad-card, .featured-car-card, .similar-ad-card {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100%;
+        min-height: 240px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Картинка на всю ширину картки */
+    .ad-image, .featured-car-image, .similar-ad-image {
+        width: 100% !important;
+        height: 110px !important; /* Фіксована висота */
+        flex: none !important;
+        border-radius: 0 !important;
+        background: #000;
+    }
+    
+    .ad-image img, .featured-car-image img {
+        border-radius: 0 !important;
+    }
+
+    /* Контент картки */
+    .ad-content, .featured-car-content, .similar-ad-content {
+        padding: 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    /* Заголовок і ціна */
+    .ad-title, .featured-car-content h4, .similar-ad-title {
+        font-size: 13px !important;
+        line-height: 1.3 !important;
+        margin-bottom: 5px !important;
+        white-space: normal !important; /* Перенос тексту */
+        height: 34px; /* Обмеження висоти (2 рядки) */
+        overflow: hidden;
+    }
+
+    .ad-price, .similar-ad-price {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: var(--success) !important;
+        margin-top: auto; /* Притискаємо до низу контенту */
+    }
+
+    /* Приховуємо зайві деталі на картках в телефоні */
+    .body-drive-line { display: none !important; }
+
+    /* Сердечко */
+    .ad-favorite-btn {
+        width: 28px !important;
+        height: 28px !important;
+        top: 5px !important;
+        right: 5px !important;
+    }
+
+    /* --- 5. МОДАЛЬНІ ВІКНА (Full Width) --- */
+    .modal {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 10px auto;
+        padding: 20px !important;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    /* --- 6. ПОШУК І ФІЛЬТРИ --- */
+    .search-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .search-container, #advancedSearchBtn, #sortSelect {
+        width: 100% !important;
+    }
+
+    /* --- 7. СТОРІНКА АВТО (RIA Layout Fix) --- */
+    .ria-layout {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+    
+    /* Міняємо порядок: Спочатку Ціна/Заголовок, потім Фото, потім Характеристики */
+    .ria-sidebar-column { order: -1; margin-bottom: 0; }
+    .ria-gallery-column { order: 1; }
+    
+    .ria-main-image {
+        aspect-ratio: 16/10; /* Більш широке фото на мобільному */
+    }
+
+    /* Продавець знизу */
+    .ria-seller-card {
+        margin-top: 20px;
+    }
+
+    /* --- 8. НЕЩОДАВНО ПЕРЕГЛЯНУТІ (Horizontal Scroll) --- */
+    .recently-viewed-grid {
+        display: flex !important;
+        overflow-x: auto !important;
+        gap: 10px !important;
+        padding-bottom: 10px !important;
+        scroll-snap-type: x mandatory;
+    }
+
+    .recent-car-card {
+        min-width: 220px !important; /* Ширина картки в скролі */
+        flex-direction: column !important; /* Вертикальна картка */
+        scroll-snap-align: start;
+    }
+    
+    .recent-car-image {
+        width: 100% !important;
+        height: 120px !important;
+        margin-right: 0 !important;
+    }
+
+    /* --- 9. ПОРІВНЯННЯ --- */
+    .comparison-bar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    .comparison-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .comparison-table th, .comparison-table td {
+        min-width: 120px; /* Менші колонки */
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+/* --- FIX ДЛЯ ДУЖЕ МАЛИХ ЕКРАНІВ (iPhone SE, < 370px) --- */
+@media (max-width: 370px) {
+    /* На дуже вузьких екранах 2 колонки це занадто, робимо 1 */
+    #adsGrid, .featured-cars-grid, .brands-grid {
+        grid-template-columns: 1fr !important;
+    }
 }
