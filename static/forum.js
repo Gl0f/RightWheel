@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getAvatarUrl(url, username) {
-        if (url) return url.startsWith('http') ? url : `http://127.0.0.1:5000${url}`;
+        if (url) return url.startsWith('http') ? url : `${url}`;
         const initial = username ? username.charAt(0).toUpperCase() : '?';
         return `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=100`;
     }

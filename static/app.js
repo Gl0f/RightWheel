@@ -359,7 +359,7 @@ function checkLoginStatus() {
             
             if (savedAvatar && savedAvatar !== 'null') {
                 // Якщо є збережена аватарка - показуємо її
-                const url = savedAvatar.startsWith('http') ? savedAvatar : `http://127.0.0.1:5000${savedAvatar}`;
+                const url = savedAvatar.startsWith('http') ? savedAvatar : `${savedAvatar}`;
                 elements.headerAvatarImg.src = url;
             } else {
                 // Якщо немає - генеруємо літеру

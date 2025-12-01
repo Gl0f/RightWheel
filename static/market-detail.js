@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ad.engine_volume) engine += `, ${ad.engine_volume} л`;
         
         const avatarUrl = ad.user_avatar 
-            ? (ad.user_avatar.startsWith('http') ? ad.user_avatar : `http://127.0.0.1:5000${ad.user_avatar}`)
+            ? (ad.user_avatar.startsWith('http') ? ad.user_avatar : `${ad.user_avatar}`)
             : `https://ui-avatars.com/api/?name=${ad.username}&background=random`;
 
         const images = ad.images && ad.images.length > 0 ? ad.images : ['https://via.placeholder.com/800x600?text=No+Photo'];

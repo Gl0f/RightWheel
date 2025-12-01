@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.user.avatar_url.startsWith('http')) {
                         elements.avatarImg.src = data.user.avatar_url;
                     } else {
-                        elements.avatarImg.src = `http://127.0.0.1:5000${data.user.avatar_url}?t=${new Date().getTime()}`;
+                        elements.avatarImg.src = `${data.user.avatar_url}?t=${new Date().getTime()}`;
                     }
                 } else {
                     const initial = data.user.username.charAt(0).toUpperCase();
@@ -216,13 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 showInfoModal('Успіх', 'Аватарку оновлено!', 'success');
                 if (elements.avatarImg) {
-                    elements.avatarImg.src = `http://127.0.0.1:5000${data.avatar_url}?t=${new Date().getTime()}`;
+                    elements.avatarImg.src = `${data.avatar_url}?t=${new Date().getTime()}`;
                 }
 
                 // --- ДОДАНО: Оновлюємо пам'ять і хедер ---
                 localStorage.setItem('RightWheel_userAvatar', data.avatar_url);
                 const headerImg = document.getElementById('headerAvatarImg');
-                if(headerImg) headerImg.src = `http://127.0.0.1:5000${data.avatar_url}`;
+                if(headerImg) headerImg.src = `${data.avatar_url}`;
                 // -----------------------------------------
 
             } catch (error) {

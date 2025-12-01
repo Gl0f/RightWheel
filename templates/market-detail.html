@@ -234,6 +234,14 @@
     </div>
   </div>
 
+  <div id="lightboxModal" class="modal-root lightbox-modal" style="display:none;">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImage">
+        <div class="lightbox-caption"></div>
+        <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+        <a class="next" onclick="changeSlide(1)">&#10095;</a>
+    </div>
+
   <div id="editAdModal" class="modal-root" style="display:none; z-index: 2000;">
     <div class="modal-back"></div>
     <div class="modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">

@@ -524,7 +524,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ФУНКЦІЯ для перемикання порівняння ---
-    // --- ФУНКЦІЯ для перемикання порівняння ---
     function toggleCompare(trimId) {
         const trimIdStr = trimId.toString();
         // Перевіряємо, чи БУВ автомобіль у списку ДО кліку
