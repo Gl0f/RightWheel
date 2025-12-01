@@ -263,7 +263,7 @@
 
           try {
               console.log(`Запит профілю для ID: ${userId}`); // Дебаг
-              const response = await fetch(`http://127.0.0.1:5000/api/users/${userId}/profile`);
+              const response = await fetch(`/api/users/${userId}/profile`);
               
               // 2. Якщо сервер повернув помилку
               if (!response.ok) {
@@ -278,7 +278,7 @@
               const imgEl = document.getElementById('publicAvatar');
               if (data.user.avatar_url) {
                   imgEl.src = data.user.avatar_url.startsWith('http') ? 
-                      data.user.avatar_url : `http://127.0.0.1:5000${data.user.avatar_url}`;
+                      data.user.avatar_url : `${data.user.avatar_url}`;
               } else {
                   const initial = data.user.username.charAt(0).toUpperCase();
                   imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=4A5568&color=fff&size=150`;
@@ -310,14 +310,14 @@
             if (!userId) { return; }
 
             try {
-                const response = await fetch(`http://127.0.0.1:5000/api/users/${userId}/profile`);
+                const response = await fetch(`/api/users/${userId}/profile`);
                 if (!response.ok) throw new Error('Помилка сервера');
                 const data = await response.json();
 
                 // 1. Аватар та Ім'я
                 const imgEl = document.getElementById('publicAvatar');
                 if (data.user.avatar_url) {
-                    imgEl.src = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `http://127.0.0.1:5000${data.user.avatar_url}`;
+                    imgEl.src = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `${data.user.avatar_url}`;
                 } else {
                     const initial = data.user.username.charAt(0).toUpperCase();
                     imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=150`;
@@ -361,7 +361,7 @@
                 if (adsContainer && userId) {
                     try {
                         // Використовуємо наш новий публічний маршрут
-                        const response = await fetch(`http://127.0.0.1:5000/api/users/${userId}/ads`);
+                        const response = await fetch(`/api/users/${userId}/ads`);
                         const ads = await response.json();
 
                         if (ads.length > 0) {
