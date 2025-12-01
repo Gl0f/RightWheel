@@ -5847,651 +5847,230 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     left: 0;
     top: 0;
 }
-/* =========================================
-   МОБІЛЬНА АДАПТАЦІЯ (RESPONSIVE DESIGN)
-   ========================================= */
+/* ============================================================
+   ФІНАЛЬНА МОБІЛЬНА АДАПТАЦІЯ (COMPACT HEADER + 2-COL GRID)
+   ============================================================ */
 
-/* --- Планшети та мобільні (до 900px) --- */
+/* --- 1. ГЛОБАЛЬНІ НАЛАШТУВАННЯ --- */
 @media (max-width: 900px) {
-    
-    /* 1. Хедер */
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
-        padding: 10px 15px;
-    }
-
-    .logo-nav {
-        width: 100%;
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
-    }
-
-    .logo-nav > a {
-        font-size: 16px; /* Зменшуємо шрифт посилань */
-    }
-
-    .controls {
-        width: 100%;
-        justify-content: center; /* Центруємо кнопки */
-        gap: 15px;
-    }
-
-    /* 2. Глобальні Гріди (розбиваємо 2 колонки в 1) */
-    .market-layout,
-    .forum-layout,
-    .account-grid,
-    .car-detail-layout-grid {
-        grid-template-columns: 1fr !important; /* Тільки одна колонка */
-        gap: 20px;
-    }
-
-    /* 3. Сайдбари (Фільтри, Інфо) */
-    .market-sidebar,
-    .forum-sidebar,
-    .car-sidebar {
-        order: 2; /* Переносимо вниз (або залиште order: 0, щоб були зверху) */
+    body, html {
+        overflow-x: hidden; /* Забороняємо горизонтальний скрол сторінки */
         width: 100%;
     }
     
-    /* Для маркету фільтри краще зверху, але згорнуті (реалізуємо JS нижче) */
-    .market-sidebar {
-        order: 0; 
-    }
-
-    /* 4. Пошук */
-    .search-section {
-        flex-direction: column;
-    }
-    .search-container, #advancedSearchBtn {
-        width: 100%;
+    .container {
+        padding: 0 10px 40px 10px; /* Зменшені відступи по краях */
     }
 }
 
-/* --- Телефони (до 600px) --- */
-@media (max-width: 600px) {
-
-    /* 5. Сітки карток */
-    .featured-cars-grid,
-    .news-grid,
-    .brands-grid,
-    .similar-cars-grid,
-    .favorites-grid-2-col {
-        grid-template-columns: 1fr !important; /* Одна картка в ряд */
-    }
-
-    /* 6. Картка авто в списку (Market) */
-    .card {
-        grid-template-columns: 1fr; /* Все в одну колонку */
-        grid-template-rows: auto;
-        gap: 5px;
-        padding: 15px;
-        height: auto;
-    }
-    
-    /* Ховаємо табличні дані на мобільному, залишаємо тільки головне */
-    .list-header { display: none; } /* Ховаємо шапку таблиці */
-    
-    .card > div { display: none; } /* Ховаємо все */
-    
-    /* Показуємо конкретні блоки і налаштовуємо їх */
-    .card .car-image-container {
-        display: flex;
-        grid-column: 1 / -1;
-        height: 160px;
-        margin-bottom: 10px;
-    }
-    
-    .card .card-title {
-        display: block;
-        grid-column: 1 / -1;
-        font-size: 18px;
-        margin-bottom: 5px;
-    }
-    
-    /* Ціна і дії */
-    .card .card-actions {
-        display: flex;
-        grid-column: 1 / -1;
-        justify-content: space-between;
-        margin-top: 10px;
-    }
-    
-    /* Показуємо ціну, яку ми сховаємо в JS або додамо клас */
-    /* Для цього краще додати окремий блок ціни в HTML, див. Крок 2 */
-
-    /* 7. Модальні вікна */
-    .modal {
-        width: 95% !important;
-        margin: 10px;
-        padding: 20px !important;
-        max-height: 85vh;
-    }
-    
-    /* Форми в 2 колонки стають в 1 */
-    .form-group.grid-2,
-    .form-group.grid-3 {
-        grid-template-columns: 1fr !important;
-    }
-
-    /* 8. Деталі авто */
-    .car-detail-main-title {
-        font-size: 22px;
-    }
-    .spec-row {
-        font-size: 13px;
-    }
-    
-    /* 9. Порівняння (таблиця) */
-    /* Фіксуємо першу колонку, решта скролиться */
-    .comparison-table th:first-child, 
-    .comparison-table td:first-child {
+/* --- 2. ХЕДЕР (ВСЕ В ОДИН РЯДОК) --- */
+@media (max-width: 900px) {
+    header {
         position: sticky;
-        left: 0;
-        background: var(--card);
-        z-index: 2;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        top: 0;
+        z-index: 1000;
+        padding: 8px 0;
     }
-}
-@media (max-width: 900px) {
-    .mobile-only { display: block !important; }
-    
-    /* Ховаємо сайдбар за замовчуванням на мобільному */
-    #marketSidebar { display: none; }
-    
-    /* Клас для відкриття */
-    #marketSidebar.open { display: block; animation: slideDown 0.3s ease-out; }
-}
 
-@media (min-width: 901px) {
-    .mobile-only { display: none !important; }
-    #marketSidebar { display: block !important; } /* На ПК завжди видно */
-}
-
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@media (max-width: 600px) {
-    .mobile-card-info { display: block !important; padding: 0 15px 15px 15px; }
-    .desktop-only { display: none !important; }
-    .ad-image { height: 200px; }
-}
-@media (min-width: 601px) {
-    .mobile-card-info { display: none !important; }
-}
-/* --- МОБІЛЬНА АДАПТАЦІЯ КАРТОК (ОНОВЛЕНО) --- */
-
-@media (max-width: 600px) {
-    /* 1. Робимо картку вертикальною */
-    .ad-card {
+    .header-content {
         display: flex;
-        flex-direction: column;
-        height: auto !important; /* Дозволяємо розтягуватися */
-        padding: 0; /* Прибираємо внутрішні відступи контейнера */
+        flex-direction: row; /* Тільки в рядок */
+        flex-wrap: nowrap;   /* Забороняємо перенос */
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        gap: 8px;
     }
 
-    /* 2. Картинка на всю ширину */
-    .ad-image {
-        width: 100%;
-        height: 220px; /* Фіксована висота для краси */
-        object-fit: cover;
-        border-radius: 8px 8px 0 0; /* Закруглення тільки зверху */
+    /* Логотип: Тільки текст, компактний */
+    .logo h1 {
+        font-size: 18px;
+        white-space: nowrap;
+        margin: 0;
     }
 
-    /* 3. Ховаємо десктопні елементи */
-    .ad-content.desktop-only, 
-    .list-header {
-        display: none !important;
+    /* Меню: (Форум, Новини...) - маленькі кнопки */
+    .logo-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        flex-grow: 1; /* Займає вільне місце по центру */
+        justify-content: center;
     }
 
-    /* 4. Показуємо мобільний блок */
-    .mobile-card-info {
-        display: block !important;
-        padding: 15px;
-        background: var(--card);
-        border-top: 1px solid var(--border);
-        border-radius: 0 0 8px 8px;
+    .nav-link-forum {
+        font-size: 11px; /* Дуже компактний шрифт */
+        padding: 4px 6px;
+        background: rgba(255,255,255,0.05); /* Легкий фон */
+        border-radius: 4px;
+        margin: 0;
+        white-space: nowrap;
     }
 
+    /* Кнопки справа (Увійти) */
+    .controls {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        width: auto;
+        flex-shrink: 0;
+    }
+
+    #showLoginModalBtn {
+        padding: 4px 8px;
+        font-size: 11px;
+        height: 28px;
+    }
+    #showLoginModalBtn svg { display: none; } /* Ховаємо іконку */
     
-    /* Виправлення кнопки "Сердечко" на мобільному */
-    .ad-favorite-btn {
-        top: 10px;
-        right: 10px;
-        width: 40px; /* Більша зона кліку */
-        height: 40px;
+    /* Якщо є профіль - аватарка теж компактна */
+    .user-menu-trigger {
+        padding: 2px 8px 2px 2px;
     }
+    .header-username { display: none; } /* Ховаємо ім'я, тільки аватар */
 }
-/* ==============================================
-   ПОКРАЩЕНА МОБІЛЬНА АДАПТАЦІЯ (GRID 2 КОЛОНКИ)
-   ============================================== */
 
-@media (max-width: 700px) {
-
-    /* --- 1. Сітки автомобілів (Маркет, Головна, Схожі, Обране) --- */
-    #adsGrid, 
+/* --- 3. СІТКА 2 КОЛОНКИ ДЛЯ ВСІХ СТОРІНОК --- */
+@media (max-width: 900px) {
+    
+    /* Головна, Маркет, Схожі, Обране */
     .featured-cars-grid, 
+    #adsGrid, 
     .similar-cars-grid, 
-    .favorites-grid-2-col {
+    .favorites-grid-2-col,
+    .recently-viewed-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important; /* Дві колонки */
-        gap: 10px !important; /* Менший відступ між картками */
+        grid-template-columns: 1fr 1fr !important; /* Дві рівні колонки */
+        gap: 8px !important;
     }
 
-    /* --- 2. Стилізація карток для вузького вигляду --- */
-    
-    /* Загальний контейнер картки */
-    .ad-card, 
+    /* Знімаємо флекс з контейнерів, які були рядками */
+    .recently-viewed-grid {
+        overflow-x: visible; /* Прибираємо горизонтальний скрол "Нещодавніх" */
+        flex-wrap: wrap;
+    }
+    .recent-scroll-wrapper .scroll-btn { display: none; } /* Ховаємо стрілки прокрутки */
+
+    /* Стиль карток для мобільного (вертикальний) */
     .featured-car-card, 
+    .ad-card, 
     .similar-ad-card, 
     .recent-car-card {
         display: flex !important;
         flex-direction: column !important;
-        height: 100% !important;
-        min-height: 220px; /* Мінімальна висота */
-        padding: 0 !important; /* Прибираємо внутрішні відступи контейнера */
-    }
-
-    /* Картинка */
-    .ad-image, 
-    .featured-car-image, 
-    .similar-car-image img,
-    .recent-car-image img,
-    .featured-car-image img {
-        width: 100% !important;
-        height: 110px !important; /* Зменшуємо висоту фото */
-        flex: 0 0 auto !important; /* Фіксуємо висоту */
-        border-radius: 8px 8px 0 0 !important;
-    }
-    
-    /* Скидаємо стилі контейнерів для фото */
-    .featured-car-image, .similar-car-image {
-        width: 100% !important;
-        height: 110px !important;
-    }
-
-    /* Контент (Текст) */
-    .ad-content, 
-    .featured-car-content, 
-    .similar-ad-content,
-    .mobile-card-info {
-        padding: 10px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        flex-grow: 1;
-    }
-    
-    /* Приховуємо зайві деталі на головній, щоб влізло */
-    .featured-car-content .body-drive-line {
-        display: none; 
-    }
-
-    /* Шрифти (робимо меншими) */
-    .ad-price, 
-    .similar-ad-price,
-    .featured-car-content h4 span:last-child {
-        font-size: 16px !important;
-    }
-
-    .ad-title, 
-    .featured-car-content h4 span:first-child, 
-    .similar-ad-title {
-        font-size: 13px !important;
-        white-space: normal !important; /* Дозволяємо перенос тексту */
-        line-height: 1.3 !important;
-        height: 34px; /* Обмеження висоти (2 рядки) */
-        overflow: hidden;
-        margin-bottom: 5px !important;
-    }
-    
-    .featured-car-content h4 {
-        flex-direction: column; /* Ціна під назвою */
-        align-items: flex-start !important;
-        gap: 2px !important;
-    }
-
-    /* --- 3. Бренди (Логотипи) - 3 колонки --- */
-    .brands-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 8px !important;
-    }
-    
-    .brand-item {
-        padding: 10px !important;
-    }
-    
-    .brand-logo-placeholder {
-        width: 40px !important;
-        height: 40px !important;
-        font-size: 16px !important;
-    }
-    
-    .brand-name {
-        font-size: 12px !important;
-    }
-    
-    .brand-country {
-        display: none; /* Ховаємо країну на телефоні для економії місця */
-    }
-
-    /* --- 4. Кнопка "Сердечко" --- */
-    .ad-favorite-btn, .favorite-btn-overlay {
-        width: 28px !important;
-        height: 28px !important;
-        top: 5px !important;
-        right: 5px !important;
-    }
-    
-    .ad-favorite-btn svg, .favorite-btn-overlay svg {
-        width: 16px !important;
-        height: 16px !important;
-    }
-}
-/* ==========================================================================
-   ОПТИМІЗАЦІЯ ІНТЕРФЕЙСУ (HEADER, MARKET, FEATURED)
-   ========================================================================== */
-
-/* --- 1. ОПТИМІЗАЦІЯ ХЕДЕРА (HEADER) --- */
-
-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: rgba(45, 55, 72, 0.95); /* Напівпрозорий фон */
-    backdrop-filter: blur(10px);       /* Ефект розмиття (Blur) */
-    border-bottom: 1px solid var(--border);
-    padding: 10px 0;
-    margin-bottom: 20px;
-}
-
-.header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 15px;
-}
-
-/* Логотип і навігація */
-.logo-nav {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    flex-grow: 1;
-}
-
-/* Кнопки праворуч */
-.controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0; /* Не стискати кнопки */
-}
-
-/* --- 1. ХЕДЕР (Меню) --- */
-@media (max-width: 900px) {
-
-    /* --- 1. КОМПАКТНИЙ ХЕДЕР --- */
-    header {
-        padding: 8px 0;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-
-    .header-content {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 10px;
-        gap: 10px;
-    }
-
-    .logo h1 {
-        font-size: 20px;
-        white-space: nowrap;
-    }
-
-    /* Меню в один рядок */
-    .logo-nav {
-        flex-direction: row;
-        border: none;
-        padding: 0;
-        margin: 0;
-        width: auto;
-        gap: 5px;
-        overflow: visible;
-    }
-
-    .nav-link-forum {
-        font-size: 13px;
-        padding: 4px 8px;
-        background: transparent;
-        margin: 0;
-    }
-
-    .controls {
-        width: auto;
-        gap: 8px;
-    }
-
-    #showLoginModalBtn {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-    #showLoginModalBtn svg { display: none; }
-
-
-/* --- 2. ВИПРАВЛЕННЯ "ОСТАННІ ДОБАВЛЕНІ" --- */
-
-.featured-cars-grid {
-        display: grid !important;
-        /* Дві колонки рівної ширини */
-        grid-template-columns: 1fr 1fr !important; 
-        gap: 10px !important;
-        
-        /* Вимикаємо скрол */
-        overflow: visible !important;
-        padding-bottom: 0 !important;
-        
-        /* Скидаємо флекс-властивості, якщо вони були */
-        flex-wrap: wrap !important;
-    }
-
-    /* Стиль картки для сітки */
-    .featured-car-card {
-        width: auto !important; /* Розтягується на ширину колонки */
-        flex: none !important;
-        
-        /* Вертикальна структура */
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100%; /* Однакова висота карток */
-        min-height: 210px; 
-        
+        height: 100%;
+        min-height: 200px;
         padding: 0 !important;
+        background: var(--card);
+        border: 1px solid var(--border);
         border-radius: 8px;
         overflow: hidden;
+        width: auto !important;
+        flex: none !important;
     }
 
     /* Фото зверху */
-    .featured-car-image {
+    .featured-car-image, 
+    .ad-image, 
+    .similar-car-image, 
+    .recent-car-image {
         width: 100% !important;
-        height: 110px !important; /* Фіксована висота фото */
+        height: 100px !important; /* Фіксована висота */
         flex: none !important;
-        border-radius: 8px 8px 0 0 !important;
+        border-radius: 0 !important;
     }
-    .featured-car-image img {
+    .featured-car-image img, .ad-image img, .similar-car-image img, .recent-car-image img {
         border-radius: 0 !important;
     }
 
-    /* Контент знизу */
-    .featured-car-content {
-        padding: 10px !important;
+    /* Текст знизу */
+    .featured-car-content, 
+    .ad-content, 
+    .similar-ad-content, 
+    .recent-car-content {
+        padding: 8px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         flex-grow: 1;
     }
 
-    /* Заголовок (Назва авто) */
-    .featured-car-content h4 {
-        flex-direction: column !important; /* Ціна під назвою */
-        align-items: flex-start !important;
-        gap: 4px !important;
-        margin-bottom: 5px !important;
-    }
-
-    /* Текст назви */
-    .featured-car-content h4 span:first-child {
+    /* Заголовки і ціни (компактно) */
+    .ad-title, .featured-car-content h4, .similar-ad-title, .recent-car-content h4 {
         font-size: 13px !important;
-        white-space: normal !important; /* Перенос тексту на новий рядок */
         line-height: 1.3 !important;
-        height: 34px; /* Обмеження висоти (2 рядки) */
+        margin-bottom: 4px !important;
+        height: 34px; /* 2 рядки тексту */
         overflow: hidden;
-    }
-
-    /* Ціна */
-    .featured-car-content h4 span:last-child {
-        font-size: 15px !important;
-        font-weight: 700;
-    }
-
-    /* Характеристики (дрібний текст) */
-    .spec-line {
-        font-size: 11px !important;
-        color: #aaa;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Ховаємо менш важливе, щоб влізло */
-    .body-drive-line {
-        display: none !important; 
-    }
-}
-
-
-/* --- 3. АДАПТАЦІЯ АВТОБАЗАРУ (MARKET LIST) - ЯК НА ПК --- */
-
-/* Це перетворює рядки таблиці на гарні картки на мобільному */
-@media (max-width: 600px) {
-    /* Робимо картки вертикальними на весь екран */
-    .market-layout {
-        display: flex;
+        white-space: normal !important;
+        display: flex !important;
         flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .ad-price, .featured-car-content h4 span:last-child, .similar-ad-price {
+        font-size: 15px !important;
+        color: var(--success) !important;
+        margin-top: 2px;
+        display: block;
+    }
+
+    /* Ховаємо зайве, щоб влізло */
+    .ad-meta, .spec-line, .body-drive-line, .list-header, .ad-location {
+        display: none !important;
     }
     
-    #adsGrid, .featured-cars-grid, .similar-cars-grid {
+    /* Для Маркету: показуємо мобільний блок */
+    .mobile-card-info { display: block !important; padding: 0 8px 8px 8px; }
+    .desktop-only { display: none !important; }
+    
+    /* Кнопка сердечка */
+    .ad-favorite-btn, .favorite-btn-overlay {
+        width: 26px !important;
+        height: 26px !important;
+        top: 4px !important;
+        right: 4px !important;
+    }
+    .ad-favorite-btn svg { width: 14px; height: 14px; }
+}
+
+/* --- 4. АДАПТАЦІЯ СТОРІНОК ДЕТАЛЕЙ (MARKET-DETAIL / CAR) --- */
+@media (max-width: 900px) {
+    .market-layout, .view-ad-layout, .car-detail-layout-grid {
         display: flex;
         flex-direction: column;
         gap: 15px;
     }
 
-    /* Стиль картки */
-    .ad-card, .featured-car-card, .similar-ad-card {
-        display: flex !important;
-        flex-direction: column !important;
-        height: auto !important;
-        background: var(--card);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    /* Фото на всю ширину */
-    .ad-image, .featured-car-image img, .similar-car-image img {
-        width: 100% !important;
-        height: 200px !important;
-        object-fit: cover;
-        border-radius: 0 !important;
+    .market-sidebar, .car-sidebar {
+        order: 2; /* Фільтри/Інфо знизу */
     }
     
-    /* Контейнери для фото (скидаємо flex) */
-    .featured-car-image, .similar-car-image {
-        width: 100% !important;
-        height: auto !important;
-        flex: none !important;
+    .ria-sidebar-column { order: 2; }
+    .ria-gallery-column { order: 1; }
+    
+    .main-img-wrapper, .ria-main-image {
+        height: 220px !important;
     }
-
-    /* Контент */
-    .ad-content, .featured-car-content, .similar-ad-content {
-        padding: 15px !important;
-    }
-
-    /* Заголовки */
-    .ad-title, .featured-car-content h4, .similar-ad-title {
-        font-size: 18px !important;
-        white-space: normal !important;
-        margin-bottom: 8px !important;
-    }
-
-    /* Ціна */
-    .ad-price, .featured-car-content h4 span:last-child {
-        font-size: 20px !important;
-        color: var(--success) !important;
-        display: block;
-        margin-bottom: 10px;
-    }
-
-    /* Приховуємо зайві елементи таблиці, якщо вони є */
-    .list-header { display: none !important; }
-    .card > div { display: none; } /* Старий грід */
-    .mobile-card-info { display: block !important; } /* Показуємо мобільний блок */
 }
-/* --- 3. ПОРІВНЯННЯ (Таблиця) --- */
+
+/* --- 5. ПОРІВНЯННЯ (TABLE SCROLL) --- */
 @media (max-width: 900px) {
     .comparison-wrapper {
-        overflow-x: auto; /* Дозволяємо скролити таблицю вбік */
+        overflow-x: auto;
     }
-    
-    .comparison-table th:first-child, 
-    .comparison-table td:first-child {
+    .comparison-table th:first-child, .comparison-table td:first-child {
         position: sticky;
         left: 0;
+        z-index: 20;
         background: #1A202C;
-        z-index: 50;
-        border-right: 2px solid var(--border);
-        min-width: 140px; /* Трохи вужча перша колонка */
+        min-width: 120px;
+        font-size: 11px;
     }
-    
-    .compare-car-card {
-        width: 200px; /* Фіксована ширина карток авто */
-    }
-    
     .comparison-table td {
-        min-width: 200px;
-    }
-}
-
-/* --- 4. МОДАЛЬНІ ВІКНА --- */
-@media (max-width: 600px) {
-    .modal {
-        width: 95% !important;
-        max-width: 95% !important;
-        padding: 20px !important;
-        margin: 10px;
-    }
-    
-    .form-group.grid-2, .form-group.grid-3 {
-        grid-template-columns: 1fr !important; /* Поля в один стовпчик */
-    }
-}
-
-/* --- 5. ПРОФІЛЬ (Account) --- */
-@media (max-width: 900px) {
-    .account-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .left-column, .right-column {
-        width: 100%;
+        min-width: 160px;
+        font-size: 12px;
     }
 }
