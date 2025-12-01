@@ -6235,73 +6235,146 @@ header {
 
 /* --- 1. ХЕДЕР (Меню) --- */
 @media (max-width: 900px) {
+
+    /* --- 1. КОМПАКТНИЙ ХЕДЕР --- */
     header {
+        padding: 8px 0;
         position: sticky;
         top: 0;
         z-index: 1000;
-        padding: 10px 0;
     }
 
     .header-content {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding: 0 15px;
-    }
-
-    .logo-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
         gap: 10px;
     }
 
-    /* Горизонтальна прокрутка для меню (Форум, Новини...) */
-    .logo-nav > a {
-        display: inline-block;
+    .logo h1 {
+        font-size: 20px;
         white-space: nowrap;
-        font-size: 15px;
-        padding: 5px 10px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.05);
-        margin-right: 5px;
     }
-    
+
+    /* Меню в один рядок */
     .logo-nav {
         flex-direction: row;
-        overflow-x: auto;
-        padding-bottom: 5px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border: none;
+        padding: 0;
+        margin: 0;
+        width: auto;
+        gap: 5px;
+        overflow: visible;
+    }
+
+    .nav-link-forum {
+        font-size: 13px;
+        padding: 4px 8px;
+        background: transparent;
+        margin: 0;
     }
 
     .controls {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
+        width: auto;
+        gap: 8px;
     }
-}
+
+    #showLoginModalBtn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    #showLoginModalBtn svg { display: none; }
 
 
 /* --- 2. ВИПРАВЛЕННЯ "ОСТАННІ ДОБАВЛЕНІ" --- */
 
-.featured-cars-section {
-    padding: 20px 0; /* Прибираємо внутрішні відступи контейнера */
-    background: transparent; /* Прибираємо фон секції */
-    box-shadow: none;
-    border: none;
-}
-
 .featured-cars-grid {
-    display: grid;
-    /* Адаптивна сітка: мінімум 280px, інакше розтягується */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-}
+        display: grid !important;
+        /* Дві колонки рівної ширини */
+        grid-template-columns: 1fr 1fr !important; 
+        gap: 10px !important;
+        
+        /* Вимикаємо скрол */
+        overflow: visible !important;
+        padding-bottom: 0 !important;
+        
+        /* Скидаємо флекс-властивості, якщо вони були */
+        flex-wrap: wrap !important;
+    }
 
-@media (max-width: 600px) {
-    /* На телефонах - строго 1 колонка на всю ширину */
-    .featured-cars-grid {
-        grid-template-columns: 1fr; 
+    /* Стиль картки для сітки */
+    .featured-car-card {
+        width: auto !important; /* Розтягується на ширину колонки */
+        flex: none !important;
+        
+        /* Вертикальна структура */
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100%; /* Однакова висота карток */
+        min-height: 210px; 
+        
+        padding: 0 !important;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Фото зверху */
+    .featured-car-image {
+        width: 100% !important;
+        height: 110px !important; /* Фіксована висота фото */
+        flex: none !important;
+        border-radius: 8px 8px 0 0 !important;
+    }
+    .featured-car-image img {
+        border-radius: 0 !important;
+    }
+
+    /* Контент знизу */
+    .featured-car-content {
+        padding: 10px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    /* Заголовок (Назва авто) */
+    .featured-car-content h4 {
+        flex-direction: column !important; /* Ціна під назвою */
+        align-items: flex-start !important;
+        gap: 4px !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Текст назви */
+    .featured-car-content h4 span:first-child {
+        font-size: 13px !important;
+        white-space: normal !important; /* Перенос тексту на новий рядок */
+        line-height: 1.3 !important;
+        height: 34px; /* Обмеження висоти (2 рядки) */
+        overflow: hidden;
+    }
+
+    /* Ціна */
+    .featured-car-content h4 span:last-child {
+        font-size: 15px !important;
+        font-weight: 700;
+    }
+
+    /* Характеристики (дрібний текст) */
+    .spec-line {
+        font-size: 11px !important;
+        color: #aaa;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Ховаємо менш важливе, щоб влізло */
+    .body-drive-line {
+        display: none !important; 
     }
 }
 
