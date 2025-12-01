@@ -6677,3 +6677,35 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
     top: auto !important;
     box-shadow: none !important;
 }
+/* --- ОПТИМІЗАЦІЯ КНОПКИ "ОБРАНЕ" В ХЕДЕРІ (МОБІЛЬНА) --- */
+@media (max-width: 900px) {
+    
+    #showFavoritesBtn {
+        /* Перетворюємо кнопку на компактний квадрат/коло */
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        
+        border-radius: 50% !important; /* Робимо круглою */
+        background-color: transparent !important; /* Прибираємо сірий фон (опціонально) */
+        border: 1px solid var(--border) !important; /* Тонка рамка */
+    }
+
+    /* Показуємо іконку (сердечко) */
+    #showFavoritesBtn svg {
+        display: block !important;
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+        color: var(--text); /* Колір іконки */
+    }
+
+    /* Ховаємо текст "Обране" */
+    #showFavoritesBtn .btn-text {
+        display: none !important;
+    }
+}
