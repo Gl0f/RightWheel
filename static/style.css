@@ -6686,7 +6686,6 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         height: 38px !important;
         padding: 0 !important;
         
-        display: flex !important;
         align-items: center;
         justify-content: center;
         
