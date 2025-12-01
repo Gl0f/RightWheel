@@ -6709,3 +6709,35 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         display: none !important;
     }
 }
+/* --- ОПТИМІЗАЦІЯ АВАТАРКИ В ХЕДЕРІ (МОБІЛЬНА) --- */
+@media (max-width: 900px) {
+    
+    /* 1. Контейнер кнопки профілю */
+    .user-menu-trigger {
+        width: 38px !important;   /* Такий самий розмір, як у зірочки */
+        height: 38px !important;
+        padding: 0 !important;    /* Прибираємо відступи */
+        border: none !important;  /* Рамка буде на самому аватарі */
+        background: transparent !important;
+        
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 2. Саме коло аватара */
+    .header-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        border: 1px solid var(--border) !important; /* Тонка рамка, як у кнопки Обране */
+        box-sizing: border-box !important;
+        /* Переконуємось, що воно кругле */
+        border-radius: 50% !important;
+    }
+
+    /* 3. Приховуємо ім'я та стрілочку (залишаємо тільки фото) */
+    .header-username,
+    .dropdown-arrow {
+        display: none !important;
+    }
+}
