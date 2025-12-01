@@ -6806,3 +6806,29 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         color: var(--text) !important;
     }
 }
+/* --- ВИПРАВЛЕННЯ ТІЛЬКИ ДЛЯ ГОЛОВНОЇ СТОРІНКИ (ID #featuredCars) --- */
+@media (max-width: 900px) {
+
+    /* Використовуємо ID #featuredCars, щоб стиль не переліз на Маркет */
+    #featuredCars .featured-car-content h4,
+    #featuredCars .featured-car-content h4 span:first-child {
+        
+        /* 1. Червоний колір */
+        color: var(--accent) !important; 
+        
+        /* 2. Дозволяємо перенос тексту (2 рядки) */
+        white-space: normal !important;   
+        display: -webkit-box !important;  
+        line-clamp: 2 !important; /* Обмеження рядків */
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        
+        /* 3. Вирівнювання */
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        line-height: 1.3 !important;
+        margin-bottom: 4px !important;
+        height: auto !important;
+    }
+}
