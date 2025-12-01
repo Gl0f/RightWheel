@@ -6413,35 +6413,54 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         max-width: 100%;
     }
 }
-/* --- ВИПРАВЛЕННЯ НАЗВ АВТО НА МОБІЛЬНОМУ --- */
+/* --- ВИПРАВЛЕННЯ ДЛЯ ГОЛОВНОЇ СТОРІНКИ (MAIN.HTML) --- */
 @media (max-width: 900px) {
-    
-    /* Таргетуємо заголовки карток */
-    .ad-title, 
-    .card-title,
-    .featured-car-content h4 {
-        /* 1. Робимо текст червоним */
-        color: var(--accent) !important; 
+
+    /* 1. Назви авто в "Останні добавлені" та "Нещодавно переглянуті" */
+    .featured-car-content h4,
+    .recent-car-content h4 {
+        /* Робимо червоним */
+        color: var(--accent) !important;
         
-        /* 2. Налаштування тексту (щоб влазив) */
-        white-space: normal !important;   /* Дозволяємо перенос слів */
-        display: -webkit-box !important;  /* Вмикаємо режим "боксу" */
-        line-clamp: 2;            /* Обмежуємо висоту 2-ма рядками */
-        -webkit-box-orient: vertical;     /* Орієнтація по вертикалі */
-        overflow: hidden;                 /* Ховаємо те, що не влізло в 2 рядки */
-        text-overflow: ellipsis;          /* Додаємо три крапки... в кінці, якщо текст гігантський */
-        
-        /* 3. Розміри */
-        font-size: 13px !important;       /* Оптимальний розмір для мобільного */
-        line-height: 1.3 !important;      /* Висота рядка */
-        height: 34px !important;          /* Фіксуємо висоту під 2 рядки, щоб картки були рівними */
+        /* Дозволяємо перенос і обмежуємо 2 рядками */
+        white-space: normal !important;
+        display: -webkit-box !important;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        /* Налаштування шрифту та висоти */
+        font-size: 13px !important;
+        line-height: 1.3 !important;
+        height: 34px !important; /* Фіксуємо висоту під 2 рядки */
         margin-bottom: 5px !important;
+        
+        /* Вирівнювання */
+        display: flex !important;
+        align-items: flex-start !important;
     }
 
-    /* Якщо всередині заголовка є теги span, теж фарбуємо їх в червоний */
-    .ad-title span, 
-    .card-title span {
+    /* Якщо всередині заголовка є теги span (наприклад, жирний шрифт марки) */
+    .featured-car-content h4 span,
+    .recent-car-content h4 span {
         color: var(--accent) !important;
+        display: inline !important; /* Щоб текст йшов підряд */
+    }
+    
+    /* Додатково: вирівнюємо картки "Останні добавлені" на головній */
+    .featured-car-card {
+        height: auto !important;
+        min-height: 220px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .featured-car-content {
+        flex-grow: 1;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
     }
 }
 /* --- МОБІЛЬНІ ФІЛЬТРИ (MARKET) --- */
@@ -6468,4 +6487,142 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
+}
+/* --- ВИПРАВЛЕННЯ СХОЖИХ АВТО (SIMILAR CARS) НА МОБІЛЬНОМУ --- */
+@media (max-width: 900px) {
+
+    /* 1. Робимо сітку 2 колонки (як в каталозі) */
+    .similar-cars-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    /* 2. Сама картка стає вертикальною */
+    .similar-car-card {
+        display: flex !important;
+        flex-direction: column !important; /* Фото зверху, текст знизу */
+        height: auto !important;
+        min-height: 180px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 !important;
+        overflow: hidden;
+        align-items: stretch !important; /* Розтягуємо на всю ширину */
+    }
+
+    /* 3. Фотографія */
+    .similar-car-image {
+        width: 100% !important;
+        height: 100px !important; /* Фіксована висота фото */
+        flex: none !important;    /* Забороняємо стискання */
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: #000;
+    }
+
+    .similar-car-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* 4. Блок з текстом */
+    .similar-car-info {
+        padding: 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+    }
+
+    /* 5. Назва авто */
+    .similar-car-title {
+        font-size: 13px !important;
+        color: var(--text) !important;
+        font-weight: 600;
+        margin-bottom: 5px !important;
+        
+        /* Дозволяємо перенос і обрізаємо, якщо задовга */
+        white-space: normal !important;
+        display: -webkit-box !important;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.2;
+    }
+
+    /* 6. Рік і комплектація */
+    .similar-car-meta {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center;
+        gap: 5px !important;
+        margin-top: auto; /* Притискаємо до низу */
+    }
+
+    .similar-year {
+        background: var(--accent) !important;
+        color: white !important;
+        font-size: 10px !important;
+        padding: 2px 4px !important;
+        border-radius: 4px;
+        font-weight: 700;
+    }
+
+    .similar-trim {
+        font-size: 11px !important;
+        color: var(--muted) !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+/* --- НОВА СІТКА ДЕТАЛЕЙ АВТО (STATIC VERSION) --- */
+
+.car-detail-layout-grid {
+    display: grid;
+    gap: 30px;
+    /* Мобільний: 1 колонка */
+    grid-template-columns: 1fr;
+}
+
+/* --- НАЛАШТУВАННЯ ДЛЯ ПК (Широкий екран) --- */
+@media (min-width: 992px) {
+    .car-detail-layout-grid {
+        /* Дві колонки: Контент (ліво) і Сайдбар (право) */
+        grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
+        /* Вирівнюємо елементи по верху */
+        align-items: start; 
+    }
+
+    /* Ліва колонка: Фото */
+    .car-gallery-section {
+        grid-column: 1; 
+        grid-row: 1;
+    }
+
+    /* Ліва колонка: Характеристики (йде одразу під фото) */
+    .car-specs-section {
+        grid-column: 1; 
+        grid-row: 2;
+    }
+
+    /* Права колонка: Сайдбар */
+    .car-sidebar {
+        grid-column: 2; 
+        grid-row: 1 / span 2; /* Займає висоту справа */
+        
+        /* ВАЖЛИВО: Статичне положення */
+        position: static !important; 
+        top: auto;
+        margin-top: 0;
+    }
+}
+
+/* Прибираємо відступ галереї */
+.car-gallery-container {
+    margin-bottom: 0;
 }

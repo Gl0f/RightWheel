@@ -514,7 +514,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // ЗБЕРІГАЄМО ІСТОРІЮ ПЕРЕГЛЯДУ
         saveToRecentlyViewed(state.trimId);
         
         carDetailContainer.innerHTML = '<p>Завантаження...</p>';
@@ -530,27 +529,38 @@ document.addEventListener('DOMContentLoaded', () => {
             document.title = `${pageTitle} — RightWheel`;
             renderBreadcrumbs(car.name);
 
-            // Оновлена HTML структура з двома кнопками
+            // === НОВА СТРУКТУРА: 3 НЕЗАЛЕЖНІ БЛОКИ ===
+            // 1. car-gallery-section (Фото)
+            // 2. car-sidebar (Ціна, Кнопки, Схожі)
+            // 3. car-specs-section (Характеристики)
+            
             carDetailContainer.innerHTML = `
                 <h2 class="car-detail-main-title">${pageTitle} (${car.year})</h2>
+                
                 <div class="car-detail-layout-grid">
-                    <div class="car-main-content">
+                    
+                    <div class="car-gallery-section">
                         ${renderGallery(car)}
-                        ${renderSpecifications(car)}
                     </div>
+
                     <div class="car-sidebar">
                         ${renderQuickSpecs(car)}
                         
                         <div class="buttons-group" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                             <button id="detailAddToCompareBtn" class="btn secondary" style="flex: 1;"><span>Завантаження...</span></button>
+                             <button id="detailAddToCompareBtn" class="btn secondary" style="flex: 1;"><span>Порівняти</span></button>
                              <button id="detailAddToFavoriteBtn" class="btn secondary" style="flex: 1;">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                 <span>В обране</span>
                              </button>
                         </div>
 
                         <div id="similarCarsContainer" class="similar-cars-section">Завантаження схожих авто...</div>
                     </div>
+
+                    <div class="car-specs-section">
+                        ${renderSpecifications(car)}
+                    </div>
+
                 </div>
             `;
 
@@ -562,11 +572,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 detailCompareBtn.addEventListener('click', handleDetailCompareClick);
             }
             if (detailFavoriteBtn) {
-                updateDetailFavoriteButtonState(); // Встановлюємо початковий стан (додано чи ні)
+                updateDetailFavoriteButtonState();
                 detailFavoriteBtn.addEventListener('click', handleDetailFavoriteClick);
             }
           
-            setupMediaToggles(); // Налаштовуємо кнопки 3D
+            setupMediaToggles();
             attachGalleryListeners();
             await loadAndRenderSimilarCars(state.trimId);
 
