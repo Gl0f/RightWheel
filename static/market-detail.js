@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- 1. ЛОГІКА ПРЕВ\'Ю ФОТО ---
+    // --- 1. ЛОГІКА ПРЕВ'Ю ФОТО ---
     if (editPhotoInput && editPhotoPreview) {
         editPhotoInput.addEventListener('change', function() {
             editPhotoPreview.innerHTML = ''; 
@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 loadSimilarAds(ad);
                 setupLightbox();
-                // Тут ми викликаємо генерацію аналітики, якщо функція існує
             }, 100);
 
         } catch (e) {
@@ -123,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let subTitleParts = [];
         if (ad.generation_name) subTitleParts.push(ad.generation_name);
         if (ad.name) subTitleParts.push(ad.name);
-        const subTitleText = subTitleParts.join(' • ');
 
         document.title = `${titleText} — RightWheel`;
         document.getElementById('breadcrumbTitle').textContent = titleText;
@@ -155,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         identifiersHtml += `</div>`;
 
-        // Аналітика ціни (виклик функції, яку ми додали внизу)
+        // Аналітика ціни
         const priceAnalyticsHtml = getAnalyticsHtml(ad.price);
 
         let equipmentHtml = '';
@@ -176,16 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentUser = localStorage.getItem('RightWheel_loggedInUser');
         const isOwner = (currentUser && currentUser === ad.username);
         
+        // --- ВАЖЛИВО: ВИКОРИСТОВУЄМО КЛАСИ ЗАМІСТЬ ID ДЛЯ КНОПОК ---
         let actionButtonsHtml = '';
         if (isOwner) {
             actionButtonsHtml = `
-                <button id="editAdBtn" class="contact-btn" style="background-color: #3182CE; color: white; border: none;">✏️ Редагувати оголошення</button>
-                <button id="deleteAdBtn" class="contact-btn" style="background-color: #E53E3E; color: white; border: none; margin-top: 10px;">🗑 Видалити оголошення</button>
+                <button class="contact-btn edit-ad-btn" style="background-color: #3182CE; color: white; border: none;">✏️ Редагувати оголошення</button>
+                <button class="contact-btn delete-ad-btn" style="background-color: #E53E3E; color: white; border: none; margin-top: 10px;">🗑 Видалити оголошення</button>
             `;
         } else {
             actionButtonsHtml = `
                 <button class="contact-btn btn-green" onclick="this.textContent='${ad.phone}'; this.style.background='#276749';">(0xx) xxx-xx-xx Показати</button>
-                <button id="writeToChatBtn" class="contact-btn btn-outline">💬 Написати в чат</button>
+                <button class="contact-btn btn-outline write-chat-btn">💬 Написати в чат</button>
             `;
         }
 
@@ -250,52 +249,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if(mobSeller) mobSeller.style.display = 'block';
         }
 
-        // --- ОБРОБНИКИ КНОПОК ---
+        // --- ВАЖЛИВО: ПРИВ'ЯЗКА ПОДІЙ ЗА КЛАСОМ (Щоб працювало на дублікатах) ---
         
-        // --- Додаємо функцію для виклику модалки ---
-        function showCustomConfirm(message) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('customConfirmModal');
-                if (!modal) return resolve(confirm(message)); // Запасний варіант
-
-                const msgElement = document.getElementById('customConfirmMessage');
-                const btnOk = document.getElementById('confirmOkBtn');
-                const btnCancel = document.getElementById('confirmCancelBtn');
-                const back = modal.querySelector('.modal-back');
-
-                if(message) msgElement.textContent = message;
-                modal.style.display = 'flex';
-
-                // Очищуємо старі події через клонування кнопок
-                const newBtnOk = btnOk.cloneNode(true);
-                const newBtnCancel = btnCancel.cloneNode(true);
-                const newBack = back.cloneNode(true);
-                
-                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
-                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
-                back.parentNode.replaceChild(newBack, back);
-
-                const close = (result) => {
-                    modal.style.display = 'none';
-                    resolve(result);
-                };
-
-                newBtnOk.addEventListener('click', () => close(true));
-                newBtnCancel.addEventListener('click', () => close(false));
-                newBack.addEventListener('click', () => close(false));
-            });
-        }
-
-        // --- ОНОВЛЕНИЙ ОБРОБНИК КНОПКИ ВИДАЛЕННЯ ---
-        const deleteBtn = document.getElementById('deleteAdBtn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
-                // Використовуємо нашу нову функцію з await
+        // 1. Кнопка ВИДАЛЕННЯ
+        const deleteBtns = document.querySelectorAll('.delete-ad-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
                 const isConfirmed = await showCustomConfirm('Ви впевнені, що хочете безповоротно видалити це оголошення?');
-                
                 if (isConfirmed) {
-                    deleteBtn.disabled = true;
-                    deleteBtn.textContent = "Видалення...";
+                    btn.disabled = true;
+                    btn.textContent = "Видалення...";
                     const token = localStorage.getItem('RightWheel_access_token');
                     try {
                         const res = await fetch(`/api/market/ads/${ad.id}`, {
@@ -308,21 +271,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             const errData = await res.json();
                             alert(errData.error || 'Помилка видалення');
-                            deleteBtn.disabled = false;
-                            deleteBtn.textContent = "🗑 Видалити оголошення";
+                            btn.disabled = false;
+                            btn.textContent = "🗑 Видалити оголошення";
                         }
-                    } catch(e) { 
-                        console.error(e); 
-                        deleteBtn.disabled = false; 
-                        deleteBtn.textContent = "🗑 Видалити оголошення";
-                    }
+                    } catch(e) { console.error(e); btn.disabled = false; btn.textContent = "🗑 Видалити оголошення"; }
                 }
             });
-        }
+        });
 
-        const editBtn = document.getElementById('editAdBtn');
-        if (editBtn) {
-            editBtn.addEventListener('click', () => {
+        // 2. Кнопка РЕДАГУВАННЯ
+        const editBtns = document.querySelectorAll('.edit-ad-btn');
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Заповнення форми (так само, як і було)
                 document.getElementById('editPrice').value = ad.price;
                 document.getElementById('editMileage').value = ad.mileage;
                 document.getElementById('editPhone').value = ad.phone;
@@ -338,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(ad.license_plate) document.getElementById('editPlate').value = ad.license_plate;
                 if(ad.body_type) document.getElementById('editBodyType').value = ad.body_type;
                 if(ad.fuel_consumption) document.getElementById('editFuelCons').value = ad.fuel_consumption;
-                // -----------------
 
                 const photosContainer = document.getElementById('existingPhotosContainer');
                 const photosGrid = document.getElementById('existingPhotosGrid');
@@ -383,11 +343,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 editModal.style.display = 'flex';
             });
-        }
+        });
 
-        const writeBtn = document.getElementById('writeToChatBtn');
-        if (writeBtn) {
-            writeBtn.addEventListener('click', async () => {
+        // 3. Кнопка ЧАТУ
+        const writeBtns = document.querySelectorAll('.write-chat-btn');
+        writeBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
                 const token = localStorage.getItem('RightWheel_access_token');
                 if (!token) {
                     if (typeof showLoginModal === 'function') showLoginModal();
@@ -407,10 +368,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } catch (e) { console.error(e); }
             });
-        }
+        });
     }
 
-    // --- 4. ДОДАНІ ФУНКЦІЇ (які були відсутні) ---
+    // --- 4. ДОДАНІ ФУНКЦІЇ ---
 
     function getAnalyticsHtml(price) {
         const randomFactor = 0.9 + Math.random() * 0.2; 
@@ -422,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="price-analytics-box"><div class="price-badge ${cssClass}">${label}</div><p class="price-text">Середня ціна: ${new Intl.NumberFormat('en-US').format(avgPrice)} $</p><div class="price-bar-container"><div class="price-bar-fill" style="width:${width}; background:${color};"></div></div></div>`;
     }
 
-// --- ФУНКЦІЯ СХОЖИХ АВТО (Гарантований показ) ---
+    // --- ФУНКЦІЯ СХОЖИХ АВТО ---
     async function loadSimilarAds(currentAd) {
         const container = document.getElementById('similarAdsContainer');
         const grid = document.getElementById('similarAdsGrid');
@@ -430,29 +391,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container || !grid) return;
 
         try {
-            // 1. Спробуємо знайти авто тієї ж марки
             let res = await fetch(`/api/market/ads?brand_id=${currentAd.brand_id}`);
             let ads = await res.json();
             
-            // Прибираємо поточне авто зі списку
             let similar = ads.filter(a => a.id !== currentAd.id);
 
-            // 2. Якщо авто цієї марки мало (менше 3) -> довантажуємо просто "Свіжі пропозиції"
             if (similar.length < 3) {
                 const resAll = await fetch(`/api/market/ads`);
                 const allAds = await resAll.json();
-                
-                // Додаємо авто, які не є поточним і ще не в списку
                 const extraAds = allAds.filter(a => a.id !== currentAd.id && !similar.find(s => s.id === a.id));
                 similar = similar.concat(extraAds);
             }
 
-            // Беремо перші 4 результати
             const finalAds = similar.slice(0, 4);
 
             if (finalAds.length > 0) {
-                container.style.display = 'block'; // <--- ВАЖЛИВО: Явно показуємо контейнер
-                
+                container.style.display = 'block'; 
                 grid.innerHTML = finalAds.map(ad => {
                     const img = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
                     const price = new Intl.NumberFormat('en-US').format(ad.price);
@@ -468,12 +422,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }).join('');
             } else {
-                console.log("Схожих авто зовсім не знайдено (база пуста?)");
                 container.style.display = 'none';
             }
-        } catch (e) { 
-            console.error("Помилка завантаження схожих авто:", e); 
-        }
+        } catch (e) { console.error("Помилка схожих авто:", e); }
     }
 
     function setupLightbox() {
@@ -502,5 +453,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateLightboxImage() {
         document.getElementById('lightboxImage').src = currentAdData.images[currentImageIndex];
+    }
+
+    function showCustomConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customConfirmModal');
+            if (!modal) return resolve(confirm(message));
+
+            const msgElement = document.getElementById('customConfirmMessage');
+            const btnOk = document.getElementById('confirmOkBtn');
+            const btnCancel = document.getElementById('confirmCancelBtn');
+            const back = modal.querySelector('.modal-back');
+
+            if(message) msgElement.textContent = message;
+            modal.style.display = 'flex';
+
+            const newBtnOk = btnOk.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            const newBack = back.cloneNode(true);
+            
+            btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+            back.parentNode.replaceChild(newBack, back);
+
+            const close = (result) => {
+                modal.style.display = 'none';
+                resolve(result);
+            };
+
+            newBtnOk.addEventListener('click', () => close(true));
+            newBtnCancel.addEventListener('click', () => close(false));
+            newBack.addEventListener('click', () => close(false));
+        });
     }
 });
