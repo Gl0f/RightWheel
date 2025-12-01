@@ -6741,3 +6741,29 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         display: none !important;
     }
 }
+/* --- ВИРІВНЮВАННЯ КНОПКИ "УВІЙТИ" НА МОБІЛЬНОМУ --- */
+@media (max-width: 900px) {
+    
+    /* 1. Центруємо весь блок з кнопками по вертикалі */
+    .controls {
+        display: flex !important;
+        align-items: center !important; /* Головне правило для вирівнювання */
+        gap: 8px !important;
+    }
+
+    /* 2. Задаємо кнопці "Увійти" ту саму висоту, що й іконкам (38px) */
+    #showLoginModalBtn {
+        height: 38px !important;
+        display: flex !important;
+        align-items: center !important; /* Центруємо текст всередині кнопки */
+        padding: 0 16px !important;     /* Відступи з боків */
+        margin: 0 !important;           /* Прибираємо зовнішні відступи */
+        font-size: 13px !important;
+    }
+    
+    /* Центруємо іконку всередині кнопки "Увійти", якщо вона є */
+    #showLoginModalBtn svg {
+        margin-top: 0 !important; 
+        margin-bottom: 0 !important;
+    }
+}
