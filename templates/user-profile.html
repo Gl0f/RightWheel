@@ -249,151 +249,124 @@
     </div>
   </div>
 
-      <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-          const params = new URLSearchParams(window.location.search);
-          const userId = params.get('id');
-          const panelBody = document.querySelector('.panel-body');
-
-          // 1. Перевірка ID в URL
-          if (!userId || userId === 'undefined') {
-              panelBody.innerHTML = '<p style="color:red">Помилка: ID користувача не вказано в посиланні.</p>';
-              return;
-          }
-
-          try {
-              console.log(`Запит профілю для ID: ${userId}`); // Дебаг
-              const response = await fetch(`/api/users/${userId}/profile`);
-              
-              // 2. Якщо сервер повернув помилку
-              if (!response.ok) {
-                  const errData = await response.json();
-                  throw new Error(errData.error || `Помилка сервера: ${response.status}`);
-              }
-              
-              const data = await response.json();
-
-              // 3. Відображення даних
-              // Аватар
-              const imgEl = document.getElementById('publicAvatar');
-              if (data.user.avatar_url) {
-                  imgEl.src = data.user.avatar_url.startsWith('http') ? 
-                      data.user.avatar_url : `${data.user.avatar_url}`;
-              } else {
-                  const initial = data.user.username.charAt(0).toUpperCase();
-                  imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=4A5568&color=fff&size=150`;
-              }
-
-              document.getElementById('publicUsername').textContent = data.user.username;
-              
-              if (data.user.created_at) {
-                  const dateObj = new Date(data.user.created_at);
-                  document.getElementById('publicJoined').textContent = 'З нами з ' + dateObj.toLocaleDateString('uk-UA');
-              } else {
-                  document.getElementById('publicJoined').style.display = 'none';
-              }
-
-              document.getElementById('publicTopics').textContent = data.stats.topic_count;
-              document.getElementById('publicPosts').textContent = data.stats.post_count;
-
-          } catch (error) {
-              console.error(error);
-              // Виводимо конкретний текст помилки на екран
-              panelBody.innerHTML = `<p style="color:red">Не вдалося завантажити профіль:<br>${error.message}</p>`;
-          }
-        });
-        document.addEventListener('DOMContentLoaded', async () => {
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const userId = params.get('id');
-            const panelBody = document.querySelector('.account-grid'); // Змінили селектор для помилок
+            
+            // Елементи для виводу помилок
+            const profileContainer = document.querySelector('.panel-body');
+            const adsContainer = document.getElementById('publicUserAds');
 
-            if (!userId) { return; }
+            if (!userId || userId === 'undefined') {
+                if(profileContainer) profileContainer.innerHTML = '<p style="color:red">Помилка: ID користувача не знайдено.</p>';
+                return;
+            }
 
-            try {
-                const response = await fetch(`/api/users/${userId}/profile`);
-                if (!response.ok) throw new Error('Помилка сервера');
-                const data = await response.json();
+            // 1. Завантаження Профілю, Статистики та Тем
+            loadUserProfile(userId);
 
-                // 1. Аватар та Ім'я
-                const imgEl = document.getElementById('publicAvatar');
-                if (data.user.avatar_url) {
-                    imgEl.src = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `${data.user.avatar_url}`;
-                } else {
-                    const initial = data.user.username.charAt(0).toUpperCase();
-                    imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=150`;
-                }
-                document.getElementById('publicUsername').textContent = data.user.username;
+            // 2. Завантаження Оголошень (окремо, щоб не блокувати профіль)
+            loadUserAds(userId);
 
-                // 2. Дата, Авто, Біо, Локація
-                if (data.user.created_at) {
-                    const dateObj = new Date(data.user.created_at);
-                    document.getElementById('publicJoined').textContent = 'З нами з ' + dateObj.toLocaleDateString('uk-UA');
-                }
-                
-                if (data.user.current_car) document.getElementById('publicCar').textContent = data.user.current_car;
-                if (data.user.bio) document.getElementById('publicBio').textContent = data.user.bio;
-                if (data.user.location) document.getElementById('publicLocation').textContent = '📍 ' + data.user.location;
+            
+            async function loadUserProfile(id) {
+                try {
+                    const response = await fetch(`/api/users/${id}/profile`);
+                    if (!response.ok) throw new Error(`Помилка: ${response.status}`);
+                    
+                    const data = await response.json();
 
-                // 3. Статистика
-                document.getElementById('publicTopics').textContent = data.stats.topic_count;
-                document.getElementById('publicPosts').textContent = data.stats.post_count;
+                    // --- Аватар та Інфо ---
+                    const imgEl = document.getElementById('publicAvatar');
+                    if (imgEl) {
+                        if (data.user.avatar_url) {
+                            imgEl.src = data.user.avatar_url.startsWith('http') ? data.user.avatar_url : `${data.user.avatar_url}`;
+                        } else {
+                            const initial = (data.user.username || 'U').charAt(0).toUpperCase();
+                            imgEl.src = `https://ui-avatars.com/api/?name=${initial}&background=2D3748&color=fff&size=150`;
+                        }
+                    }
 
-                // 4. Список останніх тем
-                const topicsContainer = document.getElementById('publicRecentTopics');
-                if (data.recent_topics && data.recent_topics.length > 0) {
-                    topicsContainer.innerHTML = data.recent_topics.map(topic => {
-                        const dateStr = new Date(topic.created_at).toLocaleDateString('uk-UA');
-                        return `
-                            <div style="padding: 12px 20px; border-bottom: 1px solid #4A5568; display: flex; justify-content: space-between; align-items: center;">
-                                <a href="topic.html?id=${topic.id}" style="color: #E2E8F0; text-decoration: none; font-weight: 500;">${topic.title}</a>
-                                <span style="font-size: 12px; color: #718096;">${dateStr}</span>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    topicsContainer.innerHTML = '<p style="padding: 20px; color: #718096; text-align: center;">Користувач ще не створював тем.</p>';
-                }
+                    setText('publicUsername', data.user.username);
+                    
+                    if (data.user.created_at) {
+                        const dateObj = new Date(data.user.created_at);
+                        setText('publicJoined', 'З нами з ' + dateObj.toLocaleDateString('uk-UA'));
+                    }
 
-                // --- Додати в скрипт внизу user-profile.html ---
+                    setText('publicCar', data.user.current_car || 'Пішохід');
+                    setText('publicBio', data.user.bio || 'Користувач ще не додав інформацію про себе.');
+                    
+                    // --- Статистика ---
+                    setText('publicTopics', data.stats.topic_count || 0);
+                    setText('publicPosts', data.stats.post_count || 0);
 
-                // Завантаження оголошень
-                const adsContainer = document.getElementById('publicUserAds');
-                if (adsContainer && userId) {
-                    try {
-                        // Використовуємо наш новий публічний маршрут
-                        const response = await fetch(`/api/users/${userId}/ads`);
-                        const ads = await response.json();
-
-                        if (ads.length > 0) {
-                            adsContainer.innerHTML = ads.map(ad => {
-                                const price = new Intl.NumberFormat('en-US').format(ad.price);
-                                const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
-                                
+                    // --- Останні теми ---
+                    const topicsContainer = document.getElementById('publicRecentTopics');
+                    if (topicsContainer) {
+                        if (data.recent_topics && data.recent_topics.length > 0) {
+                            topicsContainer.innerHTML = data.recent_topics.map(topic => {
+                                const dateStr = new Date(topic.created_at).toLocaleDateString('uk-UA');
                                 return `
-                                    <a href="market-detail.html?id=${ad.id}" style="text-decoration: none; display: block; background: #2D3748; border: 1px solid #4A5568; border-radius: 6px; overflow: hidden;">
-                                        <div style="height: 120px; overflow: hidden;">
-                                            <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <div style="padding: 10px;">
-                                            <div style="color: #38A169; font-weight: 700; font-size: 15px; margin-bottom: 2px;">$ ${price}</div>
-                                            <div style="font-size: 13px; font-weight: 500; color: #E2E8F0;">
-                                                ${ad.brand_name} ${ad.model_name} ${ad.year}
-                                            </div>
-                                        </div>
-                                    </a>
+                                    <div style="padding: 12px 20px; border-bottom: 1px solid #4A5568; display: flex; justify-content: space-between; align-items: center;">
+                                        <a href="topic.html?id=${topic.id}" style="color: #E2E8F0; text-decoration: none; font-weight: 500;">${topic.title}</a>
+                                        <span style="font-size: 12px; color: #718096;">${dateStr}</span>
+                                    </div>
                                 `;
                             }).join('');
                         } else {
-                            adsContainer.innerHTML = '<p style="color: #718096; grid-column: 1/-1; text-align: center;">Користувач не має активних оголошень.</p>';
+                            topicsContainer.innerHTML = '<p style="padding: 20px; color: #718096; text-align: center;">Користувач ще не створював тем.</p>';
                         }
-                    } catch (e) {
-                        console.error(e);
-                        adsContainer.innerHTML = '<p style="color: #718096;">Не вдалося завантажити.</p>';
                     }
-                }
 
-            } catch (error) {
-                console.error(error);
+                } catch (error) {
+                    console.error("Profile error:", error);
+                    if(profileContainer) profileContainer.innerHTML = `<p style="color:red">Не вдалося завантажити профіль.</p>`;
+                }
+            }
+
+            async function loadUserAds(id) {
+                if (!adsContainer) return;
+                
+                try {
+                    const response = await fetch(`/api/users/${id}/ads`);
+                    if (!response.ok) throw new Error('Failed to load ads');
+                    
+                    const ads = await response.json();
+
+                    if (ads && ads.length > 0) {
+                        adsContainer.innerHTML = ads.map(ad => {
+                            const price = new Intl.NumberFormat('en-US').format(ad.price);
+                            const imgUrl = ad.main_image || 'https://via.placeholder.com/300x200?text=No+Photo';
+                            
+                            return `
+                                <a href="market-detail.html?id=${ad.id}" style="text-decoration: none; display: block; background: #2D3748; border: 1px solid #4A5568; border-radius: 6px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    <div style="height: 120px; overflow: hidden;">
+                                        <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div style="padding: 10px;">
+                                        <div style="color: #38A169; font-weight: 700; font-size: 15px; margin-bottom: 2px;">$ ${price}</div>
+                                        <div style="font-size: 13px; font-weight: 500; color: #E2E8F0;">
+                                            ${ad.brand_name} ${ad.model_name} ${ad.year}
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                        }).join('');
+                    } else {
+                        adsContainer.innerHTML = '<p style="color: #718096; grid-column: 1/-1; text-align: center;">Користувач не має активних оголошень.</p>';
+                    }
+                } catch (error) {
+                    console.error("Ads error:", error);
+                    adsContainer.innerHTML = '<p style="color: #718096;">Не вдалося завантажити оголошення.</p>';
+                }
+            }
+
+            // Допоміжна функція для безпечного встановлення тексту
+            function setText(id, text) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
             }
         });
     </script>
