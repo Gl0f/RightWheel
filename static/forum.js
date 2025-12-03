@@ -179,23 +179,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateStr = new Date(topic.created_at).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
             const avatarSrc = getAvatarUrl(topic.author_avatar, topic.author_username);
             
-            // Якщо є бренд, показуємо його
             const brandBadge = topic.brand_name 
                 ? `<span style="font-size: 11px; background: #232d3b; padding: 2px 6px; border-radius: 4px; color: #A0AEC0; border: 1px solid #4A5568; margin-left: 8px;">${topic.brand_name}</span>` 
                 : '';
 
             return `
-                <div class="forum-topic-row">
-                    <a href="${profileLink}" class="topic-icon" style="overflow: hidden; border-radius: 50%; width: 40px; height: 40px; display: block;">
+                <a href="${topicLink}" class="forum-topic-row" style="text-decoration: none; color: inherit; display: grid;">
+                    
+                    <div class="topic-icon" style="overflow: hidden; border-radius: 50%; width: 40px; height: 40px;">
                         <img src="${avatarSrc}" alt="${topic.author_username}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </a>
+                    </div>
 
                     <div class="topic-main-info">
-                        <a href="${topicLink}" class="topic-title" style="text-decoration: none; color: inherit;">
+                        <span class="topic-title" style="font-weight: 600;">
                             ${topic.title} ${brandBadge}
-                        </a>
+                        </span>
                         <div class="topic-meta">
-                            Автор: <a href="${profileLink}" class="topic-author" style="color: #A0AEC0; text-decoration: none;">${topic.author_username || 'Анонім'}</a>
+                            Автор: <span class="topic-author" style="color: #A0AEC0;">${topic.author_username || 'Анонім'}</span>
                         </div>
                     </div>
 
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="topic-last-post">
                         <div>${dateStr}</div>
                     </div>
-                </div>
+                </a>
             `;
         }).join('');
     }

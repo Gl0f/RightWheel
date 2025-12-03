@@ -745,6 +745,9 @@ def get_forum_topics():
     sort_by = request.args.get('sort', 'latest') # 'latest' або 'popular'
     brand_id = request.args.get('brand_id')      # ID бренду (опціонально)
     
+    # === ОНОВЛЕНИЙ ЗАПИТ ===
+    # Ми додали підзапит: last_activity
+    # Він шукає дату найсвіжішого поста в темі.
     base_query = """
         SELECT 
             t.id, 
@@ -755,7 +758,8 @@ def get_forum_topics():
             u.username AS author_username,
             u.avatar_url AS author_avatar,
             u.id AS author_id,
-            (SELECT COUNT(*) FROM forum_posts p WHERE p.topic_id = t.id) - 1 AS post_count
+            (SELECT COUNT(*) FROM forum_posts p WHERE p.topic_id = t.id) - 1 AS post_count,
+            COALESCE((SELECT MAX(created_at) FROM forum_posts p WHERE p.topic_id = t.id), t.created_at) as last_activity
         FROM forum_topics t
         JOIN users u ON t.user_id = u.id
         LEFT JOIN brands b ON t.brand_id = b.id
@@ -774,9 +778,11 @@ def get_forum_topics():
         
     # Сортування
     if sort_by == 'popular':
-        base_query += " ORDER BY post_count DESC, t.created_at DESC"
+        # Спочатку найпопулярніші, а серед них - найактивніші
+        base_query += " ORDER BY post_count DESC, last_activity DESC"
     else: # latest
-        base_query += " ORDER BY t.created_at DESC"
+        # Сортуємо по останній активності (піднімає старі теми вгору при новій відповіді)
+        base_query += " ORDER BY last_activity DESC"
         
     topics, error = fetch_query(base_query, tuple(params))
     
