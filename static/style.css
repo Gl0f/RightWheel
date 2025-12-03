@@ -7060,3 +7060,80 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         grid-template-columns: 1fr; /* Одна колонка на дуже вузьких телефонах */
     }
 }
+/* --- ОПТИМІЗАЦІЯ КАРТОК ОГОЛОШЕНЬ (MARKET) --- */
+
+/* Стиль для значка VIN (зелена пігулка) */
+.vin-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0 6px;
+    background-color: #276749; /* Темно-зелений фон */
+    color: #9AE6B4;            /* Світло-зелений текст */
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    text-transform: uppercase;
+    border: 1px solid rgba(154, 230, 180, 0.3);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    /* Робимо картку гнучким контейнером */
+    .ad-card {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100%; /* Розтягуємо на всю висоту ряду */
+        justify-content: space-between;
+    }
+
+    /* Блок з інформацією розтягується */
+    .mobile-card-info {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-grow: 1; /* Займає все вільне місце */
+        padding: 8px 10px !important;
+        height: 100%;
+    }
+
+    /* Зафіксуємо висоту заголовка (Назва авто), щоб картки були рівні */
+    .mobile-card-title {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: var(--text) !important;
+        margin-bottom: 4px !important;
+        line-height: 1.3 !important;
+        
+        /* Обмежуємо 2 рядками */
+        height: 34px !important; 
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Нижній рядок (Місто + VIN) притискаємо до низу */
+    .card-bottom-row {
+        margin-top: auto !important; /* Магія: штовхає цей блок в самий низ */
+        padding-top: 8px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important; /* Розводить по краях: Місто зліва, VIN справа */
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .card-location {
+        font-size: 11px !important; 
+        color: #777 !important; 
+        display: flex; 
+        align-items: center; 
+        gap: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60%; /* Щоб не наїжджало на VIN */
+    }
+}
