@@ -7109,7 +7109,7 @@ body /* Якщо у вас завжди темна тема */ .ria-seller-card 
         /* Обмежуємо 2 рядками */
         height: 34px !important; 
         display: -webkit-box !important;
-        -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;

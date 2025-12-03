@@ -157,25 +157,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const fuelType = ad.engine_type || 'Паливо не вказано';
             const transmissionType = ad.transmission || 'КПП не вказана';
             const locationText = ad.location || 'Місто не вказано';
+
+            // Формуємо бейдж VIN (тільки текст VIN, без галочки, бо вона в CSS стилі)
+            const vinBadgeMobile = ad.vin_code 
+                ? `<span class="vin-badge">VIN</span>` 
+                : '';
             
             const mobileHtml = `
                 <div class="mobile-card-info" style="display:none;">
+                    
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                         <span style="font-size:16px; font-weight:700; color:#38A169;">$ ${price}</span>
                         <span style="font-size:11px; color:#aaa; background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 4px;">${ad.year}</span>
                     </div>
                     
-                    <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 5px; line-height: 1.2; height: 32px; overflow: hidden;">
+                    <div class="mobile-card-title">
                         ${ad.brand_name} ${ad.model_name}
                     </div>
                     
                     <div style="font-size:11px; color:#999; margin-bottom:5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ${transmissionType} • ${fuelType}
+                        ${transmissionType} • ${fuelType} • ${ad.mileage} тис.
                     </div>
                     
-                    <div style="font-size:11px; color:#777; display: flex; align-items: center; gap: 3px;">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        ${locationText}
+                    <div class="card-bottom-row">
+                        <div class="card-location">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            ${locationText}
+                        </div>
+                        ${vinBadgeMobile}
                     </div>
                 </div>
             `;
