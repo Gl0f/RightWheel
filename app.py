@@ -17,6 +17,8 @@ from werkzeug.utils import secure_filename
 from datetime import date, datetime, timezone, timedelta
 from werkzeug.utils import secure_filename
 import re
+import cloudinary
+import cloudinary.uploader
 
 # --- ІМПОРТИ ДЛЯ НОВИН ---
 import requests 
@@ -47,6 +49,12 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # -------------------------------------------
+
+cloudinary.config(
+    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key = os.getenv('CLOUDINARY_API_KEY'),
+    api_secret = os.getenv('CLOUDINARY_API_SECRET')
+)
 
 # --- ЗАМІНИТИ СТАРЕ НАЛАШТУВАННЯ CORS НА ЦЕ ---
 CORS(app, 
@@ -1514,29 +1522,29 @@ def upload_avatar():
     if file and allowed_file(file.filename):
         user_id = get_jwt_identity()
         
-        # Генеруємо ім'я файлу
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = secure_filename(f"user_{user_id}_{int(datetime.now().timestamp())}.{ext}")
-        
-        # Шлях для збереження на диск
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        save_path = os.path.join(basedir, app.config['UPLOAD_FOLDER'], filename)
-        
-        # --- ВСТАВИТИ ТУТ ---
-        file.seek(0)  # Повертаємо "курсор" на початок файлу, щоб він не записався порожнім
-        # -------------------
-        
-        file.save(save_path)
-        
-        # Шлях для бази даних (для HTML)
-        db_path = f"/static/uploads/avatars/{filename}"
-        
-        success, error = db_execute("UPDATE users SET avatar_url = %s WHERE id = %s", (db_path, user_id))
-        
-        if success:
-            return jsonify({"message": "Аватарку оновлено", "avatar_url": db_path})
-        else:
-            return jsonify({"error": error}), 500
+        try:
+            # Завантажуємо в Cloudinary
+            # public_id дозволяє перезаписувати старе фото користувача, щоб не плодити сміття
+            upload_result = cloudinary.uploader.upload(
+                file, 
+                folder="rightwheel_avatars",
+                public_id=f"user_{user_id}_avatar", 
+                overwrite=True
+            )
+            
+            cloud_url = upload_result['secure_url']
+            
+            # Оновлюємо посилання в базі
+            success, error = db_execute("UPDATE users SET avatar_url = %s WHERE id = %s", (cloud_url, user_id))
+            
+            if success:
+                return jsonify({"message": "Аватарку оновлено", "avatar_url": cloud_url})
+            else:
+                return jsonify({"error": error}), 500
+                
+        except Exception as e:
+            print(f"Avatar upload error: {e}")
+            return jsonify({"error": "Помилка завантаження фото в хмару"}), 500
     
     return jsonify({"error": "Недопустимий тип файлу"}), 400
 
@@ -1703,16 +1711,26 @@ def create_market_ad():
         listing_id = cursor.fetchone()[0]
         
         # Збереження фото (без змін)
+        # Збереження фото в Cloudinary
         files = request.files.getlist('photos')
         for i, file in enumerate(files):
             if file and allowed_file(file.filename):
-                ext = file.filename.rsplit('.', 1)[1].lower()
-                filename = secure_filename(f"ad_{listing_id}_{i}_{int(datetime.now().timestamp())}.{ext}")
-                save_path = os.path.join(app.config['MARKET_UPLOAD_FOLDER'], filename)
-                file.save(save_path)
-                db_path = f"/static/uploads/market/{filename}"
-                cursor.execute("INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, %s)", 
-                               (listing_id, db_path, (i == 0)))
+                try:
+                    # Завантажуємо в папку rightwheel_market в хмарі
+                    upload_result = cloudinary.uploader.upload(
+                        file, 
+                        folder="rightwheel_market"
+                    )
+                    # Отримуємо вічне HTTPS посилання
+                    cloud_url = upload_result['secure_url']
+                    
+                    # Зберігаємо це посилання в БД
+                    cursor.execute(
+                        "INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, %s)", 
+                        (listing_id, cloud_url, (i == 0))
+                    )
+                except Exception as e:
+                    print(f"Cloudinary upload error: {e}")
         
         conn.commit()
         return jsonify({"message": "Оголошення успішно додано!"}), 201
@@ -2097,31 +2115,35 @@ def update_market_ad(ad_id):
         # ... (ДАЛІ ЙДЕ КОД ДЛЯ ФОТО, ВІН ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН) ...
         # (Просто скопіюйте сюди блок "3. ВИДАЛЕННЯ ФОТО" і "4. Додавання НОВИХ фото" з минулої версії)
         
-        # --- ПОЧАТОК БЛОКУ ФОТО ---
+        # --- ПОЧАТОК БЛОКУ ФОТО (Cloudinary Version) ---
+        
+        # 1. Видалення фото (Тільки з бази даних, хмару поки не чіпаємо для безпеки)
         photos_to_delete_str = data.get('photos_to_delete', '')
         if photos_to_delete_str:
             photo_ids = [int(x) for x in photos_to_delete_str.split(',') if x.strip()]
             if photo_ids:
                 placeholders = ','.join(['%s'] * len(photo_ids))
-                cursor.execute(f"SELECT image_url FROM listing_images WHERE id IN ({placeholders}) AND listing_id = %s", (*photo_ids, ad_id))
-                rows = cursor.fetchall()
-                base_dir = os.path.abspath(os.path.dirname(__file__))
-                for row in rows:
-                    try:
-                        file_path = os.path.join(base_dir, row[0].lstrip('/'))
-                        if os.path.exists(file_path): os.remove(file_path)
-                    except Exception as e: print(f"Error deleting file: {e}")
+                # Просто видаляємо записи про картинки з БД
                 cursor.execute(f"DELETE FROM listing_images WHERE id IN ({placeholders}) AND listing_id = %s", (*photo_ids, ad_id))
 
+        # 2. Додавання нових фото в Cloudinary
         files = request.files.getlist('photos')
         for i, file in enumerate(files):
             if file and allowed_file(file.filename):
-                ext = file.filename.rsplit('.', 1)[1].lower()
-                filename = secure_filename(f"ad_{ad_id}_upd_{int(datetime.now().timestamp())}_{i}.{ext}")
-                save_path = os.path.join(app.config['MARKET_UPLOAD_FOLDER'], filename)
-                file.save(save_path)
-                db_path = f"/static/uploads/market/{filename}"
-                cursor.execute("INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, FALSE)", (ad_id, db_path))
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        file, 
+                        folder="rightwheel_market"
+                    )
+                    cloud_url = upload_result['secure_url']
+                    
+                    # is_main=FALSE, бо головне фото, швидше за все, вже є серед старих
+                    cursor.execute(
+                        "INSERT INTO listing_images (listing_id, image_url, is_main) VALUES (%s, %s, FALSE)", 
+                        (ad_id, cloud_url)
+                    )
+                except Exception as e:
+                    print(f"Cloudinary update upload error: {e}")
         # --- КІНЕЦЬ БЛОКУ ФОТО ---
 
         conn.commit()
