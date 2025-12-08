@@ -1461,14 +1461,15 @@ def get_quiz_question():
         
         # 1. Беремо більше машин (12), щоб мати запас для фільтрації повторів
         query = """
-            SELECT t.id, b.name || ' ' || m.name AS car_name, t.image_url
+            SELECT t.id, b.name || ' ' || m.name AS car_name, gi.image_url
             FROM trims t
             JOIN generations g ON t.generation_id = g.id
+            JOIN generation_images gi ON g.id = gi.generation_id
             JOIN models m ON g.model_id = m.id
             JOIN brands b ON m.brand_id = b.id
-            WHERE t.image_url IS NOT NULL AND t.image_url != ''
+            WHERE gi.image_url IS NOT NULL AND gi.image_url != ''
             ORDER BY RANDOM()
-            LIMIT 12
+            LIMIT 20
         """
         cursor.execute(query)
         rows = cursor.fetchall()
